@@ -96,6 +96,7 @@ export default function ProjectForm({ onDone, project }) {
           <option>REST API</option>
           <option>MySQL（TCP端口检测，不含数据同步）</option>
           <option>MongoDB（文档型）</option>
+          <option>Redis（KV型）</option>
         </select>
       </div>
       <div className="field">

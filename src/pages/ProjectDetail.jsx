@@ -7,6 +7,7 @@ import { useConfirm } from '../components/Modal'
 import { useDrawer } from '../components/Drawer'
 import ProjectForm from '../components/ProjectForm'
 import DocView from '../components/DocView'
+import KVView from '../components/KVView'
 import Icon from '../components/Icon'
 import { fmtTime } from '../utils/time'
 
@@ -642,6 +643,8 @@ export default function ProjectDetail() {
         {/* Tabs */}
         {adminMode === 'data' && ((project?.db_type || '').includes('MongoDB') ? (
           <DocView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} />
+        ) : (project?.db_type || '').includes('Redis') ? (
+          <KVView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {/* Toolbar: table selector + search + actions */}
