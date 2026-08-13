@@ -51,7 +51,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
   const addItem = async (e) => {
     e.preventDefault()
     const f = new FormData(e.target)
-    const body = { type: keyType, value: f.get('value') || '', field: f.get('field') || '', member: f.get('member') || '', score: f.get('score') || '0' }
+    const body = { type: keyType, value: f.get('value') || '', field: f.get('field') || '', member: f.get('value') || '', score: f.get('score') || '0' }
     try {
       await api.post(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}`, body)
       toast('已添加', 'success')
