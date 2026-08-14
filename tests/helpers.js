@@ -1,5 +1,11 @@
 // Shared mock data and API route handlers for Lambs管理系统 E2E tests
 
+// client.js runs a client-side exp check (atob of the JWT payload) — the
+// token must be JWT-shaped with a far-future exp or auth is cleared on load.
+export const MOCK_TOKEN = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${Buffer.from(
+  JSON.stringify({ exp: 4102444800, user_id: 'u_test001', username: 'admin', role: 'super_admin' })
+).toString('base64')}.mock-sig`;
+
 export const MOCK_USER = {
   id: 'u_test001',
   name: '管理员',
@@ -61,7 +67,7 @@ export async function setupApiMocks(page, overrides = {}) {
   });
   await page.route('**/api/auth/login', async (route) => {
     await route.fulfill({
-      json: { success: true, data: { access_token: 'mock-jwt-token', token_type: 'bearer' } },
+      json: { success: true, data: { access_token: MOCK_TOKEN, token_type: 'bearer' } },
     });
   });
   await page.route('**/api/auth/register', async (route) => {
@@ -82,7 +88,9 @@ export async function setupApiMocks(page, overrides = {}) {
       json: { success: true, data: { total_projects: projectsData.length, online, offline, total_users: totalUsers } },
     });
   });
-  await page.route('**/api/projects?*', async (route) => {
+  // NOTE: regex, not glob — glob '**/api/projects?*' treats ? as a single
+  // character and never matches the query-less '/api/projects' list call.
+  await page.route(/\/api\/projects(\?.*)?$/, async (route) => {
     const url = new URL(route.request().url());
     const search = (url.searchParams.get('search') || '').toLowerCase();
     const statusFilter = url.searchParams.get('status_filter') || 'all';
@@ -93,7 +101,7 @@ export async function setupApiMocks(page, overrides = {}) {
     if (statusFilter !== 'all') {
       filtered = filtered.filter(p => p.status === statusFilter);
     }
-    await route.fulfill({ json: { success: true, data: { projects: filtered } } });
+    await route.fulfill({ json: { success: true, data: { projects: filtered, total: filtered.length } } });
   });
   await page.route('**/api/projects/reorder', async (route) => {
     await route.fulfill({ json: { success: true } });
@@ -118,7 +126,7 @@ export async function setupApiMocks(page, overrides = {}) {
   });
 
   // User endpoints
-  await page.route('**/api/users?*', async (route) => {
+  await page.route(/\/api\/users(\?.*)?$/, async (route) => {
     const url = new URL(route.request().url());
     const search = (url.searchParams.get('search') || '').toLowerCase();
     const role = url.searchParams.get('role') || 'all';
@@ -144,7 +152,7 @@ export async function setupApiMocks(page, overrides = {}) {
   });
 
   // Notification endpoints
-  await page.route('**/api/notifications?*', async (route) => {
+  await page.route(/\/api\/notifications(\?.*)?$/, async (route) => {
     const notifs = overrides.notifications || MOCK_NOTIFICATIONS;
     await route.fulfill({
       json: { success: true, data: { notifications: notifs, unread_count: notifs.filter(n => !n.is_read).length } },
@@ -158,6 +166,13 @@ export async function setupApiMocks(page, overrides = {}) {
   });
   await page.route(/\/api\/notifications\/[^/]+$/, async (route) => {
     await route.fulfill({ json: { success: true } });
+  });
+
+  // System health (dashboard stat cards)
+  await page.route('**/api/system/health', async (route) => {
+    await route.fulfill({
+      json: { success: true, data: { cpu_percent: 12.5, memory_used_mb: 512, memory_total_mb: 2048, disk_used_gb: 20, disk_total_gb: 100, uptime_seconds: 86400 } },
+    });
   });
 
   // Settings config endpoint
@@ -192,7 +207,7 @@ export async function setupApiMocks(page, overrides = {}) {
 export async function loginAsAdmin(page, path = '/dashboard') {
   await setupApiMocks(page);
   await page.goto('/lambs/');
-  await page.evaluate(() => localStorage.setItem('lambs_token', 'mock-jwt-token'));
+  await page.evaluate((t) => localStorage.setItem('lambs_token', t), MOCK_TOKEN);
   await page.goto('/lambs/' + path.replace(/^\//, ''));
   await page.waitForLoadState('networkidle');
 }

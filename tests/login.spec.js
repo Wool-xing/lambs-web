@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupApiMocks } from './helpers.js';
+import { setupApiMocks, MOCK_TOKEN } from './helpers.js';
 
 test.describe('登录页面', () => {
   test.beforeEach(async ({ page }) => {
@@ -56,6 +56,7 @@ test.describe('登录页面', () => {
     await page.fill('#login-username', 'admin');
     await page.fill('#login-pass', 'password123');
     await page.locator('.login-card button.btn-primary').click();
+    await page.waitForURL('**/lambs/dashboard', { timeout: 10000 });
     const saved = await page.evaluate(() => localStorage.getItem('lambs-remember'));
     expect(saved).not.toBeNull();
     const parsed = JSON.parse(saved);
@@ -83,9 +84,9 @@ test.describe('登录页面', () => {
   });
 
   test('注册表单提交 → API 调用成功', async ({ page }) => {
-    // Mock register endpoint
+    // Mock register endpoint (token must be JWT-shaped — client-side exp check)
     await page.route('**/api/auth/register', async (route) => {
-      await route.fulfill({ json: { success: true, data: { access_token: 'mock-jwt', token_type: 'bearer', user: {} } } });
+      await route.fulfill({ json: { success: true, data: { access_token: MOCK_TOKEN, token_type: 'bearer', user: {} } } });
     });
     await page.route('**/api/auth/me', async (route) => {
       await route.fulfill({ json: { success: true, data: { id: '1', username: 'newuser', name: 'newuser', email: 'new@test.com', role: 'viewer', status: 'active' } } });
@@ -96,6 +97,6 @@ test.describe('登录页面', () => {
     await page.fill('.modal-box input[placeholder*="密码"]', 'password123');
     await page.locator('.modal-box button.btn-primary').click();
     await page.waitForURL('**/lambs/dashboard', { timeout: 10000 });
-    await expect(page.locator('.summary-row')).toBeVisible();
+    await expect(page.locator('.stat-card').first()).toBeVisible();
   });
 });

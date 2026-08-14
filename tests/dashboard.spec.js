@@ -12,7 +12,7 @@ test.describe('仪表盘页面', () => {
     await expect(statCards.nth(0)).toContainText('管理项目总数');
     await expect(statCards.nth(1)).toContainText('累计注册用户');
     await expect(statCards.nth(2)).toContainText('活跃数据源');
-    await expect(statCards.nth(3)).toContainText('系统运行');
+    await expect(statCards.nth(3)).toContainText('系统监控');
   });
 
   test('显示项目卡片列表', async ({ page }) => {
