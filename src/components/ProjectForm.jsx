@@ -25,11 +25,10 @@ export default function ProjectForm({ onDone, project }) {
   const [dss, setDss] = useState(() => {
     const list = (project?.datasources || [])
     if (list.length > 0) {
-      return list.map((d, i) => ({ id: d.id || `ds${i + 1}`, name: d.name || '主数据源', type: d.type || '直连 PostgreSQL', dsn: d.dsn || '', is_primary: i === 0 || !!d.is_primary }))
+      return list.map((d, i) => ({ id: d.id || `ds${i + 1}`, name: d.name || '主数据源', type: d.type || '直连 PostgreSQL', dsn: d.dsn || '', is_primary: i === 0 || !!d.is_primary, show: false }))
     }
-    return [{ id: 'ds1', name: '主数据源', type: project?.db_type || '直连 PostgreSQL', dsn: project?.dsn || '', is_primary: true }]
+    return [{ id: 'ds1', name: '主数据源', type: project?.db_type || '直连 PostgreSQL', dsn: project?.dsn || '', is_primary: true, show: false }]
   })
-  const [showDsn, setShowDsn] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [svcs, setSvcs] = useState(() => (project?.services || []).map(s => ({ name: s.name || '', start_cmd: s.start_cmd || '', stop_cmd: s.stop_cmd || '' })))
   const [detecting, setDetecting] = useState(false)
@@ -209,12 +208,12 @@ export default function ProjectForm({ onDone, project }) {
               value={d.name}
               onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
               placeholder="名称（可选）"
-              style={{ width: 84, flexShrink: 0 }}
+              style={{ width: 84, flexShrink: 0, height: 38 }}
             />
             <select
               value={d.type}
               onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: e.target.value } : x))}
-              style={{ width: 124, flexShrink: 0 }}
+              style={{ width: 124, flexShrink: 0, height: 38 }}
             >
               <option>直连 PostgreSQL</option>
               <option>直连 SQLite</option>
@@ -226,21 +225,21 @@ export default function ProjectForm({ onDone, project }) {
             </select>
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
-                type={showDsn ? 'text' : 'password'}
+                type={d.show ? 'text' : 'password'}
                 value={d.dsn}
                 onChange={e => onDsnChange(i, e.target.value)}
                 placeholder="连接串 / API 地址"
                 className="mono-input"
                 autoComplete="new-password"
-                style={{ width: '100%', paddingRight: 30 }}
+                style={{ width: '100%', paddingRight: 30, height: 38 }}
               />
               <span
                 className="pwd-eye"
                 style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', display: 'inline-flex' }}
-                title={showDsn ? '隐藏连接串' : '显示连接串'}
-                onClick={() => setShowDsn(!showDsn)}
+                title={d.show ? '隐藏连接串' : '显示连接串'}
+                onClick={() => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, show: !x.show } : x))}
               >
-                {showDsn ? (
+                {d.show ? (
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                 ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
@@ -254,7 +253,7 @@ export default function ProjectForm({ onDone, project }) {
           </div>
         ))}
         <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
-          onClick={() => setDss(prev => [...prev, { id: `ds${prev.length + 1}`, name: '', type: '直连 PostgreSQL', dsn: '' }])}>
+          onClick={() => setDss(prev => [...prev, { id: `ds${prev.length + 1}`, name: '', type: '直连 PostgreSQL', dsn: '', show: false }])}>
           + 添加数据源
         </button>
       </div>

@@ -425,7 +425,7 @@ body.drawer-open .drawer{transform:translateX(0)}
 .check-row input[type=checkbox]{accent-color:var(--accent-cyan)}
 .pwd-wrap{position:relative;display:flex;align-items:center}
 .pwd-wrap input{flex:1;padding-right:40px}
-.pwd-eye{position:absolute;right:6px;width:28px;height:28px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--text-tertiary);background:none;border:none;padding:0}
+.pwd-eye{position:absolute;right:6px;width:28px;height:28px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--text-secondary);background:none;border:none;padding:0}
 .pwd-eye:hover{color:var(--text-primary)}
 .pwd-eye svg{width:18px;height:18px}
 .upload-zone{
