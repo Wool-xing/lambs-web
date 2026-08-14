@@ -400,14 +400,30 @@ export default function Dashboard() {
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{showActivity ? '收起' : '展开'}</span>
           </div>
           {showActivity && (<div style={{ maxHeight: 220, overflow: 'auto', fontSize: 11.5, lineHeight: 1.6 }}>
-            {activityLogs.map((l, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)', fontSize: 10, minWidth: 130 }}>{fmtTime(l.created_at)}</span>
-                <span style={{ color: l.action === '切换状态' ? 'var(--accent-amber)' : 'var(--accent-cyan)', fontWeight: 500, minWidth: 60 }}>{l.action}</span>
-                <span style={{ color: 'var(--text-primary)' }}>{l.target}</span>
-                {l.detail && <span style={{ color: 'var(--text-tertiary)' }}>{l.detail}</span>}
-              </div>
-            ))}
+            {activityLogs.map((l, i) => {
+              const badge = {
+                '登录': ['var(--accent-cyan)', 'rgba(0,199,190,.12)'],
+                '注册': ['var(--accent-green)', 'rgba(56,210,148,.12)'],
+                '删除数据': ['var(--accent-red)', 'rgba(255,107,107,.12)'],
+                '删除项目': ['var(--accent-red)', 'rgba(255,107,107,.12)'],
+                '删除用户': ['var(--accent-red)', 'rgba(255,107,107,.12)'],
+                '重置密码': ['var(--accent-amber)', 'rgba(255,161,59,.12)'],
+                '切换状态': ['var(--accent-amber)', 'rgba(255,161,59,.12)'],
+                '新增数据': ['var(--accent-green)', 'rgba(56,210,148,.12)'],
+                '修改数据': ['var(--accent-cyan)', 'rgba(0,199,190,.12)'],
+              }[l.action] || ['var(--text-secondary)', 'var(--bg-panel-raised)']
+              const desc = (l.target && l.target !== '—' ? l.target + ' · ' : '') + (l.detail || '')
+              return (
+                <div key={i} style={{ display: 'flex', gap: 10, padding: '6px 0', borderBottom: '1px solid var(--border)', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: 10, minWidth: 104, flexShrink: 0 }}>{fmtTime(l.created_at).substring(0, 16)}</span>
+                  <span style={{
+                    fontSize: 10, padding: '1px 8px', borderRadius: 4, whiteSpace: 'nowrap', flexShrink: 0,
+                    background: badge[1], color: badge[0],
+                  }}>{l.action}</span>
+                  <span style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{desc}</span>
+                </div>
+              )
+            })}
           </div>
             )}
         </div>

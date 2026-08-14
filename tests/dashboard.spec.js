@@ -86,7 +86,7 @@ test.describe('仪表盘页面', () => {
   });
 
   test('刷新按钮显示最后刷新时间', async ({ page }) => {
-    const refreshBtn = page.locator('button:has-text("刷新")');
+    const refreshBtn = page.locator('button:has-text("刷新")').first();
     await expect(refreshBtn).toBeVisible();
     await refreshBtn.click();
     await expect(page.locator('text=最后刷新：')).toBeVisible();
