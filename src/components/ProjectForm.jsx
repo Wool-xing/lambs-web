@@ -309,32 +309,30 @@ export default function ProjectForm({ onDone, project }) {
         {showAdvanced && (
           <>
             {svcs.map((s, i) => (
-              <div key={i} style={{ marginBottom: 8 }}>
-                <div style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
-                  <input
-                    value={s.name}
-                    onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
-                    placeholder="服务名（全机唯一）"
-                    className="mono-input"
-                    style={{ width: 140, flexShrink: 0 }}
-                  />
-                  <input
-                    value={s.start_cmd}
-                    onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, start_cmd: e.target.value } : x))}
-                    placeholder="启动命令"
-                    className="mono-input"
-                    style={{ flex: 1, minWidth: 0 }}
-                  />
-                  <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 8px' }}
-                    onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
-                </div>
+              <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+                <input
+                  value={s.name}
+                  onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
+                  placeholder="服务名"
+                  className="mono-input"
+                  style={{ width: 100, flexShrink: 0 }}
+                />
+                <input
+                  value={s.start_cmd}
+                  onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, start_cmd: e.target.value } : x))}
+                  placeholder="启动命令"
+                  className="mono-input"
+                  style={{ flex: 1, minWidth: 0 }}
+                />
                 <input
                   value={s.stop_cmd}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, stop_cmd: e.target.value } : x))}
                   placeholder="停止命令"
                   className="mono-input"
-                  style={{ width: '100%' }}
+                  style={{ flex: 1, minWidth: 0 }}
                 />
+                <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 6px' }}
+                  onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
               </div>
             ))}
             <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
