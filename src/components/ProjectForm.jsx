@@ -131,7 +131,7 @@ export default function ProjectForm({ onDone, project }) {
       <div className="form-section">
         <div className="form-section-title">基本信息</div>
         <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-          <div style={{ flexShrink: 0, width: 120 }}>
+          <div style={{ flexShrink: 0, width: 120, paddingTop: 18 }}>
             <div
               className={`upload-zone ${iconUrl ? 'has-image' : ''}`}
               onClick={() => document.getElementById('logo-input')?.click()}
