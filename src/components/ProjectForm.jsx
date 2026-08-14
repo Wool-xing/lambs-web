@@ -213,6 +213,7 @@ export default function ProjectForm({ onDone, project }) {
               value={d.name}
               onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
               placeholder="名称（可选）"
+              title={d.name}
               style={{ ...rowCtrl, width: 84, flexShrink: 0 }}
             />
             <TypeSelect
