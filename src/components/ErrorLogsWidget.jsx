@@ -14,20 +14,23 @@ export default function ErrorLogsWidget() {
   const [autoScroll, setAutoScroll] = useState(false)
   const bodyRef = useRef(null)
 
-  const fetchLogs = async () => {
-    setLoading(true)
+  // silent=true for background polling: refresh data without the "加载中…"
+  // flash replacing the list every 30s.
+  const fetchLogs = async (silent = false) => {
+    if (!silent) setLoading(true)
     try {
       const r = await api.get('/logs/aggregated?lines=20')
       if (r.success) setLogs(Array.isArray(r.data) ? r.data : [])
     } catch { /* */ }
-    finally { setLoading(false) }
+    finally { if (!silent) setLoading(false) }
   }
 
   // 30s polling while expanded — near-real-time without websockets.
   useEffect(() => {
     if (!collapsed) fetchLogs()
-    const t = setInterval(() => { if (!collapsed) fetchLogs() }, 30000)
+    const t = setInterval(() => { if (!collapsed) fetchLogs(true) }, 30000)
     return () => clearInterval(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collapsed])
 
   // Follow the tail when auto-scroll is on.
@@ -36,6 +39,15 @@ export default function ErrorLogsWidget() {
       bodyRef.current.scrollTop = bodyRef.current.scrollHeight
     }
   }, [logs, autoScroll])
+
+  // Scrolling up pauses auto-follow (standard log-panel behavior) — the user
+  // is reading history; don't yank them back to the bottom on the next poll.
+  const onBodyScroll = () => {
+    const el = bodyRef.current
+    if (!el || !autoScroll) return
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 24
+    if (!nearBottom) setAutoScroll(false)
+  }
 
   const filtered = level === 'all' ? logs : logs.filter(l => l.level === level)
 
@@ -59,17 +71,17 @@ export default function ErrorLogsWidget() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <button
             className="btn-ghost"
-            title="刷新"
-            style={{ width: 26, height: 26, borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+            title={loading ? '刷新中…' : '刷新'}
+            style={{ width: 26, height: 26, borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', flexShrink: 0, opacity: loading ? 0.6 : 1 }}
             onClick={e => { e.stopPropagation(); fetchLogs() }} disabled={loading}
           >
-            <Icon name="refresh" size={14} />
+            <span className={loading ? 'spin' : ''} style={{ display: 'inline-flex' }}><Icon name="refresh" size={14} /></span>
           </button>
           <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{collapsed ? '展开' : '收起'}</span>
         </div>
       </div>
       {!collapsed && (
-        <div ref={bodyRef} style={{ maxHeight: 300, overflow: 'auto', fontFamily: 'var(--font-mono)', fontSize: 10.5, lineHeight: 1.6 }}>
+        <div ref={bodyRef} onScroll={onBodyScroll} style={{ maxHeight: 300, overflow: 'auto', fontFamily: 'var(--font-mono)', fontSize: 10.5, lineHeight: 1.6 }}>
           <div style={{ display: 'flex', gap: 6, padding: '8px 12px', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
             {LEVELS.map(lv => (
               <button key={lv}
