@@ -142,7 +142,7 @@ export default function ProjectForm({ onDone, project }) {
                 e.preventDefault(); e.stopPropagation()
                 upload.handleFile(e.dataTransfer.files[0])
               }}
-              style={{ cursor: 'pointer', width: 96, height: 96 }}
+              style={{ cursor: 'pointer', width: 102, height: 102 }}
             >
               {iconUrl ? (
                 <img src={iconUrl} alt="" />
@@ -156,19 +156,19 @@ export default function ProjectForm({ onDone, project }) {
             <input id="logo-input" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display: 'none' }} onChange={e => upload.handleFile(e.target.files[0])} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="field">
+            <div className="field" style={{ marginBottom: 10 }}>
               <label>项目名称（中文）</label>
-              <input value={name} onChange={e => setName(e.target.value)} placeholder="请输入项目名称" />
+              <input value={name} onChange={e => setName(e.target.value)} placeholder="请输入项目名称" style={{ padding: '8px 12px' }} />
             </div>
             {!isEdit ? (
-              <div className="field">
+              <div className="field" style={{ marginBottom: 0 }}>
                 <label>GitHub 仓库名</label>
-                <input value={repo} onChange={e => setRepo(e.target.value)} name="gh-repo" placeholder="请输入GitHub仓库名" className="mono-input" autoComplete="off" />
+                <input value={repo} onChange={e => setRepo(e.target.value)} name="gh-repo" placeholder="请输入GitHub仓库名" className="mono-input" autoComplete="off" style={{ padding: '8px 12px' }} />
               </div>
             ) : (
-              <div className="field">
+              <div className="field" style={{ marginBottom: 0 }}>
                 <label>状态</label>
-                <select value={status} onChange={e => setStatus(e.target.value)}>
+                <select value={status} onChange={e => setStatus(e.target.value)} style={{ padding: '8px 12px' }}>
                   <option value="online">在线</option>
                   <option value="offline">离线</option>
                   <option value="maintenance">维护中</option>
