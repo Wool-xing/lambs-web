@@ -789,7 +789,7 @@ export default function ProjectDetail() {
                         const pkVal = tableData.pk ? String(row[tableData.pk]) : null
                         return (
                           <div key={ri} className="tbl-row" style={gridStyle}>
-                            <span>
+                            <span style={{ paddingLeft: 10 }}>
                               {canManageRows && pkVal !== null && (
                                 <input type="checkbox" checked={selectedPKs.has(pkVal)} onChange={() => toggleOne(pkVal)} style={{ cursor: 'pointer' }} />
                               )}
