@@ -12,7 +12,7 @@ export default function ProjectForm({ onDone, project }) {
   const [desc, setDesc] = useState(project?.description || '')
   const [stack, setStack] = useState(project?.stack || '')
   const [port, setPort] = useState(project?.port || '')
-  const [dbType, setDbType] = useState(project?.db_type || '—')
+  const dbType = project?.db_type || '—'
   const [basePath, setBasePath] = useState(project?.base_path || '')
   const [serviceName, setServiceName] = useState(project?.service_name || '')
   const [offlineMsg, setOfflineMsg] = useState(project?.offline_msg || '')
@@ -22,7 +22,13 @@ export default function ProjectForm({ onDone, project }) {
   const [backupInterval, setBackupInterval] = useState(project?.backup_interval_hours || 0)
   const [backupRetention, setBackupRetention] = useState(project?.backup_retention_days || 0)
   const [status, setStatus] = useState(project?.status || 'online')
-  const [dsn, setDsn] = useState(project?.dsn || '')
+  const [dss, setDss] = useState(() => {
+    const list = (project?.datasources || [])
+    if (list.length > 0) {
+      return list.map((d, i) => ({ id: d.id || `ds${i + 1}`, name: d.name || '主数据源', type: d.type || '直连 PostgreSQL', dsn: d.dsn || '', is_primary: i === 0 || !!d.is_primary }))
+    }
+    return [{ id: 'ds1', name: '主数据源', type: project?.db_type || '直连 PostgreSQL', dsn: project?.dsn || '', is_primary: true }]
+  })
   const [showDsn, setShowDsn] = useState(false)
   const iconUrl = upload.preview || project?.icon_url || ''
   const [loading, setLoading] = useState(false)
@@ -36,10 +42,22 @@ export default function ProjectForm({ onDone, project }) {
     }
     setLoading(true)
     try {
+      const datasources = dss.map((d, i) => ({ id: d.id, name: d.name, type: d.type, dsn: d.dsn, is_primary: i === 0 }))
+      const primary = datasources[0]
+      const payload = {
+        name, description: desc, stack, port,
+        db_type: primary ? primary.type : dbType,
+        dsn: primary ? primary.dsn : '',
+        datasources,
+        base_path: basePath || null, service_name: serviceName || null, startup_command: startupCmd || null,
+        health_url: healthUrl || null, offline_msg: offlineMsg || null, icon_url: iconUrl || null,
+        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        backup_interval_hours: parseInt(backupInterval) || 0, backup_retention_days: parseInt(backupRetention) || 0,
+      }
       if (isEdit) {
-        await api.put(`/projects/${project.id}`, { name, description: desc, stack, port, db_type: dbType, dsn, status, base_path: basePath || null, service_name: serviceName || null, startup_command: startupCmd || null, health_url: healthUrl || null, offline_msg: offlineMsg || null, icon_url: iconUrl || null, tags: tags.split(',').map(t => t.trim()).filter(Boolean), backup_interval_hours: parseInt(backupInterval) || 0, backup_retention_days: parseInt(backupRetention) || 0 })
+        await api.put(`/projects/${project.id}`, { ...payload, status })
       } else {
-        await api.post('/projects', { name, repo, description: desc, stack, port, db_type: dbType, dsn, base_path: basePath || null, service_name: serviceName || null, startup_command: startupCmd || null, health_url: healthUrl || null, offline_msg: offlineMsg || null, icon_url: iconUrl || null, tags: tags.split(',').map(t => t.trim()).filter(Boolean), backup_interval_hours: parseInt(backupInterval) || 0, backup_retention_days: parseInt(backupRetention) || 0 })
+        await api.post('/projects', payload)
       }
       toast(isEdit ? `${name} 已更新` : `${name} 已成功接入`)
       onDone({ name, icon_url: iconUrl || null })
@@ -89,21 +107,53 @@ export default function ProjectForm({ onDone, project }) {
         <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="请输入项目描述" />
       </div>
       <div className="field">
-        <label>连接方式</label>
-        <select value={dbType} onChange={e => setDbType(e.target.value)}>
-          <option>直连 PostgreSQL</option>
-          <option>直连 SQLite</option>
-          <option>REST API</option>
-          <option>MySQL（TCP端口检测，不含数据同步）</option>
-          <option>MongoDB（文档型）</option>
-          <option>Redis（KV型）</option>
-        </select>
-      </div>
-      <div className="field">
-        <label>连接串 / API 地址 <span style={{fontSize:10,color:'var(--accent-red)',fontWeight:400}}>（含密码，保护好）</span></label>
-        <div className="pwd-wrap">
-          <input type={showDsn ? 'password' : 'text'} value={dsn} onChange={e => setDsn(e.target.value)} placeholder="请输入连接串或API地址" className="mono-input" autoComplete="new-password" />
-          <span className="pwd-eye" onClick={() => setShowDsn(!showDsn)}><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+        <label>数据源 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（第一个为主数据源，用于连接测试/同步/备份）</span></label>
+        {dss.map((d, i) => (
+          <div key={d.id} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+            <span style={{ fontSize: 10, color: i === 0 ? 'var(--accent-cyan)' : 'var(--text-tertiary)', whiteSpace: 'nowrap', minWidth: 44 }}>
+              {i === 0 ? '主源' : `源${i + 1}`}
+            </span>
+            <input
+              value={d.name}
+              onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
+              placeholder="名称"
+              style={{ width: 90, flexShrink: 0 }}
+            />
+            <select
+              value={d.type}
+              onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: e.target.value } : x))}
+              style={{ width: 130, flexShrink: 0 }}
+            >
+              <option>直连 PostgreSQL</option>
+              <option>直连 SQLite</option>
+              <option>REST API</option>
+              <option>MySQL（TCP端口检测，不含数据同步）</option>
+              <option>MongoDB（文档型）</option>
+              <option>Redis（KV型）</option>
+            </select>
+            <input
+              type={showDsn ? 'password' : 'text'}
+              value={d.dsn}
+              onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, dsn: e.target.value } : x))}
+              placeholder="连接串 / API 地址"
+              className="mono-input"
+              autoComplete="new-password"
+              style={{ flex: 1 }}
+            />
+            {dss.length > 1 && (
+              <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 8px' }}
+                onClick={() => setDss(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
+            )}
+          </div>
+        ))}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 2 }}>
+          <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
+            onClick={() => setDss(prev => [...prev, { id: `ds${prev.length + 1}`, name: '', type: '直连 PostgreSQL', dsn: '' }])}>
+            + 添加数据源
+          </button>
+          <span className="pwd-eye" style={{ marginLeft: 'auto' }} onClick={() => setShowDsn(!showDsn)}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </span>
         </div>
       </div>
       <div className="field">

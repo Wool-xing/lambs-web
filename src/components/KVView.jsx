@@ -8,7 +8,7 @@ import { useConfirm } from './Modal'
 
 const TYPE_LABELS = { string: 'String', hash: 'Hash', list: 'List', set: 'Set', zset: 'ZSet', none: '不存在' }
 
-export default function KVView({ id, tableList, selectedTable, onSelectTable, canManageRows, toast }) {
+export default function KVView({ id, tableList, selectedTable, onSelectTable, canManageRows, toast, ds }) {
   const [rows, setRows] = useState(null)
   const [search, setSearch] = useState('')
   const [newKey, setNewKey] = useState(false)      // create-key modal
@@ -19,7 +19,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
 
   const fetchRows = useCallback((table) => {
     if (!table) { setRows(null); return }
-    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}`).then(res => {
+    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}${ds ? `&ds=${ds}` : ''}`).then(res => {
       if (res.success) setRows(res.data.rows || [])
     }).catch(() => setRows(null))
   }, [id])
@@ -41,7 +41,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
     else if (type === 'set') body.member = f.get('value') || ''
     else if (type === 'zset') body.member = f.get('value') || '', body.score = f.get('score') || '0'
     try {
-      await api.post(`/projects/${id}/data/row?table=${encodeURIComponent(key)}`, body)
+      await api.post(`/projects/${id}/data/row?table=${encodeURIComponent(key)}${ds ? `&ds=${ds}` : ''}`, body)
       toast('键已创建', 'success')
       setNewKey(false)
       onSelectTable(key)
@@ -53,7 +53,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
     const f = new FormData(e.target)
     const body = { type: keyType, value: f.get('value') || '', field: f.get('field') || '', member: f.get('value') || '', score: f.get('score') || '0' }
     try {
-      await api.post(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}`, body)
+      await api.post(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}${ds ? `&ds=${ds}` : ''}`, body)
       toast('已添加', 'success')
       setItemForm(null)
       fetchRows(selectedTable)
@@ -62,7 +62,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
 
   const saveString = async () => {
     try {
-      await api.put(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}&pk=key&pkval=${encodeURIComponent(selectedTable)}`, { type: 'string', value: strVal })
+      await api.put(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}&pk=key&pkval=${encodeURIComponent(selectedTable)}${ds ? `&ds=${ds}` : ''}`, { type: 'string', value: strVal })
       toast('已保存', 'success')
       setEditingStr(false)
       fetchRows(selectedTable)
@@ -73,7 +73,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
     const ok = await confirm('删除键', `确定删除键 ${selectedTable} 吗？此操作不可撤销。`)
     if (!ok) return
     try {
-      await api.delete(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}&pk=key&pkval=${encodeURIComponent(selectedTable)}`)
+      await api.delete(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}&pk=key&pkval=${encodeURIComponent(selectedTable)}${ds ? `&ds=${ds}` : ''}`)
       toast('键已删除', 'success')
       onSelectTable('')
       setRows(null)

@@ -36,6 +36,7 @@ export default function ProjectDetail() {
   const [procStats, setProcStats] = useState(null)
   const [tableList, setTableList] = useState([])
   const [selectedTable, setSelectedTable] = useState('')
+  const [selectedDS, setSelectedDS] = useState('')
   const [tableData, setTableData] = useState(null) // { name, pk, cols, rows }
   const [selectedPKs, setSelectedPKs] = useState(new Set())
   const [liveSearch, setLiveSearch] = useState('')
@@ -143,7 +144,7 @@ export default function ProjectDetail() {
         if (String(v ?? '').trim() !== '') payload[k] = v
       }
       try {
-        await api.post(`/projects/${id}/data/row?table=${encodeURIComponent(editingRow.tabName)}`, payload)
+        await api.post(`/projects/${id}/data/row?table=${encodeURIComponent(editingRow.tabName)}${selectedDS ? `&ds=${selectedDS}` : ''}`, payload)
         toast('行已新增')
         setEditingRow(null)
         setSelectedPKs(new Set())
@@ -157,7 +158,7 @@ export default function ProjectDetail() {
     const payload = { ...editingRow.values }
     delete payload[editingRow.pk]
     try {
-      await api.put(`/projects/${id}/data/row?table=${encodeURIComponent(editingRow.tabName)}&pk=${encodeURIComponent(editingRow.pk)}&pkval=${encodeURIComponent(pkVal)}`, payload)
+      await api.put(`/projects/${id}/data/row?table=${encodeURIComponent(editingRow.tabName)}&pk=${encodeURIComponent(editingRow.pk)}&pkval=${encodeURIComponent(pkVal)}${selectedDS ? `&ds=${selectedDS}` : ''}`, payload)
       toast('行已更新')
       setEditingRow(null)
       setSelectedPKs(new Set())
@@ -172,7 +173,7 @@ export default function ProjectDetail() {
     const ok = await confirm('删除数据行', `确定删除表 ${tab.name} 中 ${tab.pk}=${pkVal} 的数据吗？此操作不可撤销。`)
     if (!ok) return
     try {
-      await api.delete(`/projects/${id}/data/row?table=${encodeURIComponent(tab.name)}&pk=${encodeURIComponent(tab.pk)}&pkval=${encodeURIComponent(pkVal)}`)
+      await api.delete(`/projects/${id}/data/row?table=${encodeURIComponent(tab.name)}&pk=${encodeURIComponent(tab.pk)}&pkval=${encodeURIComponent(pkVal)}${selectedDS ? `&ds=${selectedDS}` : ''}`)
       toast('行已删除')
       fetchTableData(tab.name)
     } catch (err) { toast(err.message, 'error') }
@@ -214,7 +215,7 @@ export default function ProjectDetail() {
       let failed = 0
       for (const pkVal of selectedPKs) {
         try {
-          await api.delete(`/projects/${id}/data/row?table=${encodeURIComponent(tableData.name)}&pk=${encodeURIComponent(tableData.pk)}&pkval=${encodeURIComponent(pkVal)}`)
+          await api.delete(`/projects/${id}/data/row?table=${encodeURIComponent(tableData.name)}&pk=${encodeURIComponent(tableData.pk)}&pkval=${encodeURIComponent(pkVal)}${selectedDS ? `&ds=${selectedDS}` : ''}`)
         } catch { failed++ }
       }
       toast(failed === 0 ? `已删除 ${selectedPKs.size} 行` : `删除完成，${failed} 行失败`)
@@ -253,20 +254,20 @@ export default function ProjectDetail() {
     setTableData(null)
     setSelectedPKs(new Set())
     setLivePage(1)
-    api.get(`/projects/${id}/tables/list`).then(res => {
+    api.get(`/projects/${id}/tables/list${selectedDS ? `?ds=${selectedDS}` : ''}`).then(res => {
       if (res.success) setTableList(res.data.tables || [])
     }).catch(() => setTableList([]))
-  }, [id])
+  }, [id, selectedDS])
 
   // Fetch table data when selected table changes
   const fetchTableData = useCallback((table) => {
     if (!table) { setTableData(null); return }
-    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}`).then(res => {
+    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}${selectedDS ? `&ds=${selectedDS}` : ''}`).then(res => {
       if (res.success) {
         setTableData({ name: table, pk: res.data.pk, cols: res.data.columns, rows: res.data.rows })
       }
     }).catch(() => setTableData(null))
-  }, [id])
+  }, [id, selectedDS])
 
   useEffect(() => {
     fetchTableData(selectedTable)
@@ -285,6 +286,9 @@ export default function ProjectDetail() {
   }, [project?.icon_url])
 
   if (!project) return <div className="empty-state"><div className="t">加载中…</div></div>
+
+  // Type of the currently selected datasource (primary when none selected)
+  const curDBType = ((project?.datasources || []).find(d => d.id === selectedDS)?.type || project?.db_type || '')
 
   const handleDelete = async () => {
     const ok = await confirm('删除项目', `确定删除「${project.name}」吗？所有数据将被移除。`)
@@ -640,11 +644,25 @@ export default function ProjectDetail() {
           </div>
         )}
 
+        {/* Datasource switcher — only for multi-datasource projects */}
+        {adminMode === 'data' && (project?.datasources || []).length > 1 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>数据源</span>
+            <select value={selectedDS} onChange={e => setSelectedDS(e.target.value)}
+              style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '6px 12px', color: 'var(--text-primary)', fontSize: 12 }}>
+              <option value="">主数据源（默认）</option>
+              {(project?.datasources || []).map(d => (
+                <option key={d.id} value={d.id}>{d.name} · {d.type}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Tabs */}
-        {adminMode === 'data' && ((project?.db_type || '').includes('MongoDB') ? (
-          <DocView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} />
-        ) : (project?.db_type || '').includes('Redis') ? (
-          <KVView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} />
+        {adminMode === 'data' && (curDBType.includes('MongoDB') ? (
+          <DocView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} ds={selectedDS} />
+        ) : curDBType.includes('Redis') ? (
+          <KVView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} ds={selectedDS} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {/* Toolbar: table selector + search + actions */}

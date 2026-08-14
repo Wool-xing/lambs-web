@@ -38,7 +38,7 @@ function JsonNode({ k, v, depth }) {
   )
 }
 
-export default function DocView({ id, tableList, selectedTable, onSelectTable, canManageRows, toast }) {
+export default function DocView({ id, tableList, selectedTable, onSelectTable, canManageRows, toast, ds }) {
   const [docs, setDocs] = useState(null)
   const [search, setSearch] = useState('')
   const [editing, setEditing] = useState(null) // { isNew: bool, doc: string(json) }
@@ -46,7 +46,7 @@ export default function DocView({ id, tableList, selectedTable, onSelectTable, c
 
   const fetchDocs = useCallback((table) => {
     if (!table) { setDocs(null); return }
-    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}`).then(res => {
+    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}${ds ? `&ds=${ds}` : ''}`).then(res => {
       if (res.success) setDocs(res.data.rows || [])
     }).catch(() => setDocs(null))
   }, [id])
@@ -64,12 +64,12 @@ export default function DocView({ id, tableList, selectedTable, onSelectTable, c
     try { parsed = JSON.parse(editing.doc) } catch { toast('JSON 格式错误', 'error'); return }
     try {
       if (editing.isNew) {
-        await api.post(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}`, parsed)
+        await api.post(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}${ds ? `&ds=${ds}` : ''}`, parsed)
         toast('文档已新增', 'success')
       } else {
         const pkVal = parsed._id || editing.pkVal
         const { _id, ...rest } = parsed
-        await api.put(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}&pk=_id&pkval=${encodeURIComponent(pkVal)}`, rest)
+        await api.put(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}&pk=_id&pkval=${encodeURIComponent(pkVal)}${ds ? `&ds=${ds}` : ''}`, rest)
         toast('文档已更新', 'success')
       }
       setEditing(null)
@@ -81,7 +81,7 @@ export default function DocView({ id, tableList, selectedTable, onSelectTable, c
     const ok = await confirm('删除文档', `确定删除 _id: ${pkVal} 吗？此操作不可撤销。`)
     if (!ok) return
     try {
-      await api.delete(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}&pk=_id&pkval=${encodeURIComponent(pkVal)}`)
+      await api.delete(`/projects/${id}/data/row?table=${encodeURIComponent(selectedTable)}&pk=_id&pkval=${encodeURIComponent(pkVal)}${ds ? `&ds=${ds}` : ''}`)
       toast('文档已删除', 'success')
       fetchDocs(selectedTable)
     } catch (err) { toast(err.message, 'error') }
