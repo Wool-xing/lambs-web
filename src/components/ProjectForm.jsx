@@ -129,9 +129,10 @@ export default function ProjectForm({ onDone, project }) {
     <form onSubmit={handleSubmit} autoComplete="off">
       {/* ── 基本信息 ── */}
       <div className="form-section">
-        <div className="form-section-title">基本信息</div>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', paddingBottom: 12, borderBottom: '1px solid var(--border)' }}>
-          <div style={{ flexShrink: 0, paddingTop: 18 }}>
+        <div className="form-section-title" style={{ borderBottom: '1px solid var(--border)', paddingBottom: 10, marginBottom: 14 }}>基本信息</div>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+          <div style={{ flexShrink: 0 }}>
+            <label style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>Logo</label>
             <div
               className={`upload-zone ${iconUrl ? 'has-image' : ''}`}
               onClick={() => document.getElementById('logo-input')?.click()}
