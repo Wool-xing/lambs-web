@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { api } from '../api/client'
 import Icon from './Icon'
+import { fmtTime } from '../utils/time'
 
 // 系统日志 — renders /logs/aggregated (audit + project status lines).
 // Note: the endpoint returns a bare array inside data, not {logs: [...]}.
@@ -114,10 +115,11 @@ export default function ErrorLogsWidget() {
               <div key={i} style={{ display: 'flex', gap: 10, padding: '3px 12px', alignItems: 'baseline', borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,.03)' : 'none' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.02)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, width: 52 }}>{(l.time || '').slice(11, 16)}</span>
+                <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, width: 52 }}>{fmtTime(l.time).slice(11, 16)}</span>
                 <span style={{ color: levelColor[l.level] || 'var(--text-secondary)', flexShrink: 0, width: 44, fontWeight: 600 }}>
                   {String(l.level || 'info').toUpperCase()}
                 </span>
+                <span style={{ color: 'var(--text-secondary)', flexShrink: 0 }}>[{l.project_name}]</span>
                 <span style={{ color: 'var(--text-primary)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                   {l.message.length > 200 ? l.message.substring(0, 200) + '…' : l.message}
                 </span>
