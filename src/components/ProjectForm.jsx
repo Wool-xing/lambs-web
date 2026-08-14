@@ -198,19 +198,23 @@ export default function ProjectForm({ onDone, project }) {
         <div className="form-section-title">数据源 <span className="hint">第一个为主数据源 · 驱动连接测试/同步/备份</span></div>
         {dss.map((d, i) => (
           <div key={d.id} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
-            <span style={{ fontSize: 10, color: i === 0 ? 'var(--accent-cyan)' : 'var(--text-tertiary)', whiteSpace: 'nowrap', minWidth: 44 }}>
+            <span style={{
+              fontSize: 10, padding: '2px 7px', borderRadius: 4, whiteSpace: 'nowrap', flexShrink: 0,
+              background: i === 0 ? 'rgba(0,199,190,.12)' : 'var(--bg-panel-raised)',
+              color: i === 0 ? 'var(--accent-cyan)' : 'var(--text-tertiary)',
+            }}>
               {i === 0 ? '主源' : `源${i + 1}`}
             </span>
             <input
               value={d.name}
               onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
-              placeholder="名称"
-              style={{ width: 80, flexShrink: 0 }}
+              placeholder="名称（可选）"
+              style={{ width: 84, flexShrink: 0 }}
             />
             <select
               value={d.type}
               onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: e.target.value } : x))}
-              style={{ width: 128, flexShrink: 0 }}
+              style={{ width: 124, flexShrink: 0 }}
             >
               <option>直连 PostgreSQL</option>
               <option>直连 SQLite</option>
@@ -220,9 +224,9 @@ export default function ProjectForm({ onDone, project }) {
               <option>Redis（KV型）</option>
               <option>向量数据库（Qdrant）</option>
             </select>
-            <div style={{ position: 'relative', flex: 1 }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
-                type={showDsn ? 'password' : 'text'}
+                type={showDsn ? 'text' : 'password'}
                 value={d.dsn}
                 onChange={e => onDsnChange(i, e.target.value)}
                 placeholder="连接串 / API 地址"
@@ -230,8 +234,17 @@ export default function ProjectForm({ onDone, project }) {
                 autoComplete="new-password"
                 style={{ width: '100%', paddingRight: 30 }}
               />
-              <span className="pwd-eye" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }} onClick={() => setShowDsn(!showDsn)}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span
+                className="pwd-eye"
+                style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', display: 'inline-flex' }}
+                title={showDsn ? '隐藏连接串' : '显示连接串'}
+                onClick={() => setShowDsn(!showDsn)}
+              >
+                {showDsn ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                )}
               </span>
             </div>
             {dss.length > 1 && (
