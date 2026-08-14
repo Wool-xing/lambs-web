@@ -99,6 +99,17 @@ export default function Dashboard() {
     window.dispatchEvent(new Event('lambs-projects-changed'))
   }
 
+  const handleClone = async (id) => {
+    try {
+      const res = await api.post(`/projects/${id}/clone`)
+      if (res.success) {
+        toast(`已克隆为「${res.data.name}」`)
+        fetchProjects()
+        window.dispatchEvent(new Event('lambs-projects-changed'))
+      } else toast(res.error || '克隆失败', 'error')
+    } catch (err) { toast(err.message, 'error') }
+  }
+
   const handleDelete = async (id, name) => {
     const ok = await confirm('删除项目', `确定删除「${name}」吗？所有数据将被移除。`)
     if (!ok) return
@@ -367,6 +378,7 @@ export default function Dashboard() {
       {menu && (
         <div className="dropdown" style={{left:menu.x,top:menu.y,opacity:1,pointerEvents:'auto'}} onClick={e=>e.stopPropagation()}>
           <div className="dd-item" onClick={()=>{setMenu(null);openDrawer(`编辑项目·${menu.project.name}`,<ProjectForm project={menu.project} onDone={(s)=>{closeDrawer();fetchProjects();syncLambsBrand(s)}}/>)}}>编辑项目</div>
+          <div className="dd-item" onClick={()=>{setMenu(null);handleClone(menu.project.id, menu.project.name)}}>克隆项目</div>
           <div className="dd-item" onClick={()=>{setMenu(null);handleToggleStatus(menu.project.id)}}>{menu.project.status === 'online' ? '停用项目' : menu.project.status === 'maintenance' ? '上线项目' : '启用项目'}</div>
           <div className="dd-item" onClick={()=>{setMenu(null);handleTogglePin(menu.project.id)}}>{menu.project.is_pinned?'取消置顶':'置顶项目'}</div>
           <div className="dd-sep" />
