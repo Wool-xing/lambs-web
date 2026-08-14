@@ -399,7 +399,8 @@ export default function Dashboard() {
             <div className="card-title" style={{ marginBottom: 0 }}>最近动态 <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 400 }}>({activityLogs.length}条)</span></div>
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{showActivity ? '收起' : '展开'}</span>
           </div>
-          {showActivity && (<div style={{ maxHeight: 220, overflow: 'auto', fontSize: 11.5, lineHeight: 1.6 }}>
+          {showActivity && (<div style={{ position: 'relative', maxHeight: 240, overflow: 'auto', fontSize: 11.5, lineHeight: 1.6, paddingLeft: 18 }}>
+            <div style={{ position: 'absolute', left: 4, top: 8, bottom: 8, width: 2, background: 'var(--border)', borderRadius: 1 }} />
             {activityLogs.map((l, i) => {
               const badge = {
                 '登录': ['var(--accent-cyan)', 'rgba(0,199,190,.12)'],
@@ -412,15 +413,19 @@ export default function Dashboard() {
                 '新增数据': ['var(--accent-green)', 'rgba(56,210,148,.12)'],
                 '修改数据': ['var(--accent-cyan)', 'rgba(0,199,190,.12)'],
               }[l.action] || ['var(--text-secondary)', 'var(--bg-panel-raised)']
-              const desc = (l.target && l.target !== '—' ? l.target + ' · ' : '') + (l.detail || '')
+              const t = fmtTime(l.created_at)
               return (
-                <div key={i} style={{ display: 'flex', gap: 10, padding: '6px 0', borderBottom: '1px solid var(--border)', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: 10, minWidth: 104, flexShrink: 0 }}>{fmtTime(l.created_at).substring(0, 16)}</span>
+                <div key={i} style={{ position: 'relative', display: 'flex', gap: 10, padding: '6px 0', alignItems: 'center' }}>
+                  <span style={{ position: 'absolute', left: -17, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', background: badge[0] }} />
+                  <span style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: 10, width: 44, flexShrink: 0 }}>{t.slice(11, 16)}</span>
+                  <span style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                    {l.target && l.target !== '—' && <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{l.target}</span>}
+                    {l.detail && <span style={{ marginLeft: l.target && l.target !== '—' ? 6 : 0 }}>{l.detail}</span>}
+                  </span>
                   <span style={{
                     fontSize: 10, padding: '1px 8px', borderRadius: 4, whiteSpace: 'nowrap', flexShrink: 0,
                     background: badge[1], color: badge[0],
                   }}>{l.action}</span>
-                  <span style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{desc}</span>
                 </div>
               )
             })}

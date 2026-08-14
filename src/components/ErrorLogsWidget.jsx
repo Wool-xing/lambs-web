@@ -50,9 +50,14 @@ export default function ErrorLogsWidget() {
             <div style={{ padding: 12, color: 'var(--text-tertiary)' }}>暂无日志</div>
           ) : (
             logs.map((l, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, padding: '3px 12px', borderBottom: '1px solid var(--border)', alignItems: 'baseline' }}>
-                <span style={{ color: 'var(--text-tertiary)', flexShrink: 0 }}>[{l.project_name}]</span>
-                <span style={{ color: levelColor[l.level] || 'var(--text-secondary)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+              <div key={i} style={{ display: 'flex', gap: 10, padding: '3px 12px', alignItems: 'baseline', borderBottom: i < logs.length - 1 ? '1px solid rgba(255,255,255,.03)' : 'none' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.02)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, width: 52 }}>{(l.time || '').slice(11, 16)}</span>
+                <span style={{ color: levelColor[l.level] || 'var(--text-secondary)', flexShrink: 0, width: 44, fontWeight: 600 }}>
+                  {String(l.level || 'info').toUpperCase()}
+                </span>
+                <span style={{ color: 'var(--text-primary)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                   {l.message.length > 200 ? l.message.substring(0, 200) + '…' : l.message}
                 </span>
               </div>
