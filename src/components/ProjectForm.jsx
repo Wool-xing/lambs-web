@@ -216,7 +216,7 @@ export default function ProjectForm({ onDone, project }) {
             <select
               value={d.type}
               onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: e.target.value } : x))}
-              style={{ ...rowCtrl, width: 124, flexShrink: 0 }}
+              style={{ ...rowCtrl, width: 124, flexShrink: 0, padding: '8px 12px' }}
             >
               <option>直连 PostgreSQL</option>
               <option>直连 SQLite</option>
