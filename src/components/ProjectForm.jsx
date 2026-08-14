@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { api } from '../api/client'
 import { useToast } from './Toast'
 import useFileUpload from '../hooks/useFileUpload'
@@ -33,18 +33,32 @@ export default function ProjectForm({ onDone, project }) {
   const [svcs, setSvcs] = useState(() => (project?.services || []).map(s => ({ name: s.name || '', start_cmd: s.start_cmd || '', stop_cmd: s.stop_cmd || '' })))
   const [detecting, setDetecting] = useState(false)
 
-  // Shared-service auto-detection from a localhost DSN
-  const LOCAL_SVC = {
-    mysql: { name: 'mysql-shared', start_cmd: 'sudo systemctl start mysql', stop_cmd: 'sudo systemctl stop mysql' },
-    redis: { name: 'redis-shared', start_cmd: 'sudo systemctl start redis-server', stop_cmd: 'sudo systemctl stop redis-server' },
-    postgres: { name: 'postgres-shared', start_cmd: 'sudo systemctl start postgresql', stop_cmd: 'sudo systemctl stop postgresql' },
-  }
+  // Shared-service auto-detection: only for units that really exist on the
+  // server and are NOT system-critical (Lambs' own postgres etc).
+  const [localServices, setLocalServices] = useState([])
+  useEffect(() => {
+    api.get('/runtime/local-services').then(r => {
+      if (r.success) setLocalServices(r.data.services || [])
+    }).catch(() => {})
+  }, [])
+  const SCHEME_UNIT = { mysql: 'mysql', redis: 'redis-server', postgres: 'postgresql', mongodb: 'mongod' }
   const guessSharedService = (dsn) => {
     try {
       const u = new URL(dsn)
       if (u.hostname !== '127.0.0.1' && u.hostname !== 'localhost') return null
       const scheme = (dsn.split('://')[0] || '').split('+')[0].toLowerCase()
-      return LOCAL_SVC[scheme] || null
+      const unit = SCHEME_UNIT[scheme]
+      if (!unit) return null
+      const svc = localServices.find(s => s.name === unit)
+      if (!svc) {
+        toast(`本机未安装 ${scheme} 服务，仅记录连接串`, 'info')
+        return null
+      }
+      if (!svc.managed) {
+        toast(`本机 ${scheme} 是系统依赖服务，不可按需管理，仅记录连接串`, 'warn')
+        return null
+      }
+      return { name: `${unit}-shared`, start_cmd: `sudo systemctl start ${svc.unit}`, stop_cmd: `sudo systemctl stop ${svc.unit}` }
     } catch { return null }
   }
   const onDsnChange = (i, val) => {
