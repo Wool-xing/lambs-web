@@ -664,7 +664,7 @@ export default function ProjectDetail() {
           <DocView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} ds={selectedDS} />
         ) : curDBType.includes('Redis') ? (
           <KVView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} ds={selectedDS} />
-        ) : curDBType.includes('向量') ? (
+        ) : curDBType.includes('向量') || curDBType.toLowerCase().includes('qdrant') ? (
           <VectorView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} ds={selectedDS} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
