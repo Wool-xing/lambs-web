@@ -14,6 +14,7 @@ export default function ErrorLogsWidget() {
   const [collapsed, setCollapsed] = useState(true)
   const [autoScroll, setAutoScroll] = useState(false)
   const [refreshedAt, setRefreshedAt] = useState(null)
+  const hideTimer = useRef(null)
   const bodyRef = useRef(null)
 
   // silent=true for background polling: refresh data without the "加载中…"
@@ -25,6 +26,9 @@ export default function ErrorLogsWidget() {
       if (r.success) {
         setLogs(Array.isArray(r.data) ? r.data : [])
         setRefreshedAt(new Date())
+        // The "已刷新" hint fades back after a few seconds.
+        clearTimeout(hideTimer.current)
+        hideTimer.current = setTimeout(() => setRefreshedAt(null), 3000)
       }
     } catch { /* */ }
     finally { if (!silent) setLoading(false) }
