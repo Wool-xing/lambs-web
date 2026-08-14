@@ -204,28 +204,34 @@ export default function ProjectForm({ onDone, project }) {
       <div className="form-section">
         <div className="form-section-title">数据源 <span className="hint">第一个为主数据源 · 驱动连接测试/同步/备份</span></div>
         {dss.map((d, i) => (
-          <div key={d.id} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
-            <span style={{
-              fontSize: 10, padding: '0 8px', borderRadius: 4, whiteSpace: 'nowrap', flexShrink: 0,
-              height: 37, minWidth: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              background: i === 0 ? 'rgba(0,199,190,.12)' : 'var(--bg-panel-raised)',
-              color: i === 0 ? 'var(--accent-cyan)' : 'var(--text-tertiary)',
-            }}>
-              {i === 0 ? '主源' : '副源'}
-            </span>
-            <input
-              value={d.name}
-              onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
-              placeholder="名称（可选）"
-              title={d.name}
-              style={{ ...rowCtrl, width: 84, flexShrink: 0 }}
-            />
-            <TypeSelect
-              value={d.type}
-              onChange={v => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: v } : x))}
-              style={{ width: 128, flexShrink: 0 }}
-            />
-            <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+          <div key={d.id} style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+              <span style={{
+                fontSize: 10, padding: '0 8px', borderRadius: 4, whiteSpace: 'nowrap', flexShrink: 0,
+                height: 37, minWidth: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                background: i === 0 ? 'rgba(0,199,190,.12)' : 'var(--bg-panel-raised)',
+                color: i === 0 ? 'var(--accent-cyan)' : 'var(--text-tertiary)',
+              }}>
+                {i === 0 ? '主源' : '副源'}
+              </span>
+              <input
+                value={d.name}
+                onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
+                placeholder="名称（可选）"
+                title={d.name}
+                style={{ ...rowCtrl, width: 110, flexShrink: 0 }}
+              />
+              <TypeSelect
+                value={d.type}
+                onChange={v => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: v } : x))}
+                style={{ width: 150, flexShrink: 0 }}
+              />
+              {dss.length > 1 && (
+                <button type="button" className="btn btn-ghost btn-sm" style={{ marginLeft: 'auto', flexShrink: 0, padding: '4px 8px' }}
+                  onClick={() => setDss(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
+              )}
+            </div>
+            <div style={{ position: 'relative' }}>
               <input
                 type={d.show ? 'text' : 'password'}
                 value={d.dsn}
@@ -233,6 +239,7 @@ export default function ProjectForm({ onDone, project }) {
                 placeholder="连接串 / API 地址"
                 className="mono-input"
                 autoComplete="new-password"
+                title={d.dsn}
                 style={{ ...rowCtrl, width: '100%', paddingRight: 30 }}
               />
               <span
@@ -248,10 +255,6 @@ export default function ProjectForm({ onDone, project }) {
                 )}
               </span>
             </div>
-            {dss.length > 1 && (
-              <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 8px' }}
-                onClick={() => setDss(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
-            )}
           </div>
         ))}
         <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
@@ -284,7 +287,7 @@ export default function ProjectForm({ onDone, project }) {
         <div className="field" style={{ marginTop: 14 }}>
           <label>启动命令 <span className="hint">留空则走 systemd</span></label>
           <div style={{ display: 'flex', gap: 6 }}>
-            <input value={startupCmd} onChange={e => setStartupCmd(e.target.value)} placeholder="如: cd /home/ubuntu/apps/myapp && PORT=3000 ./myapp" style={{ flex: 1 }} />
+            <input value={startupCmd} onChange={e => setStartupCmd(e.target.value)} placeholder="如: cd /home/ubuntu/apps/myapp && PORT=3000 ./myapp" title={startupCmd} style={{ flex: 1 }} />
             <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0 }} onClick={handleDetect} disabled={detecting}>
               {detecting ? '检测中…' : '检测'}
             </button>
@@ -328,6 +331,7 @@ export default function ProjectForm({ onDone, project }) {
                   value={s.name}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
                   placeholder="服务名"
+                  title={s.name}
                   className="mono-input"
                   style={{ ...rowCtrl, width: 100, flexShrink: 0 }}
                 />
@@ -335,6 +339,7 @@ export default function ProjectForm({ onDone, project }) {
                   value={s.start_cmd}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, start_cmd: e.target.value } : x))}
                   placeholder="启动命令"
+                  title={s.start_cmd}
                   className="mono-input"
                   style={{ ...rowCtrl, flex: 1, minWidth: 0 }}
                 />
@@ -342,6 +347,7 @@ export default function ProjectForm({ onDone, project }) {
                   value={s.stop_cmd}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, stop_cmd: e.target.value } : x))}
                   placeholder="停止命令"
+                  title={s.stop_cmd}
                   className="mono-input"
                   style={{ ...rowCtrl, flex: 1, minWidth: 0 }}
                 />
