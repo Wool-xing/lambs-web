@@ -154,7 +154,7 @@ body{
 .theme-card{
   display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;cursor:pointer;
   border:2px solid var(--border);transition:border-color .15s;background:rgba(var(--glass-bg),.6);
-  width:200px;flex:none;
+  width:100%;
 }
 .theme-card:hover{border-color:var(--border-strong)}
 .theme-card.active{border-color:var(--accent-cyan)}
