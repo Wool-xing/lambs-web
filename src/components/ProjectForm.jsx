@@ -130,8 +130,8 @@ export default function ProjectForm({ onDone, project }) {
       {/* ── 基本信息 ── */}
       <div className="form-section">
         <div className="form-section-title">基本信息</div>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <div style={{ flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', paddingBottom: 12, borderBottom: '1px solid var(--border)' }}>
+          <div style={{ flexShrink: 0, paddingTop: 18 }}>
             <div
               className={`upload-zone ${iconUrl ? 'has-image' : ''}`}
               onClick={() => document.getElementById('logo-input')?.click()}
@@ -176,7 +176,7 @@ export default function ProjectForm({ onDone, project }) {
             )}
           </div>
         </div>
-        <div className="field" style={{ marginTop: 14 }}>
+        <div className="field" style={{ marginTop: 12 }}>
           <label>项目描述</label>
           <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="请输入项目描述" rows={2} />
         </div>
