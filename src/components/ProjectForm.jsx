@@ -86,7 +86,7 @@ export default function ProjectForm({ onDone, project }) {
       const primary = datasources[0]
       const services = svcs.filter(s => s.name && s.start_cmd)
       const payload = {
-        name, description: desc, stack, port,
+        name, repo, description: desc, stack, port,
         db_type: primary ? primary.type : dbType,
         dsn: primary ? primary.dsn : '',
         datasources,
