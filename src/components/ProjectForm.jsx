@@ -201,7 +201,8 @@ export default function ProjectForm({ onDone, project }) {
         {dss.map((d, i) => (
           <div key={d.id} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
             <span style={{
-              fontSize: 10, padding: '2px 7px', borderRadius: 4, whiteSpace: 'nowrap', flexShrink: 0,
+              fontSize: 10, padding: '0 7px', borderRadius: 4, whiteSpace: 'nowrap', flexShrink: 0,
+              height: 37, display: 'inline-flex', alignItems: 'center',
               background: i === 0 ? 'rgba(0,199,190,.12)' : 'var(--bg-panel-raised)',
               color: i === 0 ? 'var(--accent-cyan)' : 'var(--text-tertiary)',
             }}>
