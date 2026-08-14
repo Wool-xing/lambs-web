@@ -146,11 +146,13 @@ export default function ProjectForm({ onDone, project }) {
               {iconUrl ? (
                 <img src={iconUrl} alt="" />
               ) : (
-                <span className="upload-hint">点击上传</span>
+                <>
+                  <span className="upload-hint">点击上传</span>
+                  <span className="upload-info" style={{ fontSize: 9, marginTop: 0, zIndex: 1, position: 'relative', textAlign: 'center' }}>PNG/JPG/SVG/WebP · 5MB</span>
+                </>
               )}
             </div>
             <input id="logo-input" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display: 'none' }} onChange={e => upload.handleFile(e.target.files[0])} />
-            <div className="upload-info" style={{ fontSize: 10, marginTop: 6 }}>PNG/JPG/SVG/WebP · 5MB</div>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="field">
