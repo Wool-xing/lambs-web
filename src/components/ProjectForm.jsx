@@ -30,6 +30,7 @@ export default function ProjectForm({ onDone, project }) {
     return [{ id: 'ds1', name: '主数据源', type: project?.db_type || '直连 PostgreSQL', dsn: project?.dsn || '', is_primary: true }]
   })
   const [showDsn, setShowDsn] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [svcs, setSvcs] = useState(() => (project?.services || []).map(s => ({ name: s.name || '', start_cmd: s.start_cmd || '', stop_cmd: s.stop_cmd || '' })))
   const [detecting, setDetecting] = useState(false)
 
@@ -126,44 +127,73 @@ export default function ProjectForm({ onDone, project }) {
 
   return (
     <form onSubmit={handleSubmit} autoComplete="off">
-      <div className="field">
-        <label>项目 Logo</label>
-        <div
-          className={`upload-zone ${iconUrl ? 'has-image' : ''}`}
-          onClick={() => document.getElementById('logo-input')?.click()}
-          onDragOver={(e) => { e.preventDefault(); e.stopPropagation() }}
-          onDragEnter={(e) => { e.preventDefault(); e.stopPropagation() }}
-          onDrop={(e) => {
-            e.preventDefault(); e.stopPropagation()
-            upload.handleFile(e.dataTransfer.files[0])
-          }}
-          style={{ cursor: 'pointer' }}
-        >
-          {iconUrl ? (
-            <img src={iconUrl} alt="" />
-          ) : (
-            <span className="upload-hint">点击或拖拽上传</span>
-          )}
+      {/* ── 基本信息 ── */}
+      <div className="form-section">
+        <div className="form-section-title">基本信息</div>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+          <div style={{ flexShrink: 0, width: 88 }}>
+            <div
+              className={`upload-zone ${iconUrl ? 'has-image' : ''}`}
+              onClick={() => document.getElementById('logo-input')?.click()}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation() }}
+              onDragEnter={(e) => { e.preventDefault(); e.stopPropagation() }}
+              onDrop={(e) => {
+                e.preventDefault(); e.stopPropagation()
+                upload.handleFile(e.dataTransfer.files[0])
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              {iconUrl ? (
+                <img src={iconUrl} alt="" />
+              ) : (
+                <span className="upload-hint">点击上传</span>
+              )}
+            </div>
+            <input id="logo-input" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display: 'none' }} onChange={e => upload.handleFile(e.target.files[0])} />
+            <div className="upload-info" style={{ fontSize: 10, marginTop: 6 }}>PNG/JPG/SVG/WebP · 5MB</div>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="field">
+              <label>项目名称（中文）</label>
+              <input value={name} onChange={e => setName(e.target.value)} placeholder="请输入项目名称" />
+            </div>
+            {!isEdit && (
+              <div className="field">
+                <label>GitHub 仓库名</label>
+                <input value={repo} onChange={e => setRepo(e.target.value)} name="gh-repo" placeholder="请输入GitHub仓库名" className="mono-input" autoComplete="off" />
+              </div>
+            )}
+          </div>
         </div>
-        <input id="logo-input" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display: 'none' }} onChange={e => upload.handleFile(e.target.files[0])} />
-        <div className="upload-info">PNG / JPG / SVG / WebP · 最大 5MB · 建议 512×512</div>
-      </div>
-      <div className="field">
-        <label>项目名称（中文）</label>
-        <input value={name} onChange={e => setName(e.target.value)} placeholder="请输入项目名称" />
-      </div>
-      {!isEdit && (
         <div className="field">
-          <label>GitHub 仓库名</label>
-          <input value={repo} onChange={e => setRepo(e.target.value)} name="gh-repo" placeholder="请输入GitHub仓库名" className="mono-input" autoComplete="off" />
+          <label>项目描述</label>
+          <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="请输入项目描述" rows={2} />
         </div>
-      )}
-      <div className="field">
-        <label>项目描述</label>
-        <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="请输入项目描述" />
+        <div className="form-grid">
+          <div className="field">
+            <label>后端技术栈</label>
+            <input value={stack} onChange={e => setStack(e.target.value)} placeholder="请输入技术栈" />
+          </div>
+          <div className="field">
+            <label>标签 <span className="hint">逗号分隔</span></label>
+            <input value={tags} onChange={e => setTags(e.target.value)} placeholder="如：AI, 后端, 内部工具" />
+          </div>
+        </div>
+        {isEdit && (
+          <div className="field">
+            <label>状态</label>
+            <select value={status} onChange={e => setStatus(e.target.value)}>
+              <option value="online">在线</option>
+              <option value="offline">离线</option>
+              <option value="maintenance">维护中</option>
+            </select>
+          </div>
+        )}
       </div>
-      <div className="field">
-        <label>数据源 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（第一个为主数据源，用于连接测试/同步/备份）</span></label>
+
+      {/* ── 数据源（核心）── */}
+      <div className="form-section">
+        <div className="form-section-title">数据源 <span className="hint">第一个为主数据源 · 驱动连接测试/同步/备份</span></div>
         {dss.map((d, i) => (
           <div key={d.id} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
             <span style={{ fontSize: 10, color: i === 0 ? 'var(--accent-cyan)' : 'var(--text-tertiary)', whiteSpace: 'nowrap', minWidth: 44 }}>
@@ -173,12 +203,12 @@ export default function ProjectForm({ onDone, project }) {
               value={d.name}
               onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
               placeholder="名称"
-              style={{ width: 90, flexShrink: 0 }}
+              style={{ width: 80, flexShrink: 0 }}
             />
             <select
               value={d.type}
               onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: e.target.value } : x))}
-              style={{ width: 130, flexShrink: 0 }}
+              style={{ width: 128, flexShrink: 0 }}
             >
               <option>直连 PostgreSQL</option>
               <option>直连 SQLite</option>
@@ -213,102 +243,105 @@ export default function ProjectForm({ onDone, project }) {
           </span>
         </div>
       </div>
-      <div className="field">
-        <label>共享服务（按需） <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（多项目填同一服务名 = 共享实例，最后一个项目停用才停止；填 127.0.0.1 连接串会自动识别）</span></label>
-        {svcs.map((s, i) => (
-          <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
-            <input
-              value={s.name}
-              onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
-              placeholder="服务名（全机唯一）"
-              className="mono-input"
-              style={{ width: 150, flexShrink: 0 }}
-            />
-            <input
-              value={s.start_cmd}
-              onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, start_cmd: e.target.value } : x))}
-              placeholder="启动命令"
-              className="mono-input"
-              style={{ flex: 1 }}
-            />
-            <input
-              value={s.stop_cmd}
-              onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, stop_cmd: e.target.value } : x))}
-              placeholder="停止命令"
-              className="mono-input"
-              style={{ flex: 1 }}
-            />
-            <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 8px' }}
-              onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
+
+      {/* ── 访问与进程 ── */}
+      <div className="form-section">
+        <div className="form-section-title">访问与进程</div>
+        <div className="form-grid">
+          <div className="field">
+            <label>服务端口</label>
+            <input value={port} onChange={e => setPort(e.target.value)} placeholder="留空自动分配" className="mono-input" />
           </div>
-        ))}
-        <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
-          onClick={() => setSvcs(prev => [...prev, { name: '', start_cmd: '', stop_cmd: '' }])}>
-          + 添加共享服务
-        </button>
-      </div>
-      <div className="field">
-        <label>后端技术栈</label>
-        <input value={stack} onChange={e => setStack(e.target.value)} placeholder="请输入技术栈" />
-      </div>
-      <div className="field">
-        <label>访问路径 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（如 /my-project，关闭/开启通过此路径控制访问）</span></label>
-        <input value={basePath} onChange={e => setBasePath(e.target.value)} placeholder="如 /my-project" className="mono-input" style={{ maxWidth: 220 }} />
-      </div>
-      <div className="field">
-        <label>服务名称 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（systemd 服务名，关闭/开启时自动启停该服务）</span></label>
-        <input value={serviceName} onChange={e => setServiceName(e.target.value)} placeholder="如 my-api" className="mono-input" style={{ maxWidth: 200 }} />
-      </div>
-      <div className="field">
-        <label>健康检查 URL <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（填了就用 HTTP 检测，适用于任何项目）</span></label>
-        <input value={healthUrl} onChange={e => setHealthUrl(e.target.value)} placeholder="如: http://localhost:3000/health 或 https://myapi.example.com/" />
-      </div>
-      <div className="field">
-        <label>启动命令 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（Lambs 直接管理，留空则走 systemd）</span></label>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <input value={startupCmd} onChange={e => setStartupCmd(e.target.value)} placeholder="如: cd /home/ubuntu/apps/myapp && PORT=3000 ./myapp" style={{ flex: 1 }} />
-          <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0 }} onClick={handleDetect} disabled={detecting}>
-            {detecting ? '检测中…' : '检测'}
-          </button>
+          <div className="field">
+            <label>访问路径 <span className="hint">闸门控制</span></label>
+            <input value={basePath} onChange={e => setBasePath(e.target.value)} placeholder="如 /my-project" className="mono-input" />
+          </div>
+          <div className="field">
+            <label>服务名称 <span className="hint">systemd</span></label>
+            <input value={serviceName} onChange={e => setServiceName(e.target.value)} placeholder="如 my-api" className="mono-input" />
+          </div>
+          <div className="field">
+            <label>健康检查 URL <span className="hint">可选</span></label>
+            <input value={healthUrl} onChange={e => setHealthUrl(e.target.value)} placeholder="如 http://localhost:3000/health" />
+          </div>
         </div>
-        <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>「检测」扫描服务器 /home/ubuntu/apps/&lt;仓库名&gt; 目录的启动物并回填候选</div>
-      </div>
-      <div className="field">
-        <label>离线提示语 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（关闭该项目后，用户看到的提示信息）</span></label>
-        <input value={offlineMsg} onChange={e => setOfflineMsg(e.target.value)} placeholder="该项目已被管理员暂时关闭，请稍后再试。" />
-      </div>
-      <div className="field">
-        <label>标签 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（逗号分隔，用于分类筛选）</span></label>
-        <input value={tags} onChange={e => setTags(e.target.value)} placeholder="如：AI, 后端, 内部工具" />
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
-          {tags.split(',').map(t => t.trim()).filter(Boolean).map(tag => (
-            <span key={tag} className="chip" style={{ fontSize: 10 }}>{tag}</span>
-          ))}
+        <div className="field" style={{ marginTop: 14 }}>
+          <label>启动命令 <span className="hint">留空则走 systemd</span></label>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input value={startupCmd} onChange={e => setStartupCmd(e.target.value)} placeholder="如: cd /home/ubuntu/apps/myapp && PORT=3000 ./myapp" style={{ flex: 1 }} />
+            <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0 }} onClick={handleDetect} disabled={detecting}>
+              {detecting ? '检测中…' : '检测'}
+            </button>
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>「检测」扫描服务器 /home/ubuntu/apps/&lt;仓库名&gt; 目录的启动物并回填候选</div>
         </div>
-      </div>
-      {isEdit && (
         <div className="field">
-          <label>状态</label>
-          <select value={status} onChange={e => setStatus(e.target.value)}>
-            <option value="online">在线</option>
-            <option value="offline">离线</option>
-            <option value="maintenance">维护中</option>
-          </select>
+          <label>离线提示语</label>
+          <input value={offlineMsg} onChange={e => setOfflineMsg(e.target.value)} placeholder="该项目已被管理员暂时关闭，请稍后再试。" />
         </div>
-      )}
-      <div className="field">
-        <label>服务端口</label>
-        <input value={port} onChange={e => setPort(e.target.value)} placeholder="请输入端口号" className="mono-input" style={{ maxWidth: 120 }} />
       </div>
-      <div className="field">
-        <label>自动备份间隔 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（小时，0=不自动备份）</span></label>
-        <input type="number" min="0" max="720" value={backupInterval} onChange={e => setBackupInterval(e.target.value)} placeholder="如：24" className="mono-input" style={{ maxWidth: 120 }} />
+
+      {/* ── 备份 ── */}
+      <div className="form-section">
+        <div className="form-section-title">备份</div>
+        <div className="form-grid">
+          <div className="field">
+            <label>自动备份间隔 <span className="hint">小时 · 0=关</span></label>
+            <input type="number" min="0" max="720" value={backupInterval} onChange={e => setBackupInterval(e.target.value)} placeholder="如：24" className="mono-input" />
+          </div>
+          <div className="field">
+            <label>备份保留天数 <span className="hint">0=永久</span></label>
+            <input type="number" min="0" max="3650" value={backupRetention} onChange={e => setBackupRetention(e.target.value)} placeholder="如：30" className="mono-input" />
+          </div>
+        </div>
       </div>
-      <div className="field">
-        <label>备份保留天数 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（0=永久保留）</span></label>
-        <input type="number" min="0" max="3650" value={backupRetention} onChange={e => setBackupRetention(e.target.value)} placeholder="如：30" className="mono-input" style={{ maxWidth: 120 }} />
+
+      {/* ── 高级：共享服务（折叠）── */}
+      <div className="form-section">
+        <button type="button" className="form-section-title" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', padding: 0, marginBottom: showAdvanced ? 12 : 0 }}
+          onClick={() => setShowAdvanced(v => !v)}>
+          <span style={{ color: 'var(--text-tertiary)', fontSize: 12, transform: showAdvanced ? 'rotate(90deg)' : 'none', display: 'inline-block', transition: 'transform .15s' }}>▶</span>
+          共享服务（按需）
+          <span className="hint">多项目同服务名 = 共享实例 · 填 127.0.0.1 连接串自动识别</span>
+        </button>
+        {showAdvanced && (
+          <>
+            {svcs.map((s, i) => (
+              <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+                <input
+                  value={s.name}
+                  onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
+                  placeholder="服务名（全机唯一）"
+                  className="mono-input"
+                  style={{ width: 150, flexShrink: 0 }}
+                />
+                <input
+                  value={s.start_cmd}
+                  onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, start_cmd: e.target.value } : x))}
+                  placeholder="启动命令"
+                  className="mono-input"
+                  style={{ flex: 1 }}
+                />
+                <input
+                  value={s.stop_cmd}
+                  onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, stop_cmd: e.target.value } : x))}
+                  placeholder="停止命令"
+                  className="mono-input"
+                  style={{ flex: 1 }}
+                />
+                <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 8px' }}
+                  onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
+              </div>
+            ))}
+            <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
+              onClick={() => setSvcs(prev => [...prev, { name: '', start_cmd: '', stop_cmd: '' }])}>
+              + 添加共享服务
+            </button>
+          </>
+        )}
       </div>
-      <div className="drawer-actions">
+
+      <div className="form-actions-sticky">
         <button className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
           {loading ? '保存中…' : (isEdit ? '保存' : '确认接入')}
         </button>

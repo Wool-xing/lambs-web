@@ -276,7 +276,7 @@ export default function Dashboard() {
                   {batchMode ? '取消' : '选择'}
                 </button>
                 <button className="btn btn-primary btn-sm"
-                  onClick={() => openDrawer('新增项目', <ProjectForm onDone={(s) => { closeDrawer(); fetchProjects(); syncLambsBrand(s) }} />)}>
+                  onClick={() => openDrawer('新增项目', <ProjectForm onDone={(s) => { closeDrawer(); fetchProjects(); syncLambsBrand(s) }} />, 620)}>
                   + 新增项目
                 </button>
               </>
@@ -377,7 +377,7 @@ export default function Dashboard() {
       {/* Dropdown menu */}
       {menu && (
         <div className="dropdown" style={{left:menu.x,top:menu.y,opacity:1,pointerEvents:'auto'}} onClick={e=>e.stopPropagation()}>
-          <div className="dd-item" onClick={()=>{setMenu(null);openDrawer(`编辑项目·${menu.project.name}`,<ProjectForm project={menu.project} onDone={(s)=>{closeDrawer();fetchProjects();syncLambsBrand(s)}}/>)}}>编辑项目</div>
+          <div className="dd-item" onClick={()=>{setMenu(null);openDrawer(`编辑项目·${menu.project.name}`,<ProjectForm project={menu.project} onDone={(s)=>{closeDrawer();fetchProjects();syncLambsBrand(s)}}/>,620)}}>编辑项目</div>
           <div className="dd-item" onClick={()=>{setMenu(null);handleClone(menu.project.id, menu.project.name)}}>克隆项目</div>
           <div className="dd-item" onClick={()=>{setMenu(null);handleToggleStatus(menu.project.id)}}>{menu.project.status === 'online' ? '停用项目' : menu.project.status === 'maintenance' ? '上线项目' : '启用项目'}</div>
           <div className="dd-item" onClick={()=>{setMenu(null);handleTogglePin(menu.project.id)}}>{menu.project.is_pinned?'取消置顶':'置顶项目'}</div>

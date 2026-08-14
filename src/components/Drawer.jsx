@@ -6,7 +6,7 @@ const DrawerContext = createContext(null)
 export const useDrawer = () => useContext(DrawerContext)
 
 export function DrawerProvider({ children }) {
-  const [state, setState] = useState({ open: false, title: '', content: null })
+  const [state, setState] = useState({ open: false, title: '', content: null, width: 0 })
   const drawerRef = useRef(null)
   useFocusTrap(drawerRef, state.open)
 
@@ -24,12 +24,12 @@ export function DrawerProvider({ children }) {
     }
   }, [state.open])
 
-  const openDrawer = useCallback((title, content) => {
-    setState({ open: true, title, content })
+  const openDrawer = useCallback((title, content, width) => {
+    setState({ open: true, title, content, width: width || 0 })
   }, [])
 
   const closeDrawer = useCallback(() => {
-    setState({ open: false, title: '', content: null })
+    setState({ open: false, title: '', content: null, width: 0 })
   }, [])
 
   return (
@@ -38,7 +38,7 @@ export function DrawerProvider({ children }) {
       {state.open && (
         <>
           <div className="drawer-mask" onClick={closeDrawer} />
-          <div className="drawer" ref={drawerRef}>
+          <div className="drawer" ref={drawerRef} style={state.width ? { width: state.width } : undefined}>
             <div className="drawer-header">
               <div className="drawer-title">{state.title}</div>
               <button className="drawer-close" onClick={closeDrawer} aria-label="关闭抽屉"><Icon name="x" size={16} /></button>
