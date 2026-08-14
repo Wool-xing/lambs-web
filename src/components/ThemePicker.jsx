@@ -1,6 +1,29 @@
 import { useState, useEffect } from 'react'
 import Icon from './Icon'
 
+// Full palettes — the default themes only swap gradients/accents; a light or
+// pure-black style must also swap background/text/border variables.
+const PALETTES = {
+  dark: {
+    '--bg-deep': '#0B0E13', '--bg-page': '#0E1116', '--bg-panel': '#161B22', '--bg-panel-raised': '#1D232C',
+    '--bg-input': '#12161C', '--border': '#262D38', '--border-strong': '#38414F',
+    '--text-primary': '#EEF1F5', '--text-secondary': '#8B93A3', '--text-tertiary': '#7A8391',
+    '--accent-cyan': '#00C7BE', '--accent-cyan-dim': '#0B3B39',
+  },
+  light: {
+    '--bg-deep': '#F3F5F7', '--bg-page': '#F8FAFB', '--bg-panel': '#FFFFFF', '--bg-panel-raised': '#EDF1F4',
+    '--bg-input': '#FFFFFF', '--border': '#E2E7EC', '--border-strong': '#C9D2DB',
+    '--text-primary': '#1B232C', '--text-secondary': '#59636F', '--text-tertiary': '#8B96A2',
+    '--accent-cyan': '#0E8F87', '--accent-cyan-dim': '#D9F1EE',
+  },
+  obsidian: {
+    '--bg-deep': '#000000', '--bg-page': '#050605', '--bg-panel': '#0A0C0A', '--bg-panel-raised': '#121512',
+    '--bg-input': '#0A0C0A', '--border': '#1E231E', '--border-strong': '#2C342C',
+    '--text-primary': '#E9EFE9', '--text-secondary': '#98A698', '--text-tertiary': '#788678',
+    '--accent-cyan': '#3FB950', '--accent-cyan-dim': '#0D2814',
+  },
+}
+
 const THEMES = {
   'dark-default': {
     label:'深色默认', desc:'经典暗色 · 青橙微光',
@@ -32,6 +55,20 @@ const THEMES = {
     glassAlpha:0.70, blur:22, accentHue:270,
     accent:'#B892FF', accentBg:'rgba(184,146,255,.10)', accentBorder:'rgba(184,146,255,.18)', accentGlow:'rgba(184,146,255,.18)'
   },
+  'light-minimal': {
+    label:'极简白', desc:'亮色清爽 · 白昼模式',
+    palette:'light',
+    gradients:'radial-gradient(ellipse at 20% 0%,rgba(14,143,135,.10),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(91,156,245,.08),transparent 50%)',
+    glassAlpha:0.98, blur:28, accentHue:15,
+    accent:'#0E8F87', accentBg:'rgba(14,143,135,.10)', accentBorder:'rgba(14,143,135,.20)', accentGlow:'rgba(14,143,135,.12)'
+  },
+  'obsidian': {
+    label:'黑曜石', desc:'纯黑终端 · 幽绿光标',
+    palette:'obsidian',
+    gradients:'radial-gradient(ellipse at 50% 0%,rgba(63,185,80,.06),transparent 60%)',
+    glassAlpha:0.85, blur:6, accentHue:-120,
+    accent:'#3FB950', accentBg:'rgba(63,185,80,.10)', accentBorder:'rgba(63,185,80,.18)', accentGlow:'rgba(63,185,80,.14)'
+  },
 }
 
 // Auto-extract accent colors from first gradient rgba color. New themes only need gradients.
@@ -45,6 +82,9 @@ function extractAccent(gradients) {
 
 export function applyTheme(name) {
   const t = THEMES[name] || THEMES['dark-default']
+  // Swap the full palette when the theme declares one; otherwise reset to dark.
+  const p = t.palette ? PALETTES[t.palette] : PALETTES.dark
+  Object.entries(p).forEach(([k, v]) => document.documentElement.style.setProperty(k, v))
   document.documentElement.style.setProperty('--body-gradients', t.gradients)
   if (t.accentHue !== undefined) document.documentElement.style.setProperty('--accent-hue', t.accentHue)
   else document.documentElement.style.setProperty('--accent-hue', 0)
@@ -71,7 +111,7 @@ export default function ThemePicker() {
         <div key={key} className={`theme-card ${key === active ? 'active' : ''}`}
           onClick={() => { setActive(key); applyTheme(key) }}>
           <div className="theme-swatch">
-            <div style={{ background: t.gradients.split('),')[0] + ')', width: '100%', height: '100%', borderRadius: '50%' }} />
+            <div style={{ background: t.gradients.split('),')[0] + ')', width: '100%', height: '100%', borderRadius: '50%', border: '1px solid var(--border-strong)' }} />
           </div>
           <div>
             <div className="tl">{t.label}</div>
