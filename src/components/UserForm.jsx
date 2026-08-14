@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { api } from '../api/client'
 import { useToast } from './Toast'
+import TypeSelect from './TypeSelect'
 
 export default function UserForm({ onDone, userData }) {
   const toast = useToast()
@@ -156,19 +157,20 @@ export default function UserForm({ onDone, userData }) {
       )}
       <div className="field">
         <label>角色</label>
-        <select value={role} onChange={e => setRole(e.target.value)}>
-          <option value="super_admin">超级管理员</option>
-          <option value="project_admin">项目管理员</option>
-          <option value="viewer">查看者</option>
-        </select>
+        <TypeSelect
+          value={{ super_admin: '超级管理员', project_admin: '项目管理员', viewer: '查看者' }[role]}
+          onChange={v => setRole({ '超级管理员': 'super_admin', '项目管理员': 'project_admin', '查看者': 'viewer' }[v])}
+          options={['超级管理员', '项目管理员', '查看者']}
+        />
       </div>
       {isEdit && (
         <div className="field">
           <label>账号状态</label>
-          <select value={status} onChange={e => setStatus(e.target.value)}>
-            <option value="active">正常</option>
-            <option value="disabled">禁用</option>
-          </select>
+          <TypeSelect
+            value={{ active: '正常', disabled: '禁用' }[status]}
+            onChange={v => setStatus({ '正常': 'active', '禁用': 'disabled' }[v])}
+            options={['正常', '禁用']}
+          />
         </div>
       )}
       <div className="field">
