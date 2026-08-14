@@ -653,9 +653,19 @@ export default function ProjectDetail() {
               style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '6px 12px', color: 'var(--text-primary)', fontSize: 12 }}>
               <option value="">主数据源（默认）</option>
               {(project?.datasources || []).map(d => (
-                <option key={d.id} value={d.id}>{d.name} · {d.type}</option>
+                <option key={d.id} value={d.id}>{d.name} · {d.type}{d.is_primary ? ' · 主' : ''}</option>
               ))}
             </select>
+            <button type="button" className="btn btn-ghost btn-sm"
+              onClick={async () => {
+                try {
+                  const res = await api.post(`/projects/${id}/test-connection${selectedDS ? `?ds=${selectedDS}` : ''}`)
+                  if (res.success && res.data?.reachable) toast(`连接成功（${res.data.db_type || '数据源'}）`, 'success')
+                  else if (res.success) toast(`连接失败: ${res.data?.error || '不可达'}`, 'error')
+                } catch (err) { toast(err.message, 'error') }
+              }}>
+              测试连接
+            </button>
           </div>
         )}
 
