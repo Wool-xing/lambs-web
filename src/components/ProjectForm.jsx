@@ -130,8 +130,8 @@ export default function ProjectForm({ onDone, project }) {
       {/* ── 基本信息 ── */}
       <div className="form-section">
         <div className="form-section-title">基本信息</div>
-        <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-          <div style={{ flexShrink: 0, width: 120, paddingTop: 18 }}>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <div style={{ flexShrink: 0 }}>
             <div
               className={`upload-zone ${iconUrl ? 'has-image' : ''}`}
               onClick={() => document.getElementById('logo-input')?.click()}
@@ -141,33 +141,42 @@ export default function ProjectForm({ onDone, project }) {
                 e.preventDefault(); e.stopPropagation()
                 upload.handleFile(e.dataTransfer.files[0])
               }}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', width: 96, height: 96 }}
             >
               {iconUrl ? (
                 <img src={iconUrl} alt="" />
               ) : (
                 <>
                   <span className="upload-hint">点击上传</span>
-                  <span className="upload-info" style={{ fontSize: 9, marginTop: 0, zIndex: 1, position: 'relative', textAlign: 'center' }}>PNG/JPG/SVG/WebP · 5MB</span>
+                  <span className="upload-info" style={{ fontSize: 9, marginTop: 0, zIndex: 1, position: 'relative', textAlign: 'center', lineHeight: 1.3 }}>PNG/JPG/SVG/WebP · 5MB</span>
                 </>
               )}
             </div>
             <input id="logo-input" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display: 'none' }} onChange={e => upload.handleFile(e.target.files[0])} />
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="form-grid" style={{ flex: 1 }}>
             <div className="field">
               <label>项目名称（中文）</label>
               <input value={name} onChange={e => setName(e.target.value)} placeholder="请输入项目名称" />
             </div>
-            {!isEdit && (
+            {!isEdit ? (
               <div className="field">
                 <label>GitHub 仓库名</label>
                 <input value={repo} onChange={e => setRepo(e.target.value)} name="gh-repo" placeholder="请输入GitHub仓库名" className="mono-input" autoComplete="off" />
               </div>
+            ) : (
+              <div className="field">
+                <label>状态</label>
+                <select value={status} onChange={e => setStatus(e.target.value)}>
+                  <option value="online">在线</option>
+                  <option value="offline">离线</option>
+                  <option value="maintenance">维护中</option>
+                </select>
+              </div>
             )}
           </div>
         </div>
-        <div className="field">
+        <div className="field" style={{ marginTop: 14 }}>
           <label>项目描述</label>
           <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="请输入项目描述" rows={2} />
         </div>
@@ -181,16 +190,6 @@ export default function ProjectForm({ onDone, project }) {
             <input value={tags} onChange={e => setTags(e.target.value)} placeholder="如：AI, 后端, 内部工具" />
           </div>
         </div>
-        {isEdit && (
-          <div className="field">
-            <label>状态</label>
-            <select value={status} onChange={e => setStatus(e.target.value)}>
-              <option value="online">在线</option>
-              <option value="offline">离线</option>
-              <option value="maintenance">维护中</option>
-            </select>
-          </div>
-        )}
       </div>
 
       {/* ── 数据源（核心）── */}
