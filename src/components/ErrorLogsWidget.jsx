@@ -106,7 +106,7 @@ export default function ErrorLogsWidget() {
               ⇩ 自动滚动
             </button>
           </div>
-          {loading ? (
+          {logs.length === 0 && loading ? (
             <div style={{ padding: 12, color: 'var(--text-tertiary)' }}>加载中…</div>
           ) : filtered.length === 0 ? (
             <div style={{ padding: 12, color: 'var(--text-tertiary)' }}>{level === 'all' ? '暂无日志' : `无 ${level.toUpperCase()} 日志`}</div>
