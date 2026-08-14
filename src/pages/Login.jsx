@@ -97,7 +97,7 @@ export default function Login() {
           setForgotCooldown(prev => { if (prev <= 1) { clearInterval(timer); return 0 } return prev - 1 })
         }, 1000)
       } else {
-        toast(data.detail || '请求失败', 'error')
+        toast(data.error || data.detail || '请求失败', 'error')
       }
     } catch { toast('网络错误', 'error') }
     finally { setForgotLoading(false) }
@@ -121,7 +121,7 @@ export default function Login() {
         toast('密码已重置，请使用新密码登录', 'success')
         closeForgot()
       } else {
-        toast(data.detail || '验证失败', 'error')
+        toast(data.error || data.detail || '验证失败', 'error')
       }
     } catch { toast('网络错误', 'error') }
     finally { setForgotLoading(false) }
