@@ -1,3 +1,4 @@
+import TypeSelect from '../components/TypeSelect'
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -649,13 +650,12 @@ export default function ProjectDetail() {
         {adminMode === 'data' && (project?.datasources || []).length > 1 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>数据源</span>
-            <select value={selectedDS} onChange={e => setSelectedDS(e.target.value)}
-              style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '6px 12px', color: 'var(--text-primary)', fontSize: 12 }}>
-              <option value="">主数据源（默认）</option>
-              {(project?.datasources || []).map(d => (
-                <option key={d.id} value={d.id}>{d.name} · {d.type}{d.is_primary ? ' · 主' : ''}</option>
-              ))}
-            </select>
+            <TypeSelect value={selectedDS} onChange={setSelectedDS}
+              style={{ minWidth: 210 }}
+              options={[
+                { value: '', label: '主数据源（默认）' },
+                ...(project?.datasources || []).map(d => ({ value: d.id, label: `${d.name} · ${d.type}${d.is_primary ? ' · 主' : ''}` })),
+              ]} />
             <button type="button" className="btn btn-ghost btn-sm"
               onClick={async () => {
                 try {
@@ -681,11 +681,9 @@ export default function ProjectDetail() {
             {/* Toolbar: table selector + search + actions */}
             <div className="toolbar">
               <div className="toolbar-left">
-                <select value={selectedTable} onChange={e => setSelectedTable(e.target.value)}
-                  style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '7px 12px', color: 'var(--text-primary)', fontSize: 12 }}>
-                  <option value="">选择数据表…</option>
-                  {tableList.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+                <TypeSelect value={selectedTable} onChange={setSelectedTable}
+                  style={{ minWidth: 190 }}
+                  options={[{ value: '', label: '选择数据表…' }, ...tableList]} />
                 {tableData && (
                   <input placeholder={`搜索 ${tableData.name}…`} value={liveSearch}
                     onChange={e => { setLiveSearch(e.target.value); setLivePage(1) }}

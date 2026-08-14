@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '../api/client'
 import { useConfirm } from './Modal'
+import TypeSelect from './TypeSelect'
 
 // VectorView — vector-database (Qdrant) data browser:
 // collection select + points table + similarity search panel.
@@ -81,11 +82,9 @@ export default function VectorView({ id, tableList, selectedTable, onSelectTable
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div className="toolbar">
         <div className="toolbar-left">
-          <select value={selectedTable} onChange={e => onSelectTable(e.target.value)}
-            style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '7px 12px', color: 'var(--text-primary)', fontSize: 12 }}>
-            <option value="">选择集合…</option>
-            {tableList.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <TypeSelect value={selectedTable} onChange={onSelectTable}
+            style={{ minWidth: 190 }}
+            options={[{ value: '', label: '选择集合…' }, ...tableList]} />
           {tableData && <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{rows.length} 个向量点</span>}
         </div>
         {canManageRows && tableData && (

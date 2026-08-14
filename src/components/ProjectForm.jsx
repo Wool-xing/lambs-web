@@ -171,11 +171,15 @@ export default function ProjectForm({ onDone, project }) {
             ) : (
               <div className="field" style={{ marginBottom: 0 }}>
                 <label>状态</label>
-                <select value={status} onChange={e => setStatus(e.target.value)} style={{ padding: '8px 12px' }}>
-                  <option value="online">在线</option>
-                  <option value="offline">离线</option>
-                  <option value="maintenance">维护中</option>
-                </select>
+                <TypeSelect
+                  value={status}
+                  onChange={setStatus}
+                  options={[
+                    { value: 'online', label: '在线' },
+                    { value: 'offline', label: '离线' },
+                    { value: 'maintenance', label: '维护中' },
+                  ]}
+                />
               </div>
             )}
           </div>

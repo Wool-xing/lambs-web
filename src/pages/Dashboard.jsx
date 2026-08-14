@@ -1,3 +1,4 @@
+import TypeSelect from '../components/TypeSelect'
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -292,12 +293,12 @@ export default function Dashboard() {
           <input placeholder="搜索项目名称或仓库…" value={search}
             onChange={e => setSearch(e.target.value)}
             style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '8px 12px', color: 'var(--text-primary)', fontSize: 12, minWidth: 220 }} />
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-            style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '8px 11px', color: 'var(--text-primary)', fontSize: 12 }}>
-            <option value="order">排序：自定义</option>
-            <option value="name">排序：名称</option>
-            <option value="users">排序：用户数</option>
-          </select>
+          <TypeSelect value={sortBy} onChange={setSortBy}
+            options={[
+              { value: 'order', label: '排序：自定义' },
+              { value: 'name', label: '排序：名称' },
+              { value: 'users', label: '排序：用户数' },
+            ]} />
           <button className="btn btn-ghost btn-sm" onClick={refreshDashboard} disabled={refreshing}>
             {refreshing ? '刷新中…' : '刷新'}
           </button>

@@ -1,3 +1,4 @@
+import TypeSelect from '../components/TypeSelect'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { api } from '../api/client'
 import { useToast } from '../components/Toast'
@@ -185,13 +186,9 @@ export default function Settings() {
           <button className="btn btn-ghost btn-sm" onClick={() => handleExport('users')}>
             导出系统用户
           </button>
-          <select value={exportProject} onChange={e => setExportProject(e.target.value)}
-            style={{ background:'var(--bg-input)', border:'1px solid var(--border-strong)', borderRadius:7, padding:'7px 11px', color:'var(--text-primary)', fontSize:12 }}>
-            <option value="">按项目导出用户</option>
-            {projects.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+          <TypeSelect value={exportProject} onChange={setExportProject}
+            style={{ minWidth: 170 }}
+            options={[{ value: '', label: '按项目导出用户' }, ...projects.map(p => ({ value: p.id, label: p.name }))]} />
           <button className="btn btn-ghost btn-sm"
             onClick={() => { if (exportProject) handleExport(`project-users/${exportProject}`) }}
             disabled={!exportProject}>
@@ -207,13 +204,9 @@ export default function Settings() {
           <input placeholder="搜索日志…" value={logSearch}
             onChange={e => setLogSearch(e.target.value)}
             style={{ background:'var(--bg-input)', border:'1px solid var(--border-strong)', borderRadius:7, padding:'7px 11px', color:'var(--text-primary)', fontSize:12, minWidth:180 }} />
-          <select value={logFilter} onChange={e => setLogFilter(e.target.value)}
-            style={{ background:'var(--bg-input)', border:'1px solid var(--border-strong)', borderRadius:7, padding:'7px 11px', color:'var(--text-primary)', fontSize:12 }}>
-            <option value="all">全部操作</option>
-            {logActions.filter(a=>a!=='all').map(a => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
+          <TypeSelect value={logFilter} onChange={setLogFilter}
+            style={{ minWidth: 150 }}
+            options={[{ value: 'all', label: '全部操作' }, ...logActions.filter(a => a !== 'all')]} />
           <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 'auto', alignSelf: 'center' }}>
             共 {filteredLogs.length} 条
           </span>

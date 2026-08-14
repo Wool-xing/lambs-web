@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '../api/client'
 import { useConfirm } from './Modal'
+import TypeSelect from './TypeSelect'
 
 // DocView — document-oriented (MongoDB) data browser: JSON tree instead of table grid.
 // Reuses the same Lambs API endpoints as the relational table view.
@@ -91,11 +92,9 @@ export default function DocView({ id, tableList, selectedTable, onSelectTable, c
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div className="toolbar">
         <div className="toolbar-left">
-          <select value={selectedTable} onChange={e => onSelectTable(e.target.value)}
-            style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '7px 12px', color: 'var(--text-primary)', fontSize: 12 }}>
-            <option value="">选择集合…</option>
-            {tableList.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <TypeSelect value={selectedTable} onChange={onSelectTable}
+            style={{ minWidth: 190 }}
+            options={[{ value: '', label: '选择集合…' }, ...tableList]} />
           {docs && (
             <input placeholder={`搜索 ${selectedTable} 文档…`} value={search} onChange={e => setSearch(e.target.value)}
               style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '7px 12px', color: 'var(--text-primary)', fontSize: 12, minWidth: 200 }} />

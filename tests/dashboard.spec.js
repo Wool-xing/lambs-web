@@ -56,11 +56,14 @@ test.describe('仪表盘页面', () => {
   });
 
   test('排序切换', async ({ page }) => {
-    const sortSelect = page.locator('select');
-    await sortSelect.selectOption('name');
-    await expect(sortSelect).toHaveValue('name');
-    await sortSelect.selectOption('users');
-    await expect(sortSelect).toHaveValue('users');
+    // Custom TypeSelect dropdown (native select replaced)
+    const sortBtn = page.getByRole('button', { name: '排序：自定义' });
+    await sortBtn.click();
+    await page.getByRole('button', { name: '排序：名称' }).click();
+    await expect(page.getByRole('button', { name: '排序：名称' })).toBeVisible();
+    await page.getByRole('button', { name: '排序：名称' }).click();
+    await page.getByRole('button', { name: '排序：用户数' }).click();
+    await expect(page.getByRole('button', { name: '排序：用户数' })).toBeVisible();
   });
 
   test('点击项目卡片 → 跳转详情页', async ({ page }) => {

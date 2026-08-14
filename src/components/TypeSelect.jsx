@@ -15,6 +15,11 @@ export default function TypeSelect({ value, onChange, style, options = OPTIONS }
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
+  // Options may be plain strings or {value,label} pairs.
+  const items = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
+  const current = items.find(o => o.value === value)
+  const display = current ? current.label : (value || items[0]?.label || '')
+
   useEffect(() => {
     if (!open) return
     const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
@@ -30,7 +35,7 @@ export default function TypeSelect({ value, onChange, style, options = OPTIONS }
   return (
     <div ref={ref} style={{ position: 'relative', ...style }}>
       <button type="button" style={triggerStyle} onClick={() => setOpen(v => !v)}>
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</span>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{display}</span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
           style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}>
           <path d="m6 9 6 6 6-6" />
@@ -42,19 +47,19 @@ export default function TypeSelect({ value, onChange, style, options = OPTIONS }
           background: 'var(--bg-panel)', border: '1px solid var(--border-strong)', borderRadius: 10,
           padding: 4, boxShadow: '0 10px 28px rgba(0,0,0,.45)',
         }}>
-          {options.map(o => (
+          {items.map(o => (
             <button
-              key={o}
+              key={o.value}
               type="button"
-              onClick={() => { onChange(o); setOpen(false) }}
+              onClick={() => { onChange(o.value); setOpen(false) }}
               style={{
                 display: 'block', width: '100%', textAlign: 'left', padding: '7px 10px', fontSize: 12.5,
                 borderRadius: 6, border: 'none', cursor: 'pointer',
-                background: o === value ? 'rgba(0,199,190,.12)' : 'transparent',
-                color: o === value ? 'var(--accent-cyan)' : 'var(--text-primary)',
+                background: o.value === value ? 'rgba(0,199,190,.12)' : 'transparent',
+                color: o.value === value ? 'var(--accent-cyan)' : 'var(--text-primary)',
               }}
             >
-              {o}
+              {o.label}
             </button>
           ))}
         </div>

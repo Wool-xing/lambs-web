@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '../api/client'
 import { useConfirm } from './Modal'
+import TypeSelect from './TypeSelect'
 
 // KVView — Redis key-value data browser. Renders per data type:
 // string → single value, hash → field table, list → indexed list,
@@ -12,6 +13,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
   const [rows, setRows] = useState(null)
   const [search, setSearch] = useState('')
   const [newKey, setNewKey] = useState(false)      // create-key modal
+  const [newKeyType, setNewKeyType] = useState('string')
   const [itemForm, setItemForm] = useState(null)   // { type, ...fields } add-item inline
   const [editingStr, setEditingStr] = useState(false)
   const [strVal, setStrVal] = useState('')
@@ -32,7 +34,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
   const createKey = async (e) => {
     e.preventDefault()
     const f = new FormData(e.target)
-    const key = f.get('key'); const type = f.get('type')
+    const key = f.get('key'); const type = newKeyType
     if (!key) { toast('键名不能为空', 'error'); return }
     const body = { type }
     if (type === 'string') body.value = f.get('value') || ''
@@ -84,11 +86,9 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div className="toolbar">
         <div className="toolbar-left">
-          <select value={selectedTable} onChange={e => onSelectTable(e.target.value)}
-            style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '7px 12px', color: 'var(--text-primary)', fontSize: 12 }}>
-            <option value="">选择键…</option>
-            {tableList.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <TypeSelect value={selectedTable} onChange={onSelectTable}
+            style={{ minWidth: 190 }}
+            options={[{ value: '', label: '选择键…' }, ...tableList]} />
           {rows && (
             <input placeholder="搜索内容…" value={search} onChange={e => setSearch(e.target.value)}
               style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '7px 12px', color: 'var(--text-primary)', fontSize: 12, minWidth: 180 }} />
@@ -195,13 +195,17 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
             </div>
             <div className="field" style={{ marginBottom: 10 }}>
               <label>类型</label>
-              <select name="type">
-                <option value="string">String（单值）</option>
-                <option value="hash">Hash（字段表）</option>
-                <option value="list">List（列表）</option>
-                <option value="set">Set（集合）</option>
-                <option value="zset">ZSet（有序集合）</option>
-              </select>
+              <TypeSelect
+                value={newKeyType}
+                onChange={setNewKeyType}
+                options={[
+                  { value: 'string', label: 'String（单值）' },
+                  { value: 'hash', label: 'Hash（字段表）' },
+                  { value: 'list', label: 'List（列表）' },
+                  { value: 'set', label: 'Set（集合）' },
+                  { value: 'zset', label: 'ZSet（有序集合）' },
+                ]}
+              />
             </div>
             <div className="field" style={{ marginBottom: 10 }}>
               <label>值 / 字段名（hash） / 成员（set/zset）</label>
