@@ -218,30 +218,30 @@ export default function ProjectForm({ onDone, project }) {
               <option>Redis（KV型）</option>
               <option>向量数据库（Qdrant）</option>
             </select>
-            <input
-              type={showDsn ? 'password' : 'text'}
-              value={d.dsn}
-              onChange={e => onDsnChange(i, e.target.value)}
-              placeholder="连接串 / API 地址"
-              className="mono-input"
-              autoComplete="new-password"
-              style={{ flex: 1 }}
-            />
+            <div style={{ position: 'relative', flex: 1 }}>
+              <input
+                type={showDsn ? 'password' : 'text'}
+                value={d.dsn}
+                onChange={e => onDsnChange(i, e.target.value)}
+                placeholder="连接串 / API 地址"
+                className="mono-input"
+                autoComplete="new-password"
+                style={{ width: '100%', paddingRight: 30 }}
+              />
+              <span className="pwd-eye" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }} onClick={() => setShowDsn(!showDsn)}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+            </div>
             {dss.length > 1 && (
               <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 8px' }}
                 onClick={() => setDss(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
             )}
           </div>
         ))}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 2 }}>
-          <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
-            onClick={() => setDss(prev => [...prev, { id: `ds${prev.length + 1}`, name: '', type: '直连 PostgreSQL', dsn: '' }])}>
-            + 添加数据源
-          </button>
-          <span className="pwd-eye" style={{ marginLeft: 'auto' }} onClick={() => setShowDsn(!showDsn)}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-          </span>
-        </div>
+        <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
+          onClick={() => setDss(prev => [...prev, { id: `ds${prev.length + 1}`, name: '', type: '直连 PostgreSQL', dsn: '' }])}>
+          + 添加数据源
+        </button>
       </div>
 
       {/* ── 访问与进程 ── */}
