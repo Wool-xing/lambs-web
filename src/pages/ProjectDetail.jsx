@@ -8,6 +8,7 @@ import { useDrawer } from '../components/Drawer'
 import ProjectForm from '../components/ProjectForm'
 import DocView from '../components/DocView'
 import KVView from '../components/KVView'
+import VectorView from '../components/VectorView'
 import Icon from '../components/Icon'
 import { fmtTime } from '../utils/time'
 
@@ -663,6 +664,8 @@ export default function ProjectDetail() {
           <DocView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} ds={selectedDS} />
         ) : curDBType.includes('Redis') ? (
           <KVView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} ds={selectedDS} />
+        ) : curDBType.includes('向量') ? (
+          <VectorView id={id} tableList={tableList} selectedTable={selectedTable} onSelectTable={setSelectedTable} canManageRows={canManageRows} toast={toast} ds={selectedDS} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {/* Toolbar: table selector + search + actions */}

@@ -186,6 +186,7 @@ export default function ProjectForm({ onDone, project }) {
               <option>MySQL</option>
               <option>MongoDB（文档型）</option>
               <option>Redis（KV型）</option>
+              <option>向量数据库（Qdrant）</option>
             </select>
             <input
               type={showDsn ? 'password' : 'text'}
