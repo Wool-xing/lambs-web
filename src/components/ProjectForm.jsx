@@ -85,6 +85,9 @@ export default function ProjectForm({ onDone, project }) {
     finally { setDetecting(false) }
   }
   const iconUrl = upload.preview || project?.icon_url || ''
+  // Row-level controls live outside .field wrappers, so they don't inherit
+  // the .field input/select styles — apply them explicitly for equal height.
+  const rowCtrl = { padding: '9px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, color: 'var(--text-primary)', fontSize: 12.5, fontFamily: 'var(--font-body)' }
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
@@ -208,12 +211,12 @@ export default function ProjectForm({ onDone, project }) {
               value={d.name}
               onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
               placeholder="名称（可选）"
-              style={{ width: 84, flexShrink: 0, height: 38 }}
+              style={{ ...rowCtrl, width: 84, flexShrink: 0 }}
             />
             <select
               value={d.type}
               onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: e.target.value } : x))}
-              style={{ width: 124, flexShrink: 0, height: 38 }}
+              style={{ ...rowCtrl, width: 124, flexShrink: 0 }}
             >
               <option>直连 PostgreSQL</option>
               <option>直连 SQLite</option>
@@ -231,7 +234,7 @@ export default function ProjectForm({ onDone, project }) {
                 placeholder="连接串 / API 地址"
                 className="mono-input"
                 autoComplete="new-password"
-                style={{ width: '100%', paddingRight: 30, height: 38 }}
+                style={{ ...rowCtrl, width: '100%', paddingRight: 30 }}
               />
               <span
                 className="pwd-eye"
@@ -327,21 +330,21 @@ export default function ProjectForm({ onDone, project }) {
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
                   placeholder="服务名"
                   className="mono-input"
-                  style={{ width: 100, flexShrink: 0 }}
+                  style={{ ...rowCtrl, width: 100, flexShrink: 0 }}
                 />
                 <input
                   value={s.start_cmd}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, start_cmd: e.target.value } : x))}
                   placeholder="启动命令"
                   className="mono-input"
-                  style={{ flex: 1, minWidth: 0 }}
+                  style={{ ...rowCtrl, flex: 1, minWidth: 0 }}
                 />
                 <input
                   value={s.stop_cmd}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, stop_cmd: e.target.value } : x))}
                   placeholder="停止命令"
                   className="mono-input"
-                  style={{ flex: 1, minWidth: 0 }}
+                  style={{ ...rowCtrl, flex: 1, minWidth: 0 }}
                 />
                 <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 6px' }}
                   onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
