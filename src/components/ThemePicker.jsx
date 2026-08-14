@@ -9,18 +9,14 @@ const PALETTES = {
     '--bg-input': '#12161C', '--border': '#262D38', '--border-strong': '#38414F',
     '--text-primary': '#EEF1F5', '--text-secondary': '#8B93A3', '--text-tertiary': '#7A8391',
     '--accent-cyan': '#00C7BE', '--accent-cyan-dim': '#0B3B39',
-  },
-  light: {
-    '--bg-deep': '#F3F5F7', '--bg-page': '#F8FAFB', '--bg-panel': '#FFFFFF', '--bg-panel-raised': '#EDF1F4',
-    '--bg-input': '#FFFFFF', '--border': '#E2E7EC', '--border-strong': '#C9D2DB',
-    '--text-primary': '#1B232C', '--text-secondary': '#59636F', '--text-tertiary': '#8B96A2',
-    '--accent-cyan': '#0E8F87', '--accent-cyan-dim': '#D9F1EE',
+    '--glass-bg': '22,27,34',
   },
   obsidian: {
     '--bg-deep': '#000000', '--bg-page': '#050605', '--bg-panel': '#0A0C0A', '--bg-panel-raised': '#121512',
     '--bg-input': '#0A0C0A', '--border': '#1E231E', '--border-strong': '#2C342C',
     '--text-primary': '#E9EFE9', '--text-secondary': '#98A698', '--text-tertiary': '#788678',
     '--accent-cyan': '#3FB950', '--accent-cyan-dim': '#0D2814',
+    '--glass-bg': '10,12,10',
   },
 }
 
@@ -55,18 +51,17 @@ const THEMES = {
     glassAlpha:0.70, blur:22, accentHue:270,
     accent:'#B892FF', accentBg:'rgba(184,146,255,.10)', accentBorder:'rgba(184,146,255,.18)', accentGlow:'rgba(184,146,255,.18)'
   },
-  'light-minimal': {
-    label:'极简白', desc:'亮色清爽 · 白昼模式',
-    palette:'light',
-    gradients:'radial-gradient(ellipse at 20% 0%,rgba(14,143,135,.10),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(91,156,245,.08),transparent 50%)',
-    glassAlpha:0.98, blur:28, accentHue:15,
-    accent:'#0E8F87', accentBg:'rgba(14,143,135,.10)', accentBorder:'rgba(14,143,135,.20)', accentGlow:'rgba(14,143,135,.12)'
+  'crimson-night': {
+    label:'绯红之夜', desc:'暗红热烈 · 玫红主调',
+    gradients:'radial-gradient(ellipse at 15% 15%,rgba(255,93,93,.26),transparent 55%),radial-gradient(ellipse at 80% 70%,rgba(230,70,110,.20),transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(255,120,140,.14),transparent 58%),radial-gradient(ellipse at 30% 90%,rgba(180,50,90,.12),transparent 45%)',
+    glassAlpha:0.72, blur:20, accentHue:-50,
+    accent:'#FF5D7A', accentBg:'rgba(255,93,122,.10)', accentBorder:'rgba(255,93,122,.18)', accentGlow:'rgba(255,93,122,.18)'
   },
   'obsidian': {
     label:'黑曜石', desc:'纯黑终端 · 幽绿光标',
     palette:'obsidian',
-    gradients:'radial-gradient(ellipse at 50% 0%,rgba(63,185,80,.06),transparent 60%)',
-    glassAlpha:0.85, blur:6, accentHue:-120,
+    gradients:'radial-gradient(ellipse at 50% 0%,rgba(63,185,80,.10),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(63,185,80,.06),transparent 50%)',
+    glassAlpha:0.72, blur:20, accentHue:-120,
     accent:'#3FB950', accentBg:'rgba(63,185,80,.10)', accentBorder:'rgba(63,185,80,.18)', accentGlow:'rgba(63,185,80,.14)'
   },
 }
