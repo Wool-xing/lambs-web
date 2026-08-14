@@ -19,13 +19,53 @@ function clearAuth() {
   window.dispatchEvent(new Event('lambs-auth-expired'))
 }
 
+// fetchWithTimeout aborts requests that hang (weak network / dead proxy).
+async function fetchWithTimeout(url, opts, ms = 15000) {
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), ms)
+  try {
+    return await fetch(url, { ...opts, signal: ctrl.signal })
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+// isRetryable: transient failures worth one retry (GETs only — writes must
+// never be silently re-sent, they could double-apply).
+function isRetryable(status) {
+  return status === 0 || status === 502 || status === 503 || status === 504
+}
+
 async function request(path, options = {}) {
   const token = getToken()
   if (token && isTokenExpired(token)) { clearAuth(); throw new Error('登录已过期') }
   const headers = { 'Content-Type': 'application/json', ...options.headers }
   if (token) headers['Authorization'] = `Bearer ${token}`
 
-  const res = await fetch(BASE + path, { ...options, headers })
+  const method = (options.method || 'GET').toUpperCase()
+  let attempts = 1
+  if (method === 'GET') attempts = 2 // one retry for transient failures
+
+  let res
+  let lastErr
+  for (let i = 0; i < attempts; i++) {
+    try {
+      res = await fetchWithTimeout(BASE + path, { ...options, headers })
+      if (!res.ok && isRetryable(res.status) && i < attempts - 1) {
+        await new Promise(r => setTimeout(r, 600))
+        continue
+      }
+      break
+    } catch (err) {
+      lastErr = err
+      if (i === attempts - 1) {
+        throw new Error('网络异常，请检查连接')
+      }
+      await new Promise(r => setTimeout(r, 600))
+    }
+  }
+  if (!res) throw lastErr || new Error('网络异常')
+
   const body = await res.json().catch(() => ({}))
   if (!res.ok) {
     if (res.status === 401) clearAuth()
