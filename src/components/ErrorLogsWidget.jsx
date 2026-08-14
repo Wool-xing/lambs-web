@@ -13,6 +13,7 @@ export default function ErrorLogsWidget() {
   const [loading, setLoading] = useState(false)
   const [collapsed, setCollapsed] = useState(true)
   const [autoScroll, setAutoScroll] = useState(false)
+  const [refreshedAt, setRefreshedAt] = useState(null)
   const bodyRef = useRef(null)
 
   // silent=true for background polling: refresh data without the "加载中…"
@@ -21,7 +22,10 @@ export default function ErrorLogsWidget() {
     if (!silent) setLoading(true)
     try {
       const r = await api.get('/logs/aggregated?lines=20')
-      if (r.success) setLogs(Array.isArray(r.data) ? r.data : [])
+      if (r.success) {
+        setLogs(Array.isArray(r.data) ? r.data : [])
+        setRefreshedAt(new Date())
+      }
     } catch { /* */ }
     finally { if (!silent) setLoading(false) }
   }
@@ -95,11 +99,14 @@ export default function ErrorLogsWidget() {
                 {lv === 'all' ? '全部' : lv.toUpperCase()}
               </button>
             ))}
+            <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>
+              {loading ? '刷新中…' : refreshedAt ? `已刷新 ${refreshedAt.toTimeString().slice(0, 8)}` : ''}
+            </span>
             <button
               onClick={() => setAutoScroll(v => !v)}
               title="自动滚动到底部"
               style={{
-                marginLeft: 'auto', fontSize: 10, padding: '2px 10px', borderRadius: 10, border: 'none', cursor: 'pointer', flexShrink: 0,
+                fontSize: 10, padding: '2px 10px', borderRadius: 10, border: 'none', cursor: 'pointer', flexShrink: 0,
                 background: autoScroll ? 'var(--bg-panel-raised)' : 'transparent',
                 color: autoScroll ? 'var(--accent-cyan)' : 'var(--text-tertiary)',
               }}>
