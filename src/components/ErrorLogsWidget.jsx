@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { api } from '../api/client'
+import Icon from './Icon'
 
 // 系统日志 — renders /logs/aggregated (audit + project status lines).
 // Note: the endpoint returns a bare array inside data, not {logs: [...]}.
@@ -36,11 +37,17 @@ export default function ErrorLogsWidget() {
             </span>
           )}
         </div>
-        <button className="btn btn-ghost btn-xs" style={{ flexShrink: 0 }}
-          onClick={e => { e.stopPropagation(); fetchLogs() }} disabled={loading}>
-          {loading ? '刷新中…' : '刷新'}
-        </button>
-        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{collapsed ? '展开' : '收起'}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button
+            className="btn-ghost"
+            title="刷新"
+            style={{ width: 26, height: 26, borderRadius: 6, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+            onClick={e => { e.stopPropagation(); fetchLogs() }} disabled={loading}
+          >
+            <Icon name="refresh" size={14} />
+          </button>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{collapsed ? '展开' : '收起'}</span>
+        </div>
       </div>
       {!collapsed && (
         <div style={{ maxHeight: 300, overflow: 'auto', fontFamily: 'var(--font-mono)', fontSize: 10.5, lineHeight: 1.6 }}>
