@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { api } from '../api/client'
 import Icon from './Icon'
 
 // 系统日志 — renders /logs/aggregated (audit + project status lines).
 // Note: the endpoint returns a bare array inside data, not {logs: [...]}.
+const LEVELS = ['all', 'info', 'warn', 'error']
+
 export default function ErrorLogsWidget() {
   const [logs, setLogs] = useState([])
+  const [level, setLevel] = useState('all')
   const [loading, setLoading] = useState(false)
   const [collapsed, setCollapsed] = useState(true)
+  const [autoScroll, setAutoScroll] = useState(false)
+  const bodyRef = useRef(null)
 
   const fetchLogs = async () => {
     setLoading(true)
@@ -18,7 +23,21 @@ export default function ErrorLogsWidget() {
     finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchLogs() }, [])
+  // 30s polling while expanded — near-real-time without websockets.
+  useEffect(() => {
+    if (!collapsed) fetchLogs()
+    const t = setInterval(() => { if (!collapsed) fetchLogs() }, 30000)
+    return () => clearInterval(t)
+  }, [collapsed])
+
+  // Follow the tail when auto-scroll is on.
+  useEffect(() => {
+    if (autoScroll && bodyRef.current) {
+      bodyRef.current.scrollTop = bodyRef.current.scrollHeight
+    }
+  }, [logs, autoScroll])
+
+  const filtered = level === 'all' ? logs : logs.filter(l => l.level === level)
 
   const levelColor = {
     error: 'var(--accent-red)',
@@ -50,14 +69,37 @@ export default function ErrorLogsWidget() {
         </div>
       </div>
       {!collapsed && (
-        <div style={{ maxHeight: 300, overflow: 'auto', fontFamily: 'var(--font-mono)', fontSize: 10.5, lineHeight: 1.6 }}>
+        <div ref={bodyRef} style={{ maxHeight: 300, overflow: 'auto', fontFamily: 'var(--font-mono)', fontSize: 10.5, lineHeight: 1.6 }}>
+          <div style={{ display: 'flex', gap: 6, padding: '8px 12px', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
+            {LEVELS.map(lv => (
+              <button key={lv}
+                onClick={() => setLevel(lv)}
+                style={{
+                  fontSize: 10, padding: '2px 10px', borderRadius: 10, border: 'none', cursor: 'pointer', flexShrink: 0,
+                  background: level === lv ? 'var(--bg-panel-raised)' : 'transparent',
+                  color: level === lv ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                }}>
+                {lv === 'all' ? '全部' : lv.toUpperCase()}
+              </button>
+            ))}
+            <button
+              onClick={() => setAutoScroll(v => !v)}
+              title="自动滚动到底部"
+              style={{
+                marginLeft: 'auto', fontSize: 10, padding: '2px 10px', borderRadius: 10, border: 'none', cursor: 'pointer', flexShrink: 0,
+                background: autoScroll ? 'var(--bg-panel-raised)' : 'transparent',
+                color: autoScroll ? 'var(--accent-cyan)' : 'var(--text-tertiary)',
+              }}>
+              ⇩ 自动滚动
+            </button>
+          </div>
           {loading ? (
             <div style={{ padding: 12, color: 'var(--text-tertiary)' }}>加载中…</div>
-          ) : logs.length === 0 ? (
-            <div style={{ padding: 12, color: 'var(--text-tertiary)' }}>暂无日志</div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: 12, color: 'var(--text-tertiary)' }}>{level === 'all' ? '暂无日志' : `无 ${level.toUpperCase()} 日志`}</div>
           ) : (
-            logs.map((l, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, padding: '3px 12px', alignItems: 'baseline', borderBottom: i < logs.length - 1 ? '1px solid rgba(255,255,255,.03)' : 'none' }}
+            filtered.map((l, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, padding: '3px 12px', alignItems: 'baseline', borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,.03)' : 'none' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.02)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 <span style={{ color: 'var(--text-tertiary)', flexShrink: 0, width: 52 }}>{(l.time || '').slice(11, 16)}</span>

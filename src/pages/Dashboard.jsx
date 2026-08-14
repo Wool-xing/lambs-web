@@ -6,7 +6,7 @@ import { useToast } from '../components/Toast'
 import { useConfirm } from '../components/Modal'
 import { useDrawer } from '../components/Drawer'
 import { useDebounce } from '../hooks/useDebounce'
-import { fmtTime } from '../utils/time'
+import { fmtRelative } from '../utils/time'
 import Icon from '../components/Icon'
 import ProjectForm from '../components/ProjectForm'
 import ErrorLogsWidget from '../components/ErrorLogsWidget'
@@ -81,7 +81,10 @@ export default function Dashboard() {
     }, 30000)
     api.get('/system/health').then(s => { if (s.success) setSysHealth(s.data) }).catch(() => {})
     api.get('/settings/audit-logs').then(r => { if (r.success) setActivityLogs(r.data.logs?.slice(0, 10) || []) }).catch(() => {})
-    return () => clearInterval(timer)
+    const actTimer = setInterval(() => {
+      api.get('/settings/audit-logs').then(r => { if (r.success) setActivityLogs(r.data.logs?.slice(0, 10) || []) }).catch(() => {})
+    }, 30000)
+    return () => { clearInterval(timer); clearInterval(actTimer) }
   }, [])
 
   const refreshDashboard = async () => {
@@ -413,13 +416,20 @@ export default function Dashboard() {
                 '新增数据': ['var(--accent-green)', 'rgba(56,210,148,.12)'],
                 '修改数据': ['var(--accent-cyan)', 'rgba(0,199,190,.12)'],
               }[l.action] || ['var(--text-secondary)', 'var(--bg-panel-raised)']
-              const t = fmtTime(l.created_at)
+              const isProjectAction = ['删除项目', '切换状态', '编辑项目', '新增数据', '修改数据', '删除数据'].includes(l.action)
+              const jumpTarget = isProjectAction ? `/project/${l.target}` : `/users?search=${encodeURIComponent(l.target)}`
               return (
                 <div key={i} style={{ position: 'relative', display: 'flex', gap: 10, padding: '6px 0', alignItems: 'center' }}>
                   <span style={{ position: 'absolute', left: -17, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', background: badge[0] }} />
-                  <span style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: 10, width: 44, flexShrink: 0 }}>{t.slice(11, 16)}</span>
+                  <span style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: 10, width: 58, flexShrink: 0 }}>{fmtRelative(l.created_at)}</span>
                   <span style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                    {l.target && l.target !== '—' && <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{l.target}</span>}
+                    {l.target && l.target !== '—' && (
+                      <span
+                        style={{ color: 'var(--text-primary)', fontWeight: 500, cursor: 'pointer' }}
+                        title={jumpTarget}
+                        onClick={() => navigate(jumpTarget)}
+                      >{l.target}</span>
+                    )}
                     {l.detail && <span style={{ marginLeft: l.target && l.target !== '—' ? 6 : 0 }}>{l.detail}</span>}
                   </span>
                   <span style={{
@@ -429,6 +439,9 @@ export default function Dashboard() {
                 </div>
               )
             })}
+            <div style={{ padding: '8px 0 2px', display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="btn btn-ghost btn-xs" onClick={() => navigate('/settings')}>查看全部 →</button>
+            </div>
           </div>
             )}
         </div>

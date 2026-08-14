@@ -20,3 +20,23 @@ export function fmtTime(val) {
     return `${Y}-${M}-${D} ${h}:${m}:${sec}`
   } catch { return s.substring(0, 19).replace('T', ' ') }
 }
+
+// Relative time: 刚刚 / N分钟前 / N小时前 / N天前,older falls back to fmtTime.
+export function fmtRelative(val) {
+  const s = String(val || '')
+  if (!/^\d{4}-\d{2}-\d{2}/.test(s)) return s
+  try {
+    const raw = s.replace(' ', 'T')
+    const d = new Date(raw + (raw.endsWith('Z') ? '' : 'Z'))
+    if (isNaN(d.getTime())) return s.substring(0, 16)
+    const diff = Date.now() - d.getTime()
+    const min = Math.floor(diff / 60000)
+    if (min < 1) return '刚刚'
+    if (min < 60) return `${min} 分钟前`
+    const hr = Math.floor(min / 60)
+    if (hr < 24) return `${hr} 小时前`
+    const day = Math.floor(hr / 24)
+    if (day < 7) return `${day} 天前`
+    return fmtTime(val).substring(0, 16)
+  } catch { return s.substring(0, 16) }
+}
