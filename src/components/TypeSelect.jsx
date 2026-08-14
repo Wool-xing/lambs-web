@@ -11,7 +11,7 @@ const triggerStyle = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, cursor: 'pointer',
 }
 
-export default function TypeSelect({ value, onChange, style }) {
+export default function TypeSelect({ value, onChange, style, options = OPTIONS }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -42,7 +42,7 @@ export default function TypeSelect({ value, onChange, style }) {
           background: 'var(--bg-panel)', border: '1px solid var(--border-strong)', borderRadius: 10,
           padding: 4, boxShadow: '0 10px 28px rgba(0,0,0,.45)',
         }}>
-          {OPTIONS.map(o => (
+          {options.map(o => (
             <button
               key={o}
               type="button"

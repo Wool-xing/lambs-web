@@ -7,6 +7,7 @@ import { fmtTime } from '../utils/time'
 import { useDrawer } from '../components/Drawer'
 import { useDebounce } from '../hooks/useDebounce'
 import UserForm from '../components/UserForm'
+import TypeSelect from '../components/TypeSelect'
 import { useNavigate } from 'react-router-dom'
 
 export default function Users() {
@@ -90,15 +91,13 @@ export default function Users() {
         </button>
       </div>
 
-      {/* Mobile role select */}
+      {/* Mobile role select — custom rounded dropdown (native popup can't be styled) */}
       <div className="role-nav-mobile" style={{ marginBottom: 10 }}>
-        <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)}
-          style={{ width: '100%', background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '8px 12px', color: 'var(--text-primary)', fontSize: 13, fontFamily: 'var(--font-body)' }}>
-          <option value="all">全部用户</option>
-          <option value="super_admin">超级管理员</option>
-          <option value="project_admin">项目管理员</option>
-          <option value="viewer">查看者</option>
-        </select>
+        <TypeSelect
+          value={{ all: '全部用户', super_admin: '超级管理员', project_admin: '项目管理员', viewer: '查看者' }[roleFilter]}
+          onChange={v => setRoleFilter({ '全部用户': 'all', '超级管理员': 'super_admin', '项目管理员': 'project_admin', '查看者': 'viewer' }[v])}
+          options={['全部用户', '超级管理员', '项目管理员', '查看者']}
+        />
       </div>
 
       <div style={{ display: 'flex', gap: 20 }}>
