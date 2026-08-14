@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { api } from '../api/client'
 import { useToast } from './Toast'
 import useFileUpload from '../hooks/useFileUpload'
+import TypeSelect from './TypeSelect'
 
 export default function ProjectForm({ onDone, project }) {
   const toast = useToast()
@@ -214,19 +215,11 @@ export default function ProjectForm({ onDone, project }) {
               placeholder="名称（可选）"
               style={{ ...rowCtrl, width: 84, flexShrink: 0 }}
             />
-            <select
+            <TypeSelect
               value={d.type}
-              onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: e.target.value } : x))}
-              style={{ ...rowCtrl, width: 124, flexShrink: 0, padding: '8px 12px' }}
-            >
-              <option>直连 PostgreSQL</option>
-              <option>直连 SQLite</option>
-              <option>REST API</option>
-              <option>MySQL</option>
-              <option>MongoDB（文档型）</option>
-              <option>Redis（KV型）</option>
-              <option>向量数据库（Qdrant）</option>
-            </select>
+              onChange={v => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: v } : x))}
+              style={{ width: 128, flexShrink: 0 }}
+            />
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <input
                 type={d.show ? 'text' : 'password'}
