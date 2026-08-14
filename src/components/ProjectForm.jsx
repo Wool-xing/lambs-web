@@ -30,6 +30,46 @@ export default function ProjectForm({ onDone, project }) {
     return [{ id: 'ds1', name: '主数据源', type: project?.db_type || '直连 PostgreSQL', dsn: project?.dsn || '', is_primary: true }]
   })
   const [showDsn, setShowDsn] = useState(false)
+  const [svcs, setSvcs] = useState(() => (project?.services || []).map(s => ({ name: s.name || '', start_cmd: s.start_cmd || '', stop_cmd: s.stop_cmd || '' })))
+  const [detecting, setDetecting] = useState(false)
+
+  // Shared-service auto-detection from a localhost DSN
+  const LOCAL_SVC = {
+    mysql: { name: 'mysql-shared', start_cmd: 'sudo systemctl start mysql', stop_cmd: 'sudo systemctl stop mysql' },
+    redis: { name: 'redis-shared', start_cmd: 'sudo systemctl start redis-server', stop_cmd: 'sudo systemctl stop redis-server' },
+    postgres: { name: 'postgres-shared', start_cmd: 'sudo systemctl start postgresql', stop_cmd: 'sudo systemctl stop postgresql' },
+  }
+  const guessSharedService = (dsn) => {
+    try {
+      const u = new URL(dsn)
+      if (u.hostname !== '127.0.0.1' && u.hostname !== 'localhost') return null
+      const scheme = (dsn.split('://')[0] || '').split('+')[0].toLowerCase()
+      return LOCAL_SVC[scheme] || null
+    } catch { return null }
+  }
+  const onDsnChange = (i, val) => {
+    setDss(prev => prev.map((x, xi) => xi === i ? { ...x, dsn: val } : x))
+    const g = guessSharedService(val)
+    if (g) {
+      setSvcs(prev => prev.some(s => s.name === g.name) ? prev : [...prev, g])
+    }
+  }
+  const handleDetect = async () => {
+    if (!repo) { toast('请先填写仓库名', 'error'); return }
+    setDetecting(true)
+    try {
+      const res = await api.post('/runtime/detect', { repo })
+      if (res.success && res.data.exists && res.data.candidates.length > 0) {
+        setStartupCmd(res.data.candidates[0].replace('PORT', port || '3510'))
+        toast(`检测到 ${res.data.candidates.length} 个候选，已填入第一个（${res.data.candidates[0].split('&&').pop().trim().split(' ')[0]}）`)
+      } else if (res.success && !res.data.exists) {
+        toast('服务器上未找到该项目目录（/home/ubuntu/apps/' + repo + '），请先部署代码', 'warn')
+      } else {
+        toast('未识别到启动方式，请手动填写', 'warn')
+      }
+    } catch (err) { toast(err.message, 'error') }
+    finally { setDetecting(false) }
+  }
   const iconUrl = upload.preview || project?.icon_url || ''
   const [loading, setLoading] = useState(false)
 
@@ -44,12 +84,14 @@ export default function ProjectForm({ onDone, project }) {
     try {
       const datasources = dss.map((d, i) => ({ id: d.id, name: d.name, type: d.type, dsn: d.dsn, is_primary: i === 0 }))
       const primary = datasources[0]
+      const services = svcs.filter(s => s.name && s.start_cmd)
       const payload = {
         name, description: desc, stack, port,
         db_type: primary ? primary.type : dbType,
         dsn: primary ? primary.dsn : '',
         datasources,
-        base_path: basePath || null, service_name: serviceName || null, startup_command: startupCmd || null,
+        services,
+        base_path: basePath || (isEdit ? null : `/${repo}`), service_name: serviceName || null, startup_command: startupCmd || null,
         health_url: healthUrl || null, offline_msg: offlineMsg || null, icon_url: iconUrl || null,
         tags: tags.split(',').map(t => t.trim()).filter(Boolean),
         backup_interval_hours: parseInt(backupInterval) || 0, backup_retention_days: parseInt(backupRetention) || 0,
@@ -134,7 +176,7 @@ export default function ProjectForm({ onDone, project }) {
             <input
               type={showDsn ? 'password' : 'text'}
               value={d.dsn}
-              onChange={e => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, dsn: e.target.value } : x))}
+              onChange={e => onDsnChange(i, e.target.value)}
               placeholder="连接串 / API 地址"
               className="mono-input"
               autoComplete="new-password"
@@ -157,6 +199,40 @@ export default function ProjectForm({ onDone, project }) {
         </div>
       </div>
       <div className="field">
+        <label>共享服务（按需） <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（多项目填同一服务名 = 共享实例，最后一个项目停用才停止；填 127.0.0.1 连接串会自动识别）</span></label>
+        {svcs.map((s, i) => (
+          <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+            <input
+              value={s.name}
+              onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
+              placeholder="服务名（全机唯一）"
+              className="mono-input"
+              style={{ width: 150, flexShrink: 0 }}
+            />
+            <input
+              value={s.start_cmd}
+              onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, start_cmd: e.target.value } : x))}
+              placeholder="启动命令"
+              className="mono-input"
+              style={{ flex: 1 }}
+            />
+            <input
+              value={s.stop_cmd}
+              onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, stop_cmd: e.target.value } : x))}
+              placeholder="停止命令"
+              className="mono-input"
+              style={{ flex: 1 }}
+            />
+            <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 8px' }}
+              onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
+          </div>
+        ))}
+        <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
+          onClick={() => setSvcs(prev => [...prev, { name: '', start_cmd: '', stop_cmd: '' }])}>
+          + 添加共享服务
+        </button>
+      </div>
+      <div className="field">
         <label>后端技术栈</label>
         <input value={stack} onChange={e => setStack(e.target.value)} placeholder="请输入技术栈" />
       </div>
@@ -174,7 +250,13 @@ export default function ProjectForm({ onDone, project }) {
       </div>
       <div className="field">
         <label>启动命令 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（Lambs 直接管理，留空则走 systemd）</span></label>
-        <input value={startupCmd} onChange={e => setStartupCmd(e.target.value)} placeholder="如: cd /home/ubuntu/apps/myapp && PORT=3000 ./myapp" />
+        <div style={{ display: 'flex', gap: 6 }}>
+          <input value={startupCmd} onChange={e => setStartupCmd(e.target.value)} placeholder="如: cd /home/ubuntu/apps/myapp && PORT=3000 ./myapp" style={{ flex: 1 }} />
+          <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0 }} onClick={handleDetect} disabled={detecting}>
+            {detecting ? '检测中…' : '检测'}
+          </button>
+        </div>
+        <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 4 }}>「检测」扫描服务器 /home/ubuntu/apps/&lt;仓库名&gt; 目录的启动物并回填候选</div>
       </div>
       <div className="field">
         <label>离线提示语 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（关闭该项目后，用户看到的提示信息）</span></label>
