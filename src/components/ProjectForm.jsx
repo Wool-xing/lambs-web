@@ -154,7 +154,7 @@ export default function ProjectForm({ onDone, project }) {
             </div>
             <input id="logo-input" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display: 'none' }} onChange={e => upload.handleFile(e.target.files[0])} />
           </div>
-          <div className="form-grid" style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div className="field">
               <label>项目名称（中文）</label>
               <input value={name} onChange={e => setName(e.target.value)} placeholder="请输入项目名称" />
@@ -202,7 +202,7 @@ export default function ProjectForm({ onDone, project }) {
               background: i === 0 ? 'rgba(0,199,190,.12)' : 'var(--bg-panel-raised)',
               color: i === 0 ? 'var(--accent-cyan)' : 'var(--text-tertiary)',
             }}>
-              {i === 0 ? '主源' : `源${i + 1}`}
+              {i === 0 ? '主源' : '副源'}
             </span>
             <input
               value={d.name}
