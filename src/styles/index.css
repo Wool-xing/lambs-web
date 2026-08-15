@@ -1,5 +1,7 @@
 :root {
   --bg-deep: #0B0E13; --bg-page: #0E1116; --bg-panel: #161B22; --bg-panel-raised: #1D232C;
+  /* Code-view syntax colors (GitHub-dark palette, theme-overridable) */
+  --code-bg: #0d1117; --code-key: #7ee787; --code-str: #a5d6ff; --code-num: #79c0ff; --code-punct: #8b949e;
   --bg-input: #12161C; --border: #262D38; --border-strong: #38414F;
   --accent-cyan: #00C7BE; --accent-cyan-dim: #0B3B39;
   --accent-amber: #FFA13B; --accent-amber-dim: #4A3115;

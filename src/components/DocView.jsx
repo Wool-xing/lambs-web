@@ -15,9 +15,9 @@ function JsonNode({ k, v, depth }) {
     const raw = typeof v === 'string' ? `"${v}"` : String(v)
     return (
       <div style={{ ...pad, fontFamily: 'var(--font-mono)', fontSize: 11.5, lineHeight: 1.7 }}>
-        <span style={{ color: '#7ee787' }}>{k}</span>
-        <span style={{ color: '#8b949e' }}>: </span>
-        <span style={{ color: typeof v === 'number' ? '#79c0ff' : '#a5d6ff' }}>{raw}</span>
+        <span style={{ color: 'var(--code-key)' }}>{k}</span>
+        <span style={{ color: 'var(--code-punct)' }}>: </span>
+        <span style={{ color: typeof v === 'number' ? 'var(--code-num)' : 'var(--code-str)' }}>{raw}</span>
       </div>
     )
   }
@@ -27,9 +27,9 @@ function JsonNode({ k, v, depth }) {
     <div>
       <div style={{ ...pad, cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 11.5, lineHeight: 1.7, userSelect: 'none' }}
         onClick={() => setOpen(!open)}>
-        <span style={{ color: open ? '#79c0ff' : '#8b949e' }}>{open ? '▼' : '▶'}</span>
-        <span style={{ color: '#7ee787', marginLeft: 4 }}>{k}</span>
-        <span style={{ color: '#8b949e', marginLeft: 6, fontSize: 10.5 }}>{isArr ? `[${count}]` : `{${count}}`}</span>
+        <span style={{ color: open ? 'var(--code-num)' : 'var(--code-punct)' }}>{open ? '▼' : '▶'}</span>
+        <span style={{ color: 'var(--code-key)', marginLeft: 4 }}>{k}</span>
+        <span style={{ color: 'var(--code-punct)', marginLeft: 6, fontSize: 10.5 }}>{isArr ? `[${count}]` : `{${count}}`}</span>
       </div>
       {open && (isArr
         ? v.map((item, i) => <JsonNode key={i} k={String(i)} v={item} depth={depth + 1} />)
@@ -142,7 +142,7 @@ export default function DocView({ id, tableList, selectedTable, onSelectTable, c
             <div className="modal-title">{editing.isNew ? '新增文档' : '编辑文档'} · {selectedTable}</div>
             <textarea value={editing.doc} onChange={e => setEditing(prev => ({ ...prev, doc: e.target.value }))}
               rows={14}
-              style={{ width: '100%', background: '#0d1117', border: '1px solid var(--border-strong)', borderRadius: 7, padding: 10, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 12 }} />
+              style={{ width: '100%', background: 'var(--code-bg)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: 10, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 12 }} />
             <div className="modal-actions" style={{ marginTop: 16 }}>
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(null)}>取消</button>
               <button className="btn btn-primary btn-sm">{editing.isNew ? '新增' : '保存'}</button>

@@ -117,14 +117,14 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
               {editingStr ? (
                 <>
                   <textarea value={strVal} onChange={e => setStrVal(e.target.value)} rows={6}
-                    style={{ width: '100%', background: '#0d1117', border: '1px solid var(--border-strong)', borderRadius: 7, padding: 10, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 12 }} />
+                    style={{ width: '100%', background: 'var(--code-bg)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: 10, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 12 }} />
                   <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
                     <button className="btn btn-primary btn-sm" onClick={saveString}>保存</button>
                     <button className="btn btn-ghost btn-sm" onClick={() => setEditingStr(false)}>取消</button>
                   </div>
                 </>
               ) : (
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12.5, color: '#a5d6ff', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12.5, color: 'var(--code-str)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                   {rows[0]?.value ?? '(空)'}
                   {canManageRows && <div style={{ marginTop: 8 }}><button className="btn btn-ghost btn-sm" onClick={() => { setStrVal(rows[0]?.value ?? ''); setEditingStr(true) }}>编辑</button></div>}
                 </div>
@@ -136,8 +136,8 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
             <div style={{ background: 'rgba(var(--glass-bg),.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
               {filtered.map((r, i) => (
                 <div key={i} style={{ display: 'flex', gap: 12, padding: '5px 0', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                  <span style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: 12, color: '#7ee787' }}>{r.field}</span>
-                  <span style={{ flex: 2, fontFamily: 'var(--font-mono)', fontSize: 12, color: '#a5d6ff', wordBreak: 'break-all' }}>{r.value}</span>
+                  <span style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--code-key)' }}>{r.field}</span>
+                  <span style={{ flex: 2, fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--code-str)', wordBreak: 'break-all' }}>{r.value}</span>
                 </div>
               ))}
             </div>
@@ -148,7 +148,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
               {filtered.map((r, i) => (
                 <div key={i} style={{ background: 'rgba(var(--glass-bg),.5)', border: '1px solid var(--border)', borderRadius: 7, padding: '8px 12px', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
                   {keyType === 'list' && <span style={{ color: 'var(--text-tertiary)', marginRight: 10 }}>[{r.index}]</span>}
-                  <span style={{ color: '#a5d6ff' }}>{keyType === 'list' ? r.value : r.member}</span>
+                  <span style={{ color: 'var(--code-str)' }}>{keyType === 'list' ? r.value : r.member}</span>
                 </div>
               ))}
             </div>
@@ -158,8 +158,8 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
             <div style={{ background: 'rgba(var(--glass-bg),.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
               {filtered.map((r, i) => (
                 <div key={i} style={{ display: 'flex', gap: 12, padding: '5px 0', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                  <span style={{ flex: 2, fontFamily: 'var(--font-mono)', fontSize: 12, color: '#a5d6ff' }}>{r.member}</span>
-                  <span style={{ flex: 1, textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 12, color: '#79c0ff' }}>{r.score}</span>
+                  <span style={{ flex: 2, fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--code-str)' }}>{r.member}</span>
+                  <span style={{ flex: 1, textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--code-num)' }}>{r.score}</span>
                 </div>
               ))}
             </div>

@@ -26,6 +26,10 @@ export default function ProjectDetail() {
   const [logs, setLogs] = useState([])
   const [loadingLogs, setLoadingLogs] = useState(false)
   const [procStats, setProcStats] = useState(null)
+  const [connResult, setConnResult] = useState(null)
+  const [testingConn, setTestingConn] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [adminMode, setAdminMode] = useState('data') // 'data' | 'members' | 'logs'
   const [tableList, setTableList] = useState([])
   const [selectedTable, setSelectedTable] = useState('')
   const [selectedDS, setSelectedDS] = useState('')
@@ -35,6 +39,8 @@ export default function ProjectDetail() {
   const [liveSort, setLiveSort] = useState(null) // { col, dir }
   const [livePage, setLivePage] = useState(1)
   const [liveColWidths, setLiveColWidths] = useState({})
+  const [members, setMembers] = useState([])
+  const [nonMembers, setNonMembers] = useState([])
   const [backups, setBackups] = useState([])
   const [backupLoading, setBackupLoading] = useState(false)
   const PER_PAGE = 15
@@ -466,7 +472,7 @@ export default function ProjectDetail() {
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{project.service_name}.service · 最近 {logs.length} 条</span>
               <button className="btn btn-ghost btn-sm" onClick={fetchLogs} disabled={loadingLogs}>{loadingLogs ? '加载中…' : '刷新日志'}</button>
             </div>
-            <div style={{ background: '#0d1117', border: '1px solid var(--border)', borderRadius: 8, padding: 12, maxHeight: 400, overflow: 'auto', fontFamily: 'var(--font-mono)', fontSize: 10.5, lineHeight: 1.6, color: '#8b949e' }}>
+            <div style={{ background: 'var(--code-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: 12, maxHeight: 400, overflow: 'auto', fontFamily: 'var(--font-mono)', fontSize: 10.5, lineHeight: 1.6, color: 'var(--code-punct)' }}>
               {logs.length === 0 ? (
                 <span style={{ color: 'var(--text-tertiary)' }}>— 暂无日志 —</span>
               ) : (
