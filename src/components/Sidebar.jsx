@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useConfirm } from '../components/Modal'
 import { useToast } from '../components/Toast'
-import { api } from '../api/client'
+import { api, resolveAsset } from '../api/client'
 import Icon from './Icon'
 
 const MAX_VISIBLE = 8
@@ -68,7 +68,7 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <div className="sidebar-mark">{logoImg ? <img src={logoImg} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}} /> : 'L'}</div>
+        <div className="sidebar-mark">{logoImg ? <img src={resolveAsset(logoImg)} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}} /> : 'L'}</div>
         <div className="sidebar-name">Lambs管理系统</div>
       </div>
       <nav className="sidebar-nav">
@@ -117,7 +117,7 @@ export default function Sidebar() {
       <div className="sidebar-footer">
         <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
           {user?.avatar_url ? (
-            <img src={user.avatar_url} alt="" style={{width:36,height:36,borderRadius:'50%',objectFit:'cover',flexShrink:0}} />
+            <img src={resolveAsset(user.avatar_url)} alt="" onError={e => { e.currentTarget.style.display = 'none' }} style={{width:36,height:36,borderRadius:'50%',objectFit:'cover',flexShrink:0}} />
           ) : (
             <div style={{width:36,height:36,borderRadius:'50%',background:'linear-gradient(135deg, #6366f1, #8b5cf6)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontSize:15,fontWeight:700,color:'#fff',textTransform:'uppercase'}}>
               {(user?.name || user?.username || '?')[0]}

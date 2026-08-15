@@ -1,6 +1,6 @@
 import TypeSelect from '../components/TypeSelect'
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { api } from '../api/client'
+import { api, resolveAsset } from '../api/client'
 import { useToast } from '../components/Toast'
 import { useDebounce } from '../hooks/useDebounce'
 import ThemePicker from '../components/ThemePicker'
@@ -59,7 +59,7 @@ export default function Settings() {
   }
 
   const handleExport = (type, projectId) => {
-    const token = localStorage.getItem('lambs_token')
+    const token = localStorage.getItem('lambs_token') || sessionStorage.getItem('lambs_token')
     const base = import.meta.env.BASE_URL === '/' ? '/api' : import.meta.env.BASE_URL + 'api'
     let url = `${base}/settings/export/${type}`
     if (projectId) url += `?project_id=${projectId}`
@@ -132,7 +132,7 @@ export default function Settings() {
               onClick={() => logoRef.current?.click()}
               onDragOver={e => { e.preventDefault() }}
               onDrop={e => { e.preventDefault(); upload.handleFile(e.dataTransfer.files[0]) }}>
-              {logoImg ? <img src={logoImg} alt="" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:7}} /> : <span className="upload-hint" style={{fontSize:9}}>Logo</span>}
+              {logoImg ? <img src={resolveAsset(logoImg)} alt="" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:7}} /> : <span className="upload-hint" style={{fontSize:9}}>Logo</span>}
             </div>
             <input ref={logoRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{display:'none'}}
               onChange={e => upload.handleFile(e.target.files[0])} />

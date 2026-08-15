@@ -16,7 +16,7 @@ const triggerStyle = {
 }
 
 const panelStyle = {
-  position: 'fixed', zIndex: 9999,
+  position: 'fixed', zIndex: 9999, maxHeight: 320, overflowY: 'auto',
   background: 'var(--bg-panel)', border: '1px solid var(--border-strong)', borderRadius: 10,
   padding: 4, boxShadow: '0 10px 28px rgba(0,0,0,.45)',
 }
@@ -35,7 +35,10 @@ export default function TypeSelect({ value, onChange, style, options = OPTIONS }
   const toggle = () => {
     if (!open && ref.current) {
       const r = ref.current.getBoundingClientRect()
-      setPos({ top: r.bottom + 4, left: r.left, width: r.width })
+      // Flip above the trigger when the panel would overflow the viewport.
+      const estH = Math.min(items.length * 34 + 12, 320)
+      const top = r.bottom + 4 + estH > window.innerHeight ? Math.max(8, r.top - 4 - estH) : r.bottom + 4
+      setPos({ top, left: r.left, width: r.width })
     }
     setOpen(v => !v)
   }

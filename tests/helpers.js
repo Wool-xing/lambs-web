@@ -61,6 +61,13 @@ export async function setupApiMocks(page, overrides = {}) {
   // Block external font requests for speed
   await page.route('**/fonts.googleapis.com**', (route) => route.abort());
 
+  // Catch-all (registered FIRST — later specific mocks take precedence):
+  // unmocked API calls must not leak to the real backend. The dev proxy now
+  // forwards them, and a real 401 would wipe the mock session mid-test.
+  // Narrow to the API base path — a bare '**/api/**' would also swallow
+  // '/lambs/src/api/client.js' and break module loading.
+  await page.route('**/lambs/api/**', (route) => route.fulfill({ json: { success: true, data: {} } }));
+
   // Auth endpoints
   await page.route('**/api/auth/me', async (route) => {
     await route.fulfill({ json: { success: true, data: userData } });

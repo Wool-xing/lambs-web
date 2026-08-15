@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api/client'
+import { useAuth } from '../context/AuthContext'
 import Icon from './Icon'
 
 function useClock() {
@@ -29,6 +30,7 @@ export default function Topbar() {
   const time = useClock()
   const location = useLocation()
   const navigate = useNavigate()
+  const { logout } = useAuth()
   const [unread, setUnread] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [projectName, setProjectName] = useState('')
@@ -88,7 +90,7 @@ export default function Topbar() {
           <span className="ps-dot green" />
           <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>系统正常</span>
         </div>
-        <button className="topbar-btn" title="退出登录" onClick={() => { localStorage.removeItem('lambs_token'); window.location.href = '/lambs/login' }} style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <button className="topbar-btn" title="退出登录" onClick={() => logout()} style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
           <Icon name="logout" size={14} />
           <span style={{ fontSize: 11 }}>退出</span>
         </button>

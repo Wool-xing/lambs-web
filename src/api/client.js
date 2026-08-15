@@ -90,8 +90,9 @@ export const api = {
 export function resolveAsset(src) {
   if (!src || typeof src !== 'string') return src
   if (src.startsWith('data:') || src.startsWith('http')) return src
-  if (src.startsWith('/api/')) {
-    return (import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')) + src
+  if (src.startsWith('/')) {
+    const base = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')
+    if (base && !src.startsWith(base + '/')) return base + src
   }
   return src
 }

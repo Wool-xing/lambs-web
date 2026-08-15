@@ -42,25 +42,28 @@ export default function Dashboard() {
   const [showActivity, setShowActivity] = useState(false)
   const debouncedSearch = useDebounce(search)
 
+  const applyLocalOrder = useCallback((list) => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('lambs-project-order') || '[]')
+      if (saved.length > 0) {
+        const orderMap = new Map(saved.map((id, i) => [id, i]))
+        return [...list].sort((a, b) => {
+          const ao = orderMap.has(a.id) ? orderMap.get(a.id) : 999
+          const bo = orderMap.has(b.id) ? orderMap.get(b.id) : 999
+          return ao - bo
+        })
+      }
+    } catch { /* ignore */ }
+    return list
+  }, [])
+
   const fetchProjects = useCallback(async () => {
     try {
       const q = new URLSearchParams({ search: debouncedSearch, status: filter, sort_by: sortBy })
       const res = await api.get(`/projects?${q}`)
       if (res.success) {
         let list = res.data.projects
-        if (sortBy === 'order') {
-          try {
-            const saved = JSON.parse(localStorage.getItem('lambs-project-order') || '[]')
-            if (saved.length > 0) {
-              const orderMap = new Map(saved.map((id, i) => [id, i]))
-              list = [...list].sort((a, b) => {
-                const ao = orderMap.has(a.id) ? orderMap.get(a.id) : 999
-                const bo = orderMap.has(b.id) ? orderMap.get(b.id) : 999
-                return ao - bo
-              })
-            }
-          } catch { /* ignore */ }
-        }
+        if (sortBy === 'order') list = applyLocalOrder(list)
         setProjects(list)
       }
       const s = await api.get('/projects/stats')
@@ -78,7 +81,7 @@ export default function Dashboard() {
     const timer = setInterval(() => {
       api.get('/projects/stats').then(s => { if (s.success) setStats(s.data) }).catch(() => {})
       api.get('/system/health').then(s => { if (s.success) setSysHealth(s.data) }).catch(() => {})
-      api.get('/projects?sort_by=order').then(r => { if (r.success) setProjects(r.data.projects || []) }).catch(() => {})
+      api.get('/projects?sort_by=order').then(r => { if (r.success) setProjects(applyLocalOrder(r.data.projects || [])) }).catch(() => {})
     }, 30000)
     api.get('/system/health').then(s => { if (s.success) setSysHealth(s.data) }).catch(() => {})
     api.get('/settings/audit-logs').then(r => { if (r.success) setActivityLogs(r.data.logs?.slice(0, 10) || []) }).catch(() => {})
@@ -344,7 +347,7 @@ export default function Dashboard() {
                       onClick={e => { e.stopPropagation(); toggleSelect(p.id) }} />
                   )}
                   <div className={`project-logo ${p.icon_cls || 'default'}`}>
-                    {p.icon_url ? <img src={resolveAsset(p.icon_url)} alt="" /> : logoInitials(p.name)}
+                    {p.icon_url ? <img src={resolveAsset(p.icon_url)} alt="" onError={e => { e.currentTarget.style.display = 'none' }} /> : logoInitials(p.name)}
                   </div>
                   {!batchMode && (
                     <button className="project-card-more" onClick={e => { e.stopPropagation(); const r=e.currentTarget.getBoundingClientRect(); setMenu({project:p, x:r.right-160, y:r.bottom+4}) }}><Icon name="moreHorizontal" size={16} /></button>

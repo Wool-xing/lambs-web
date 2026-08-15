@@ -159,7 +159,11 @@ export default function ProjectDetail() {
       }
       toast(failed === 0 ? `已删除 ${selectedPKs.size} 行` : `删除完成，${failed} 行失败`)
       setSelectedPKs(new Set())
-      fetchTableData(tableData.name)
+      const remaining = Math.max(0, (tableData.total || 0) - selectedPKs.size)
+      const maxPage = Math.max(1, Math.ceil(remaining / PER_PAGE))
+      const nextPage = Math.min(livePage, maxPage)
+      setLivePage(nextPage)
+      fetchTableData(tableData.name, nextPage)
     } catch (err) { toast(err.message, 'error') }
   }
 
@@ -195,9 +199,13 @@ export default function ProjectDetail() {
   }, [id, selectedDS])
 
   // Fetch table data when selected table changes
-  const fetchTableData = useCallback((table, page = 1) => {
+  const fetchTableData = useCallback((table, page = 1, search = '', sortCol = '', sortDir = '') => {
     if (!table) { setTableData(null); return }
-    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}&page=${page}&page_size=${PER_PAGE}${selectedDS ? `&ds=${selectedDS}` : ''}`).then(res => {
+    const q = new URLSearchParams({ table, page: String(page), page_size: String(PER_PAGE) })
+    if (selectedDS) q.set('ds', selectedDS)
+    if (search) q.set('search', search)
+    if (sortCol) { q.set('sort_col', sortCol); q.set('sort_dir', sortDir || 'asc') }
+    api.get(`/projects/${id}/tables?${q}`).then(res => {
       if (res.success) {
         setTableData({ name: table, pk: res.data.pk, cols: res.data.columns, rows: res.data.rows, total: res.data.total || 0, page, pageSize: res.data.page_size || PER_PAGE })
       }
@@ -206,11 +214,10 @@ export default function ProjectDetail() {
 
   useEffect(() => {
     setLivePage(1)
-    fetchTableData(selectedTable, 1)
+    fetchTableData(selectedTable, 1, liveSearch, liveSort?.col, liveSort?.dir)
     setSelectedPKs(new Set())
-    setLiveSort(null)
     setLiveColWidths({})
-  }, [selectedTable, fetchTableData])
+  }, [selectedTable, liveSearch, liveSort, fetchTableData])
 
   // Set browser favicon to project logo
   useEffect(() => {
@@ -321,6 +328,27 @@ export default function ProjectDetail() {
     try {
       await api.post(`/backups/${id}/restore/${filename}`)
       toast('数据库已恢复')
+    } catch (err) { toast(err.message, 'error') }
+  }
+
+  const downloadBackup = async (filename) => {
+    try {
+      const token = localStorage.getItem('lambs_token') || sessionStorage.getItem('lambs_token')
+      const base = import.meta.env.BASE_URL === '/' ? '/api' : import.meta.env.BASE_URL + 'api'
+      const res = await fetch(`${base}/backups/${id}/download/${encodeURIComponent(filename)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        toast(body.error || `下载失败 (${res.status})`, 'error')
+        return
+      }
+      const blob = await res.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(a.href)
     } catch (err) { toast(err.message, 'error') }
   }
 
@@ -513,7 +541,7 @@ export default function ProjectDetail() {
                       <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{b.created} · {b.size_mb}MB</div>
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <a className="btn btn-ghost btn-xs" href={`/lambs/api/backups/${id}/download/${b.filename}`} download style={{ textDecoration: 'none' }}>下载</a>
+                      <button className="btn btn-ghost btn-xs" onClick={() => downloadBackup(b.filename)}>下载</button>
                       <button className="btn btn-ghost btn-xs" onClick={() => restoreBackup(b.filename)}>恢复</button>
                       <button className="btn btn-ghost btn-xs" style={{ color: 'var(--accent-red)' }} onClick={() => deleteBackup(b.filename)}>删除</button>
                     </div>
@@ -636,18 +664,8 @@ export default function ProjectDetail() {
             {/* Table */}
             {tableData && (() => {
               const cols = tableData.cols
-              const q = liveSearch.toLowerCase().trim()
-              let rows = [...tableData.rows]
-              if (q) rows = rows.filter(r => cols.some(c => String(r[c] ?? '').toLowerCase().includes(q)))
-              if (liveSort) {
-                rows.sort((a, b) => {
-                  const va = String(a[liveSort.col] ?? '').toLowerCase()
-                  const vb = String(b[liveSort.col] ?? '').toLowerCase()
-                  return liveSort.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
-                })
-              }
+              const rows = tableData.rows // server-side search/sort/pagination
               const totalPages = Math.max(1, Math.ceil((tableData.total || rows.length) / PER_PAGE))
-              // Server-side pagination: rows are already the current page.
               const paged = rows
               const gridStyle = liveColWidths._locked
                 ? { gridTemplateColumns: `44px ${cols.map((_, i) => i === cols.length - 1 ? '1fr' : (liveColWidths[i] || 80) + 'px').join(' ')}` }
@@ -723,14 +741,14 @@ export default function ProjectDetail() {
                   {totalPages > 1 && (
                     <div className="pagination">
                       <span className="pg-info" style={{ marginRight: 6 }}>共 {tableData.total} 行</span>
-                      <button className="pg-btn" disabled={livePage === 1} onClick={() => { const p = livePage - 1; setLivePage(p); fetchTableData(tableData.name, p) }}>‹</button>
+                      <button className="pg-btn" disabled={livePage === 1} onClick={() => { const p = livePage - 1; setLivePage(p); setSelectedPKs(new Set()); fetchTableData(tableData.name, p) }}>‹</button>
                       {getPages().map((p, i) => (
                         p === '...'
                           ? <span key={i} className="pg-info">…</span>
                           : <button key={i} className={`pg-btn ${p === livePage ? 'active' : ''}`}
-                              onClick={() => { setLivePage(p); fetchTableData(tableData.name, p) }}>{p}</button>
+                              onClick={() => { setLivePage(p); setSelectedPKs(new Set()); fetchTableData(tableData.name, p) }}>{p}</button>
                       ))}
-                      <button className="pg-btn" disabled={livePage === totalPages} onClick={() => { const p = livePage + 1; setLivePage(p); fetchTableData(tableData.name, p) }}>›</button>
+                      <button className="pg-btn" disabled={livePage === totalPages} onClick={() => { const p = livePage + 1; setLivePage(p); setSelectedPKs(new Set()); fetchTableData(tableData.name, p) }}>›</button>
                       <span className="pg-info">{livePage}/{totalPages}</span>
                     </div>
                   )}

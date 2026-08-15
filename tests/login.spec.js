@@ -4,6 +4,9 @@ import { setupApiMocks, MOCK_TOKEN } from './helpers.js';
 test.describe('登录页面', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/fonts.googleapis.com**', (route) => route.abort());
+    // Catch-all first (later routes win): keep unmocked API calls off the
+    // real backend — a real 401 would wipe the mock session mid-test.
+    await page.route('**/lambs/api/**', (route) => route.fulfill({ json: { success: true, data: {} } }));
     await page.route('**/api/auth/me', async (route) => {
       await route.fulfill({ status: 401, json: { detail: 'Not authenticated' } });
     });

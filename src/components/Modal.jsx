@@ -35,7 +35,7 @@ export function ConfirmProvider({ children }) {
       {children}
       {state.open && (
         <div className="modal-overlay open" onClick={() => close(false)}>
-          <div className="modal-box" ref={modalRef} onClick={e => e.stopPropagation()}>
+          <div className="modal-box" ref={modalRef} role="dialog" aria-modal="true" aria-label={state.title} onClick={e => e.stopPropagation()}>
             <div className="modal-title">{state.title}</div>
             <div className="modal-desc">{state.desc}</div>
             <div className="modal-actions">
