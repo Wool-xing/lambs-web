@@ -87,6 +87,8 @@ test.describe('登录页面', () => {
   });
 
   test('注册表单提交 → API 调用成功', async ({ page }) => {
+    // Dashboard 需要 stats mock（catch-all 的 data:{} 会让 total_users.toLocaleString 崩）
+    await setupApiMocks(page);
     // Mock register endpoint (token must be JWT-shaped — client-side exp check)
     await page.route('**/api/auth/register', async (route) => {
       await route.fulfill({ json: { success: true, data: { access_token: MOCK_TOKEN, token_type: 'bearer', user: {} } } });
