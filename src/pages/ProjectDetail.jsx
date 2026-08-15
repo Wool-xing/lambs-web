@@ -23,16 +23,6 @@ export default function ProjectDetail() {
   const [editingRow, setEditingRow] = useState(null) // { tabIdx, rowIdx, values: {} }
   const [project, setProject] = useState(null)
   const [activeTab, setActiveTab] = useState(0)
-  const [tabSearch, setTabSearch] = useState({})
-  const [tabSort, setTabSort] = useState({}) // { tabIdx: { col, dir } }
-  const [tabPage, setTabPage] = useState({}) // { tabIdx: page }
-  const [connResult, setConnResult] = useState(null)
-  const [testingConn, setTestingConn] = useState(false)
-  const [syncing, setSyncing] = useState(false)
-  const [adminMode, setAdminMode] = useState('data') // 'data' | 'members' | 'logs'
-  const [members, setMembers] = useState([])
-  const [nonMembers, setNonMembers] = useState([])
-  const [tabWidths, setTabWidths] = useState({})
   const [logs, setLogs] = useState([])
   const [loadingLogs, setLoadingLogs] = useState(false)
   const [procStats, setProcStats] = useState(null)
@@ -57,54 +47,6 @@ export default function ProjectDetail() {
       localStorage.setItem('lambs_brand_logo_img', saved.icon_url)
       window.dispatchEvent(new Event('lambs-logo-changed'))
     }
-  }
-
-  const resizeCol = (tabIdx, colIdx, e) => {
-    e.preventDefault(); e.stopPropagation()
-    const startX = e.clientX
-    const row = e.target.closest('.tbl-row')
-    const cells = row ? [...row.children] : []
-    const startW = cells[colIdx] ? cells[colIdx].getBoundingClientRect().width : 100
-    // Lock ALL columns to current pixel widths on first drag
-    setTabWidths(prev => {
-      const tw = { ...(prev[tabIdx] || {}) }
-      if (!tw._locked) {
-        tw._locked = true
-        for (let i = 0; i < cells.length; i++) {
-          tw[i] = cells[i] ? cells[i].getBoundingClientRect().width : 80
-        }
-      }
-      return { ...prev, [tabIdx]: tw }
-    })
-    const onMove = (ev) => {
-      const delta = ev.clientX - startX
-      const newW = Math.max(40, startW + delta)
-      setTabWidths(prev => {
-        const tw = { ...(prev[tabIdx] || {}) }
-        tw[colIdx] = newW
-        return { ...prev, [tabIdx]: tw }
-      })
-    }
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove)
-      document.removeEventListener('mouseup', onUp)
-    }
-    document.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseup', onUp)
-  }
-
-  const getColStyle = (tab, tabIdx) => {
-    const cw = tabWidths[tabIdx]
-    const n = tab.cols.length
-    // Locked mode: all columns have pixel widths
-    if (cw && cw._locked) {
-      return Array.from({ length: n }, (_, i) => {
-        if (i === n - 1) return '1fr'
-        return (cw[i] || 80) + 'px'
-      }).join(' ')
-    }
-    // Default: equal-width columns
-    return `repeat(${n}, 1fr)`
   }
 
   const fetchProject = async () => {
@@ -169,18 +111,6 @@ export default function ProjectDetail() {
     } catch (err) { toast(err.message, 'error') }
   }
 
-  const handleDeleteRow = async (tab, row) => {
-    if (!tab.pk) { toast('该表无主键，无法删除', 'error'); return }
-    const pkVal = Array.isArray(row) ? row[tab.cols.indexOf(tab.pk)] : row[tab.pk]
-    if (pkVal === undefined || pkVal === null || pkVal === '') { toast('该行主键值为空，无法删除', 'error'); return }
-    const ok = await confirm('删除数据行', `确定删除表 ${tab.name} 中 ${tab.pk}=${pkVal} 的数据吗？此操作不可撤销。`)
-    if (!ok) return
-    try {
-      await api.delete(`/projects/${id}/data/row?table=${encodeURIComponent(tab.name)}&pk=${encodeURIComponent(tab.pk)}&pkval=${encodeURIComponent(pkVal)}${selectedDS ? `&ds=${selectedDS}` : ''}`)
-      toast('行已删除')
-      fetchTableData(tab.name)
-    } catch (err) { toast(err.message, 'error') }
-  }
 
   // Column resize for the live table (colIdx = data column index; cell index = colIdx+1 due to checkbox column)
   const liveResizeCol = (colIdx, e) => {
@@ -230,10 +160,6 @@ export default function ProjectDetail() {
   useEffect(() => {
     setConnResult(null)
     setActiveTab(0)
-    setTabSearch({})
-    setTabSort({})
-    setTabPage({})
-    setTabWidths({})
     setAdminMode('data')
     setProcStats(null)
     fetchProject()
@@ -263,19 +189,19 @@ export default function ProjectDetail() {
   }, [id, selectedDS])
 
   // Fetch table data when selected table changes
-  const fetchTableData = useCallback((table) => {
+  const fetchTableData = useCallback((table, page = 1) => {
     if (!table) { setTableData(null); return }
-    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}${selectedDS ? `&ds=${selectedDS}` : ''}`).then(res => {
+    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}&page=${page}&page_size=${PER_PAGE}${selectedDS ? `&ds=${selectedDS}` : ''}`).then(res => {
       if (res.success) {
-        setTableData({ name: table, pk: res.data.pk, cols: res.data.columns, rows: res.data.rows })
+        setTableData({ name: table, pk: res.data.pk, cols: res.data.columns, rows: res.data.rows, total: res.data.total || 0, page, pageSize: res.data.page_size || PER_PAGE })
       }
     }).catch(() => setTableData(null))
   }, [id, selectedDS])
 
   useEffect(() => {
-    fetchTableData(selectedTable)
-    setSelectedPKs(new Set())
     setLivePage(1)
+    fetchTableData(selectedTable, 1)
+    setSelectedPKs(new Set())
     setLiveSort(null)
     setLiveColWidths({})
   }, [selectedTable, fetchTableData])
@@ -326,7 +252,6 @@ export default function ProjectDetail() {
   }
 
   const handleToggleStatus = async () => {
-    const nextStatus = project.status === 'online' ? 'offline' : project.status === 'maintenance' ? 'online' : 'maintenance'
     const actionLabel = project.status === 'online' ? '停用项目' : project.status === 'maintenance' ? '上线项目' : '启用项目'
     const msg = project.status === 'online'
       ? `停用后「${project.name}」将对所有用户不可访问。${project.base_path ? '访问 '+project.base_path+' 将显示维护页面。' : ''}`
@@ -391,55 +316,6 @@ export default function ProjectDetail() {
       await api.post(`/backups/${id}/restore/${filename}`)
       toast('数据库已恢复')
     } catch (err) { toast(err.message, 'error') }
-  }
-
-  const handleTabSort = (tabIdx, colIdx) => {
-    const key = `${tabIdx}`
-    const current = tabSort[key]
-    let next
-    if (current?.col === colIdx) {
-      if (current.dir === 'desc') { next = null } // cancel
-      else { next = { col: colIdx, dir: 'desc' } }
-    } else {
-      next = { col: colIdx, dir: 'asc' }
-    }
-    setTabSort(prev => {
-      const updated = { ...prev }
-      if (next) updated[key] = next
-      else delete updated[key]
-      return updated
-    })
-    setTabPage(prev => ({ ...prev, [tabIdx]: 1 }))
-  }
-
-  const getTabRows = (tab, tabIdx) => {
-    let rows = [...tab.rows]
-    // Search filter
-    const q = (tabSearch[tabIdx] || '').toLowerCase().trim()
-    if (q) rows = rows.filter(r => r.some(c => String(c).toLowerCase().includes(q)))
-    // Sort
-    const sortState = tabSort[`${tabIdx}`]
-    if (sortState) {
-      rows.sort((a, b) => {
-        const va = String(a[sortState.col] || '').toLowerCase()
-        const vb = String(b[sortState.col] || '').toLowerCase()
-        const na = parseFloat(va), nb = parseFloat(vb)
-        if (!isNaN(na) && !isNaN(nb)) return sortState.dir === 'asc' ? na - nb : nb - na
-        return sortState.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
-      })
-    }
-    return rows
-  }
-
-  const getPagedRows = (rows, tabIdx) => {
-    const page = tabPage[tabIdx] || 1
-    return rows.slice((page - 1) * PER_PAGE, page * PER_PAGE)
-  }
-
-  const sortArrow = (tabIdx, colIdx) => {
-    const s = tabSort[`${tabIdx}`]
-    if (s?.col !== colIdx) return ''
-    return s.dir === 'asc' ? ' ▲' : ' ▼'
   }
 
   const fetchMembers = async () => {
@@ -764,12 +640,12 @@ export default function ProjectDetail() {
                   return liveSort.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
                 })
               }
-              const totalPages = Math.ceil(rows.length / PER_PAGE) || 1
-              const paged = rows.slice((livePage - 1) * PER_PAGE, livePage * PER_PAGE)
+              const totalPages = Math.max(1, Math.ceil((tableData.total || rows.length) / PER_PAGE))
+              // Server-side pagination: rows are already the current page.
+              const paged = rows
               const gridStyle = liveColWidths._locked
                 ? { gridTemplateColumns: `44px ${cols.map((_, i) => i === cols.length - 1 ? '1fr' : (liveColWidths[i] || 80) + 'px').join(' ')}` }
                 : { gridTemplateColumns: `44px repeat(${cols.length}, minmax(90px, 1fr))` }
-              const pkIdx = tableData.pk ? cols.indexOf(tableData.pk) : -1
               const allChecked = paged.length > 0 && paged.every(r => selectedPKs.has(String(r[tableData.pk])))
               const toggleAll = () => {
                 const next = new Set(selectedPKs)
@@ -840,13 +716,15 @@ export default function ProjectDetail() {
 
                   {totalPages > 1 && (
                     <div className="pagination">
-                      <button className="pg-btn" disabled={livePage === 1} onClick={() => setLivePage(livePage - 1)}>‹</button>
+                      <span className="pg-info" style={{ marginRight: 6 }}>共 {tableData.total} 行</span>
+                      <button className="pg-btn" disabled={livePage === 1} onClick={() => { const p = livePage - 1; setLivePage(p); fetchTableData(tableData.name, p) }}>‹</button>
                       {getPages().map((p, i) => (
                         p === '...'
                           ? <span key={i} className="pg-info">…</span>
-                          : <button key={i} className={`pg-btn ${p === livePage ? 'active' : ''}`} onClick={() => setLivePage(p)}>{p}</button>
+                          : <button key={i} className={`pg-btn ${p === livePage ? 'active' : ''}`}
+                              onClick={() => { setLivePage(p); fetchTableData(tableData.name, p) }}>{p}</button>
                       ))}
-                      <button className="pg-btn" disabled={livePage === totalPages} onClick={() => setLivePage(livePage + 1)}>›</button>
+                      <button className="pg-btn" disabled={livePage === totalPages} onClick={() => { const p = livePage + 1; setLivePage(p); fetchTableData(tableData.name, p) }}>›</button>
                       <span className="pg-info">{livePage}/{totalPages}</span>
                     </div>
                   )}
