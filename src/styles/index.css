@@ -119,7 +119,7 @@ body{
 .sidebar-footer .logout:hover{color:var(--accent-red)}
 
 /* ===== MAIN ===== */
-.main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .25s ease}
+.main{margin-left:230px;flex:1;min-width:0;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .25s ease}
 .topbar{
   display:flex;justify-content:space-between;align-items:center;padding:0 28px;height:58px;
   border-bottom:1px solid rgba(255,255,255,.06);background:rgba(var(--glass-bg),var(--glass-alpha2));

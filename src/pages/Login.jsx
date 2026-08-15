@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/Toast'
 import Icon from '../components/Icon'
@@ -45,11 +45,13 @@ export default function Login() {
       const saved = JSON.parse(localStorage.getItem('lambs-remember'))
       if (saved) {
         setUsername(saved.username || '')
-        setPassword(saved.password || '')
         setRemember(true)
       }
     } catch { /* ignore */ }
   }, [])
+
+  const cooldownTimer = useRef(null)
+  useEffect(() => () => { if (cooldownTimer.current) clearInterval(cooldownTimer.current) }, [])
 
   const apiUrl = (path) => {
     const base = import.meta.env.BASE_URL === '/' ? '/api' : import.meta.env.BASE_URL + 'api'
@@ -64,7 +66,8 @@ export default function Login() {
     try {
       await login(username.trim(), password, remember)
       if (remember) {
-        localStorage.setItem('lambs-remember', JSON.stringify({ username: username.trim(), password }))
+        // Username only — never persist passwords in plain text.
+        localStorage.setItem('lambs-remember', JSON.stringify({ username: username.trim() }))
       } else {
         localStorage.removeItem('lambs-remember')
       }
@@ -93,8 +96,9 @@ export default function Login() {
         setForgotStep(2)
         // Start 60s resend cooldown
         setForgotCooldown(60)
-        const timer = setInterval(() => {
-          setForgotCooldown(prev => { if (prev <= 1) { clearInterval(timer); return 0 } return prev - 1 })
+        if (cooldownTimer.current) clearInterval(cooldownTimer.current)
+        cooldownTimer.current = setInterval(() => {
+          setForgotCooldown(prev => { if (prev <= 1) { clearInterval(cooldownTimer.current); return 0 } return prev - 1 })
         }, 1000)
       } else {
         toast(data.error || data.detail || '请求失败', 'error')

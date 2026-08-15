@@ -250,7 +250,7 @@ export default function Dashboard() {
         <div className="stat-card">
           <div className="k">活跃数据源</div>
           <div className="v">{stats.online}</div>
-          <div className="sub">{stats.online > 0 ? '所有数据源正常连接' : '部分数据源异常'}</div>
+          <div className="sub">{stats.online > 0 ? `${stats.online} 个数据源在线 · ${stats.offline} 个离线` : '暂无在线数据源'}</div>
         </div>
         <div className="stat-card">
           <div className="k">系统监控</div>

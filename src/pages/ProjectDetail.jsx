@@ -118,6 +118,7 @@ export default function ProjectDetail() {
   }
 
   const canManageRows = user?.role === 'super_admin' || user?.role === 'project_admin'
+  const canAdmin = canManageRows
 
   const handleEditRow = (tab, row) => {
     const values = {}
@@ -469,7 +470,7 @@ export default function ProjectDetail() {
       {/* Status banners */}
       {project.status === 'offline' && (
         <div style={{ background:'rgba(255,93,93,.12)', border:'1px solid var(--accent-red)', borderRadius:10, padding:'14px 18px', display:'flex', alignItems:'center', gap:12 }}>
-          <Icon name="slash" size={20} color="var(--accent-red)" />
+          <Icon name="xCircle" size={20} color="var(--accent-red)" />
           <div>
             <div style={{ fontSize:14, fontWeight:600, color:'var(--accent-red)' }}>该项目已被管理员停用</div>
             <div style={{ fontSize:11, color:'var(--text-tertiary)', marginTop:2 }}>所有用户无法访问该项目。点击下方"启用"按钮恢复访问。</div>
@@ -478,7 +479,7 @@ export default function ProjectDetail() {
       )}
       {project.status === 'maintenance' && (
         <div style={{ background:'rgba(255,161,59,.12)', border:'1px solid var(--accent-amber)', borderRadius:10, padding:'14px 18px', display:'flex', alignItems:'center', gap:12 }}>
-          <Icon name="alertCircle" size={20} color="var(--accent-amber)" />
+          <Icon name="alert" size={20} color="var(--accent-amber)" />
           <div>
             <div style={{ fontSize:14, fontWeight:600, color:'var(--accent-amber)' }}>该项目正在维护中</div>
             <div style={{ fontSize:11, color:'var(--text-tertiary)', marginTop:2 }}>维护期间用户暂时无法访问，请稍后重试。</div>
@@ -521,28 +522,34 @@ export default function ProjectDetail() {
             {project.name} · 详情
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-ghost btn-sm" onClick={testConnection} disabled={testingConn}>
-              {testingConn ? '检测中…' : '测试连接'}
-            </button>
-            <button className="btn btn-primary btn-sm" onClick={syncData} disabled={syncing || project.status !== 'online'}>
-              {syncing ? '同步中…' : '同步数据'}
-            </button>
-            <button className="btn btn-ghost btn-sm"
-              onClick={() => openDrawer(`编辑项目·${project.name}`, <ProjectForm project={project} onDone={(s) => { closeDrawer(); fetchProject(); window.dispatchEvent(new Event('lambs-projects-changed')); syncLambsBrand(s) }} />)}>
-              编辑
-            </button>
-            <button className={`btn ${project.status === 'online' ? 'btn-ghost' : 'btn-ghost'} btn-sm`}
-              onClick={handleToggleStatus}>
-              {project.status === 'online' ? '停用' : project.status === 'maintenance' ? '上线' : '启用'}
-            </button>
-            <button className="btn btn-danger btn-sm" onClick={handleDelete}>删除</button>
+            {canAdmin && (
+              <>
+                <button className="btn btn-ghost btn-sm" onClick={testConnection} disabled={testingConn}>
+                  {testingConn ? '检测中…' : '测试连接'}
+                </button>
+                <button className="btn btn-primary btn-sm" onClick={syncData} disabled={syncing || project.status !== 'online'}>
+                  {syncing ? '同步中…' : '同步数据'}
+                </button>
+                <button className="btn btn-ghost btn-sm"
+                  onClick={() => openDrawer(`编辑项目·${project.name}`, <ProjectForm project={project} onDone={(s) => { closeDrawer(); fetchProject(); window.dispatchEvent(new Event('lambs-projects-changed')); syncLambsBrand(s) }} />)}>
+                  编辑
+                </button>
+                <button className={`btn ${project.status === 'online' ? 'btn-ghost' : 'btn-ghost'} btn-sm`}
+                  onClick={handleToggleStatus}>
+                  {project.status === 'online' ? '停用' : project.status === 'maintenance' ? '上线' : '启用'}
+                </button>
+                <button className="btn btn-danger btn-sm" onClick={handleDelete}>删除</button>
+              </>
+            )}
           </div>
         </div>
 
         {/* Admin tabs */}
         <div className="tabs" style={{ marginBottom: 12 }}>
           <div className={`tab-item ${adminMode === 'data' ? 'active' : ''}`} onClick={() => setAdminMode('data')}>数据浏览</div>
-          <div className={`tab-item ${adminMode === 'members' ? 'active' : ''}`} onClick={() => { setAdminMode('members'); fetchMembers() }}>成员管理</div>
+          {canAdmin && (
+            <div className={`tab-item ${adminMode === 'members' ? 'active' : ''}`} onClick={() => { setAdminMode('members'); fetchMembers() }}>成员管理</div>
+          )}
           {project?.service_name && (
             <div className={`tab-item ${adminMode === 'logs' ? 'active' : ''}`} onClick={() => { setAdminMode('logs'); fetchLogs() }}>服务日志</div>
           )}
@@ -590,7 +597,7 @@ export default function ProjectDetail() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {backups.map(b => (
-                  <div key={b.filename} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(22,27,34,.5)', borderRadius: 8 }}>
+                  <div key={b.filename} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(var(--glass-bg),.5)', borderRadius: 8 }}>
                     <div>
                       <div style={{ fontSize: 13, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>{b.filename}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{b.created} · {b.size_mb}MB</div>
@@ -614,7 +621,7 @@ export default function ProjectDetail() {
               <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 14 }}>暂无成员</div>
             ) : (
               members.map(m => (
-                <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(22,27,34,.5)', borderRadius: 7, marginBottom: 4 }}>
+                <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(var(--glass-bg),.5)', borderRadius: 7, marginBottom: 4 }}>
                   <div>
                     <span style={{ fontSize: 13, fontWeight: 500 }}>{m.name}</span>
                     <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 8, fontFamily: 'var(--font-mono)' }}>{m.email}</span>
@@ -633,7 +640,7 @@ export default function ProjectDetail() {
               <>
                 <div style={{ fontSize: 13, fontWeight: 600, marginTop: 18, marginBottom: 10, color: 'var(--text-primary)' }}>可添加用户</div>
                 {nonMembers.map(u => (
-                  <div key={u.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(22,27,34,.3)', borderRadius: 7, marginBottom: 4 }}>
+                  <div key={u.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(var(--glass-bg),.3)', borderRadius: 7, marginBottom: 4 }}>
                     <div>
                       <span style={{ fontSize: 12 }}>{u.name}</span>
                       <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 8, fontFamily: 'var(--font-mono)' }}>{u.email}</span>

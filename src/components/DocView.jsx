@@ -118,7 +118,7 @@ export default function DocView({ id, tableList, selectedTable, onSelectTable, c
       {docs && filtered.map(d => {
         const pkVal = d._id ?? ''
         return (
-          <div key={String(pkVal)} style={{ background: 'rgba(22,27,34,.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
+          <div key={String(pkVal)} style={{ background: 'rgba(var(--glass-bg),.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>_id: {String(pkVal)}</span>
               {canManageRows && (

@@ -113,7 +113,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
           </div>
 
           {keyType === 'string' && (
-            <div style={{ background: 'rgba(22,27,34,.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 12 }}>
+            <div style={{ background: 'rgba(var(--glass-bg),.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 12 }}>
               {editingStr ? (
                 <>
                   <textarea value={strVal} onChange={e => setStrVal(e.target.value)} rows={6}
@@ -133,7 +133,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
           )}
 
           {keyType === 'hash' && (
-            <div style={{ background: 'rgba(22,27,34,.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
+            <div style={{ background: 'rgba(var(--glass-bg),.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
               {filtered.map((r, i) => (
                 <div key={i} style={{ display: 'flex', gap: 12, padding: '5px 0', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none' }}>
                   <span style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: 12, color: '#7ee787' }}>{r.field}</span>
@@ -146,7 +146,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
           {(keyType === 'list' || keyType === 'set') && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {filtered.map((r, i) => (
-                <div key={i} style={{ background: 'rgba(22,27,34,.5)', border: '1px solid var(--border)', borderRadius: 7, padding: '8px 12px', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                <div key={i} style={{ background: 'rgba(var(--glass-bg),.5)', border: '1px solid var(--border)', borderRadius: 7, padding: '8px 12px', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
                   {keyType === 'list' && <span style={{ color: 'var(--text-tertiary)', marginRight: 10 }}>[{r.index}]</span>}
                   <span style={{ color: '#a5d6ff' }}>{keyType === 'list' ? r.value : r.member}</span>
                 </div>
@@ -155,7 +155,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
           )}
 
           {keyType === 'zset' && (
-            <div style={{ background: 'rgba(22,27,34,.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
+            <div style={{ background: 'rgba(var(--glass-bg),.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
               {filtered.map((r, i) => (
                 <div key={i} style={{ display: 'flex', gap: 12, padding: '5px 0', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none' }}>
                   <span style={{ flex: 2, fontFamily: 'var(--font-mono)', fontSize: 12, color: '#a5d6ff' }}>{r.member}</span>

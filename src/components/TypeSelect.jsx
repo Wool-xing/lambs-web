@@ -47,7 +47,7 @@ export default function TypeSelect({ value, onChange, style, options = OPTIONS }
           background: 'var(--bg-panel)', border: '1px solid var(--border-strong)', borderRadius: 10,
           padding: 4, boxShadow: '0 10px 28px rgba(0,0,0,.45)',
         }}>
-          {items.map(o => (
+          {items.filter(o => o.value !== '').map(o => (
             <button
               key={o.value}
               type="button"

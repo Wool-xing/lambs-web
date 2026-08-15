@@ -89,7 +89,7 @@ export default function Topbar() {
           <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>系统正常</span>
         </div>
         <button className="topbar-btn" title="退出登录" onClick={() => { localStorage.removeItem('lambs_token'); window.location.href = '/lambs/login' }} style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Icon name="logOut" size={14} />
+          <Icon name="logout" size={14} />
           <span style={{ fontSize: 11 }}>退出</span>
         </button>
       </div>

@@ -96,7 +96,7 @@ export default function VectorView({ id, tableList, selectedTable, onSelectTable
 
       {/* Similarity search panel */}
       {selectedTable && (
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', background: 'rgba(22,27,34,.4)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', background: 'rgba(var(--glass-bg),.4)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 4 }}>相似度检索 · 输入向量（JSON 数组）</div>
             <textarea value={searchInput} onChange={e => setSearchInput(e.target.value)} rows={2}
