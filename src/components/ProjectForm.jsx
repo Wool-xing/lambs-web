@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { api } from '../api/client'
+import { api, resolveAsset } from '../api/client'
 import { useToast } from './Toast'
 import useFileUpload from '../hooks/useFileUpload'
 import TypeSelect from './TypeSelect'
@@ -148,7 +148,7 @@ export default function ProjectForm({ onDone, project }) {
               style={{ cursor: 'pointer', width: 102, height: 102 }}
             >
               {iconUrl ? (
-                <img src={iconUrl} alt="" />
+                <img src={resolveAsset(iconUrl)} alt="" />
               ) : (
                 <>
                   <span className="upload-hint">点击上传</span>

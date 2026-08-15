@@ -2,7 +2,7 @@ import TypeSelect from '../components/TypeSelect'
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { api } from '../api/client'
+import { api, resolveAsset } from '../api/client'
 import { useToast } from '../components/Toast'
 import { useConfirm } from '../components/Modal'
 import { useDrawer } from '../components/Drawer'
@@ -344,7 +344,7 @@ export default function Dashboard() {
                       onClick={e => { e.stopPropagation(); toggleSelect(p.id) }} />
                   )}
                   <div className={`project-logo ${p.icon_cls || 'default'}`}>
-                    {p.icon_url ? <img src={p.icon_url} alt="" /> : logoInitials(p.name)}
+                    {p.icon_url ? <img src={resolveAsset(p.icon_url)} alt="" /> : logoInitials(p.name)}
                   </div>
                   {!batchMode && (
                     <button className="project-card-more" onClick={e => { e.stopPropagation(); const r=e.currentTarget.getBoundingClientRect(); setMenu({project:p, x:r.right-160, y:r.bottom+4}) }}><Icon name="moreHorizontal" size={16} /></button>

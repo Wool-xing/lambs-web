@@ -1,6 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import { resolveAsset } from './api/client'
 const Login = lazy(() => import('./pages/Login'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'))
@@ -15,6 +16,7 @@ import { applyTheme } from './components/ThemePicker'
 // v2.6 — global favicon setter (available on login page too)
 const DEFAULT_FAV = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAUklEQVR4nO3XIQ4AIAxD0d3/UFiOBQ5DEzBbJ36T6T65RqjMsVLumaziL0hVuURUl18IK8BVfhAAAAAAAAAAAAAAANgB9re8BcA+zVqM0wqIyAZqzpfIgTCdawAAAABJRU5ErkJggg=="
 window.setLambsFavicon = (url) => {
+  url = resolveAsset(url)
   let fav = document.getElementById('lambs-favicon')
   if (!fav) { fav = document.querySelector('link[rel="icon"]') }
   if (!fav) { fav = document.createElement('link'); fav.rel = 'icon'; fav.id = 'lambs-favicon'; document.head.appendChild(fav) }

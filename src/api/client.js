@@ -84,3 +84,14 @@ export const api = {
   patch: (path, data) => request(path, { method: 'PATCH', body: data ? JSON.stringify(data) : undefined }),
   delete: (path) => request(path, { method: 'DELETE' }),
 }
+
+// resolveAsset resolves server-relative asset paths (like logo URLs returned
+// by the API) against the app base path — "/api/x" must become "/lambs/api/x".
+export function resolveAsset(src) {
+  if (!src || typeof src !== 'string') return src
+  if (src.startsWith('data:') || src.startsWith('http')) return src
+  if (src.startsWith('/api/')) {
+    return (import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')) + src
+  }
+  return src
+}
