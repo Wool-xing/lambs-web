@@ -494,15 +494,43 @@ export default function ProjectDetail() {
         </div>
       )}
 
-      {procStats?.running && (
-        <div style={{ background: 'var(--bg-panel-raised)', border: '1px solid var(--border-strong)', borderRadius: 8, padding: '10px 16px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 18 }}>
-          <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>● 进程运行中</span>
-          <span>CPU <b style={{ color: 'var(--text-primary)' }}>{procStats.cpu_percent?.toFixed(1)}%</b></span>
-          <span>内存 <b style={{ color: 'var(--text-primary)' }}>{procStats.rss_mb} MB</b></span>
-          <span>运行时长 <b style={{ color: 'var(--text-primary)' }}>{Math.floor(procStats.uptime_sec / 3600)}小时{Math.floor((procStats.uptime_sec % 3600) / 60)}分</b></span>
-          <span>PID <b style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{procStats.pid}</b></span>
-        </div>
-      )}
+      {(() => {
+        const hasProcess = !!(project?.service_name || project?.startup_command)
+        const statusLabel = { online: '在线', offline: '已离线', maintenance: '维护中' }[project?.status] || project?.status
+        const statusColor = project?.status === 'online' ? 'var(--accent-green)' : project?.status === 'maintenance' ? 'var(--accent-amber)' : 'var(--text-tertiary)'
+        const barStyle = { background: 'var(--bg-panel-raised)', border: '1px solid var(--border-strong)', borderRadius: 8, padding: '10px 16px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }
+        if (hasProcess) {
+          if (procStats?.running) {
+            return (
+              <div style={barStyle}>
+                <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>● 进程运行中</span>
+                <span>CPU <b style={{ color: 'var(--text-primary)' }}>{procStats.cpu_percent?.toFixed(1)}%</b></span>
+                <span>内存 <b style={{ color: 'var(--text-primary)' }}>{procStats.rss_mb} MB</b></span>
+                <span>运行时长 <b style={{ color: 'var(--text-primary)' }}>{Math.floor(procStats.uptime_sec / 3600)}小时{Math.floor((procStats.uptime_sec % 3600) / 60)}分</b></span>
+                <span>PID <b style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{procStats.pid}</b></span>
+              </div>
+            )
+          }
+          return (
+            <div style={barStyle}>
+              <span style={{ color: 'var(--text-tertiary)', fontWeight: 600 }}>● 进程未运行</span>
+              <span>状态 <b style={{ color: statusColor }}>{statusLabel}</b></span>
+              <span>配置了 {project.startup_command ? '启动命令' : 'systemd 服务'}，上线后由 Lambs 拉起</span>
+            </div>
+          )
+        }
+        // Pure datasource project: no managed process — show its real config state.
+        const dsCount = (project.datasources || []).length
+        return (
+          <div style={barStyle}>
+            <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>● 数据源模式</span>
+            <span>类型 <b style={{ color: 'var(--text-primary)' }}>{project.db_type || '未配置'}</b></span>
+            {user?.role === 'super_admin' && dsCount > 0 && <span>数据源 <b style={{ color: 'var(--text-primary)' }}>{dsCount} 个</b></span>}
+            <span>状态 <b style={{ color: statusColor }}>{statusLabel}</b></span>
+            <span>无进程管理 — 直接连接浏览数据</span>
+          </div>
+        )
+      })()}
 
       {/* Stats */}
       <div className="summary-row">
