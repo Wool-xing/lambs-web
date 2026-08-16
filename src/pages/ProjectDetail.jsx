@@ -715,8 +715,8 @@ export default function ProjectDetail() {
                           <input type="checkbox" checked={allChecked} onChange={toggleAll} style={{ cursor: 'pointer' }} />
                         )}
                       </span>
-                      {cols.map((col, ci) => (
-                        <span key={ci} onClick={() => {
+                      {cols.map((col, ci) => {
+                        const applySort = () => {
                           // Sort refetches inline and keeps the row selection:
                           // sorting only reorders the same rows, so clearing
                           // selectedPKs on the third click (desc→none) was a
@@ -726,12 +726,21 @@ export default function ProjectDetail() {
                             : { col, dir: 'asc' }
                           setLiveSort(next)
                           setLivePage(1)
+                          // Jumping back to page 1 hides rows selected on
+                          // later pages — keep the checkbox count honest (R5 F1).
+                          if (livePage !== 1) setSelectedPKs(new Set())
                           fetchTableData(selectedTable, 1, debouncedSearch, next?.col, next?.dir)
-                        }} style={{ cursor: 'pointer', position: 'relative', paddingRight: ci < cols.length - 1 ? 10 : 0 }}>
-                          {col}{liveSort?.col === col ? (liveSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
-                          {ci < cols.length - 1 && <span className="col-resize" onMouseDown={e => liveResizeCol(ci, e)} />}
-                        </span>
-                      ))}
+                        }
+                        return (
+                          <span key={ci} role="button" tabIndex={0} aria-sort={liveSort?.col === col ? (liveSort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                            onClick={applySort}
+                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applySort() } }}
+                            style={{ cursor: 'pointer', position: 'relative', paddingRight: ci < cols.length - 1 ? 10 : 0 }}>
+                            {col}{liveSort?.col === col ? (liveSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
+                            {ci < cols.length - 1 && <span className="col-resize" onMouseDown={e => liveResizeCol(ci, e)} />}
+                          </span>
+                        )
+                      })}
                     </div>
                     {paged.length === 0 ? (
                       <div className="empty-state"><div className="t">无匹配数据</div></div>

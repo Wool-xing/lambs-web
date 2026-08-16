@@ -38,7 +38,9 @@ export default function TypeSelect({ value, onChange, style, options = OPTIONS }
       // Flip above the trigger when the panel would overflow the viewport.
       // Item ≈30px (7px padding ×2 + ~16px line height), panel padding 8px
       // (R3-P3: the old 34/12 estimate overshot by ~34px for 7 options).
-      const estH = Math.min(items.length * 30 + 8, 320)
+      // Count only rendered items — the '' placeholder is filtered out (R5 F5).
+      const renderedCount = items.filter(o => o.value !== '').length
+      const estH = Math.min(renderedCount * 30 + 8, 320)
       const top = r.bottom + 4 + estH > window.innerHeight ? Math.max(8, r.top - 4 - estH) : r.bottom + 4
       setPos({ top, left: r.left, width: r.width })
     }
