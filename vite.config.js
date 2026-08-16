@@ -7,6 +7,11 @@ export default defineConfig({
   build: { assetsDir: 'static' },
   server: {
     proxy: {
+      // App requests /lambs/api/* (BASE_URL=/lambs/) — strip the base path.
+      '/lambs/api': {
+        target: 'http://localhost:8000',
+        rewrite: (p) => p.replace(/^\/lambs/, ''),
+      },
       '/api': 'http://localhost:8000',
     },
   },

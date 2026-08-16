@@ -24,9 +24,11 @@ window.setLambsFavicon = (url) => {
   // Resize to 32x32 PNG — browsers reject huge data URLs as favicon
   const img = new Image()
   img.onload = () => {
-    const c = document.createElement('canvas'); c.width = 32; c.height = 32
-    c.getContext('2d').drawImage(img, 0, 0, 32, 32)
-    fav.href = c.toDataURL('image/png')
+    try {
+      const c = document.createElement('canvas'); c.width = 32; c.height = 32
+      c.getContext('2d').drawImage(img, 0, 0, 32, 32)
+      fav.href = c.toDataURL('image/png')
+    } catch { fav.href = DEFAULT_FAV } // tainted canvas (cross-origin icon)
   }
   img.onerror = () => { fav.href = DEFAULT_FAV }
   img.src = url

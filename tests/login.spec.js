@@ -4,6 +4,9 @@ import { setupApiMocks, MOCK_TOKEN } from './helpers.js';
 test.describe('登录页面', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/fonts.googleapis.com**', (route) => route.abort());
+    // Catch-all first (later routes win): keep unmocked API calls off the
+    // real backend — a real 401 would wipe the mock session mid-test.
+    await page.route('**/lambs/api/**', (route) => route.fulfill({ json: { success: true, data: {} } }));
     await page.route('**/api/auth/me', async (route) => {
       await route.fulfill({ status: 401, json: { detail: 'Not authenticated' } });
     });
@@ -84,6 +87,8 @@ test.describe('登录页面', () => {
   });
 
   test('注册表单提交 → API 调用成功', async ({ page }) => {
+    // Dashboard 需要 stats mock（catch-all 的 data:{} 会让 total_users.toLocaleString 崩）
+    await setupApiMocks(page);
     // Mock register endpoint (token must be JWT-shaped — client-side exp check)
     await page.route('**/api/auth/register', async (route) => {
       await route.fulfill({ json: { success: true, data: { access_token: MOCK_TOKEN, token_type: 'bearer', user: {} } } });
