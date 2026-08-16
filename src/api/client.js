@@ -108,6 +108,11 @@ export const api = {
 // public per-user data — this layer keeps the raw password out of DevTools
 // and the wire (R7); TLS + server bcrypt remain the actual security.
 export async function hashPassword(password, salt = '') {
+  // crypto.subtle only exists on HTTPS/localhost — fail with a readable
+  // Chinese message instead of a raw TypeError (R7 code review).
+  if (!window.crypto || !window.crypto.subtle) {
+    throw new Error('当前环境不支持安全哈希，请使用 HTTPS 访问')
+  }
   const data = new TextEncoder().encode(password + salt)
   const digest = await crypto.subtle.digest('SHA-256', data)
   return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('')
