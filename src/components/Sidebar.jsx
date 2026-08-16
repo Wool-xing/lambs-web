@@ -18,6 +18,7 @@ export default function Sidebar() {
   const [projects, setProjects] = useState([])
   const [expanded, setExpanded] = useState(false)
   const [showPwd, setShowPwd] = useState(false)
+  const [avatarFailed, setAvatarFailed] = useState(false)
   const [oldPwd, setOldPwd] = useState('')
   const [newPwd, setNewPwd] = useState('')
   const [cfmPwd, setCfmPwd] = useState('')
@@ -115,8 +116,8 @@ export default function Sidebar() {
       </nav>
       <div className="sidebar-footer">
         <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
-          {user?.avatar_url ? (
-            <img src={resolveAsset(user.avatar_url)} alt="" onError={e => { e.currentTarget.style.display = 'none' }} style={{width:36,height:36,borderRadius:'50%',objectFit:'cover',flexShrink:0}} />
+          {user?.avatar_url && !avatarFailed ? (
+            <img src={resolveAsset(user.avatar_url)} alt="" onError={() => setAvatarFailed(true)} style={{width:36,height:36,borderRadius:'50%',objectFit:'cover',flexShrink:0}} />
           ) : (
             <div style={{width:36,height:36,borderRadius:'50%',background:'linear-gradient(135deg, #6366f1, #8b5cf6)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontSize:15,fontWeight:700,color:'#fff',textTransform:'uppercase'}}>
               {(user?.name || user?.username || '?')[0]}
