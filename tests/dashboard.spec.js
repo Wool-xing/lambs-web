@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin, MOCK_PROJECTS } from './helpers.js';
+import { loginAsAdmin, setupApiMocks, MOCK_TOKEN, MOCK_PROJECTS } from './helpers.js';
 
 test.describe('仪表盘页面', () => {
   test.beforeEach(async ({ page }) => {
@@ -93,5 +93,24 @@ test.describe('仪表盘页面', () => {
     await expect(refreshBtn).toBeVisible();
     await refreshBtn.click();
     await expect(page.locator('text=最后刷新：')).toBeVisible();
+  });
+
+  test('首屏 projects 列表只请求一次（R3-8 回归）', async ({ page }) => {
+    // Register the listener BEFORE navigating — the beforeEach login would
+    // otherwise let the mount requests slip past it.
+    const seen = [];
+    page.on('request', (req) => {
+      if (req.url().includes('/api/projects?sort_by=order')) seen.push(req.url());
+    });
+    await setupApiMocks(page);
+    // beforeEach's login left a token behind — clear it BEFORE the first
+    // navigation, otherwise the login-page visit mounts the Sidebar and
+    // fires an extra fetch.
+    await page.evaluate(() => localStorage.clear());
+    await page.goto('/lambs/');
+    await page.evaluate((t) => localStorage.setItem('lambs_token', t), MOCK_TOKEN);
+    await page.goto('/lambs/dashboard');
+    await page.waitForTimeout(800);
+    expect(seen.length).toBe(1);
   });
 });
