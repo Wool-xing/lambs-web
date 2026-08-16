@@ -6,11 +6,11 @@ test.describe('登录页面', () => {
     await page.route('**/fonts.googleapis.com**', (route) => route.abort());
     // Catch-all first (later routes win): keep unmocked API calls off the
     // real backend — a real 401 would wipe the mock session mid-test.
-    await page.route('**/lambs/api/**', (route) => route.fulfill({ json: { success: true, data: {} } }));
+    await page.route('**/Lambs/api/**', (route) => route.fulfill({ json: { success: true, data: {} } }));
     await page.route('**/api/auth/me', async (route) => {
       await route.fulfill({ status: 401, json: { detail: 'Not authenticated' } });
     });
-    await page.goto('/lambs/');
+    await page.goto('/Lambs/');
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     await page.waitForSelector('.login-card', { timeout: 10000 });
@@ -40,7 +40,7 @@ test.describe('登录页面', () => {
     await page.fill('#login-username', 'admin');
     await page.fill('#login-pass', 'password123');
     await page.locator('.login-card button.btn-primary').click();
-    await page.waitForURL('**/lambs/dashboard', { timeout: 10000 });
+    await page.waitForURL('**/Lambs/dashboard', { timeout: 10000 });
     await expect(page.locator('.summary-row')).toBeVisible();
   });
 
@@ -59,7 +59,7 @@ test.describe('登录页面', () => {
     await page.fill('#login-username', 'admin');
     await page.fill('#login-pass', 'password123');
     await page.locator('.login-card button.btn-primary').click();
-    await page.waitForURL('**/lambs/dashboard', { timeout: 10000 });
+    await page.waitForURL('**/Lambs/dashboard', { timeout: 10000 });
     const saved = await page.evaluate(() => localStorage.getItem('lambs-remember'));
     expect(saved).not.toBeNull();
     const parsed = JSON.parse(saved);
@@ -101,7 +101,40 @@ test.describe('登录页面', () => {
     await page.fill('.modal-box input[placeholder="请输入邮箱"]', 'new@test.com');
     await page.fill('.modal-box input[placeholder*="密码"]', 'password123');
     await page.locator('.modal-box button.btn-primary').click();
-    await page.waitForURL('**/lambs/dashboard', { timeout: 10000 });
+    await page.waitForURL('**/Lambs/dashboard', { timeout: 10000 });
     await expect(page.locator('.stat-card').first()).toBeVisible();
+  });
+});
+
+test.describe('R7 加盐密码', () => {
+  test('登录提交的密码是 sha256(密码+盐)，非明文', async ({ page }) => {
+    const salt = '0123456789abcdef0123456789abcdef';
+    await page.route('**/fonts.googleapis.com**', (route) => route.abort());
+    await page.route('**/Lambs/api/**', (route) => route.fulfill({ json: { success: true, data: {} } }));
+    // 后注册更具体 → 覆盖 catch-all；返回非空盐
+    await page.route('**/api/auth/salt*', (route) =>
+      route.fulfill({ json: { success: true, data: { salt } } }));
+    let sentPassword = null;
+    await page.route('**/api/auth/login', async (route) => {
+      sentPassword = (JSON.parse(route.request().postData() || '{}') || {}).password ?? null;
+      await route.fulfill({ json: { success: true, data: { access_token: MOCK_TOKEN, token_type: 'bearer' } } });
+    });
+    await page.route('**/api/auth/me', (route) =>
+      route.fulfill({ json: { success: true, data: { id: 'u_test001', username: 'admin', name: '管理员', email: 'a@b.c', role: 'super_admin', status: 'active' } } }));
+    await page.goto('/Lambs/');
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.waitForSelector('.login-card', { timeout: 10000 });
+    await page.fill('#login-username', 'admin');
+    await page.fill('#login-pass', 'admin123');
+    await page.locator('.login-card button.btn-primary').click();
+    await page.waitForURL('**/Lambs/dashboard', { timeout: 10000 });
+    const expected = await page.evaluate(async (s) => {
+      const { hashPassword } = await import('/Lambs/src/api/client.js');
+      return hashPassword('admin123', s);
+    }, salt);
+    expect(sentPassword).toBe(expected);
+    expect(sentPassword).not.toBe('admin123');
+    expect(sentPassword).toMatch(/^[0-9a-f]{64}$/);
   });
 });
