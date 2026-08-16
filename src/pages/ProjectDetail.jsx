@@ -732,7 +732,7 @@ export default function ProjectDetail() {
                           fetchTableData(selectedTable, 1, debouncedSearch, next?.col, next?.dir)
                         }
                         return (
-                          <span key={ci} role="button" tabIndex={0} aria-sort={liveSort?.col === col ? (liveSort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                          <span key={ci} role="button" tabIndex={0}
                             onClick={applySort}
                             onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applySort() } }}
                             style={{ cursor: 'pointer', position: 'relative', paddingRight: ci < cols.length - 1 ? 10 : 0 }}>
