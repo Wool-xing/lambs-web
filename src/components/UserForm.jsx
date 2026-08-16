@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { api } from '../api/client'
+import { api, hashPassword, newSaltHex } from '../api/client'
 import { useToast } from './Toast'
 import TypeSelect from './TypeSelect'
 
@@ -71,7 +71,13 @@ export default function UserForm({ onDone, userData }) {
         if (newPassword && newPassword.length < 6) { toast('密码至少6位', 'error'); setLoading(false); return }
         if (newPassword && newPassword !== confirmPassword) { toast('两次密码不一致', 'error'); setLoading(false); return }
         const payload = { username, name, email, role, project_access: JSON.stringify(pa), avatar_url: avatarUrl || null }
-        if (newPassword) payload.password = newPassword
+        if (newPassword) {
+          // R7: hash with a locally generated salt — plaintext never leaves
+          // the browser.
+          const salt = newSaltHex()
+          payload.password = await hashPassword(newPassword, salt)
+          payload.salt = salt
+        }
         const res = await api.post('/users', payload)
         toast(newPassword ? '用户已创建' : `用户已创建，初始密码：${res.data.password}`)
       }

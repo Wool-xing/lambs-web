@@ -104,6 +104,23 @@ export const api = {
   delete: (path) => request(path, { method: 'DELETE' }),
 }
 
+// hashPassword computes sha256hex(password+salt) via Web Crypto. The salt is
+// public per-user data — this layer keeps the raw password out of DevTools
+// and the wire (R7); TLS + server bcrypt remain the actual security.
+export async function hashPassword(password, salt = '') {
+  const data = new TextEncoder().encode(password + salt)
+  const digest = await crypto.subtle.digest('SHA-256', data)
+  return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// newSaltHex returns a random 16-byte salt for account creation (the server
+// stores it alongside the bcrypt hash).
+export function newSaltHex() {
+  const b = new Uint8Array(16)
+  crypto.getRandomValues(b)
+  return [...b].map(x => x.toString(16).padStart(2, '0')).join('')
+}
+
 // resolveAsset resolves server-relative API paths (like logo URLs returned
 // by the API) against the app base path — "/api/x" must become "/Lambs/api/x".
 // Only "/api" paths get the prefix: other absolute paths ("/static/...",
