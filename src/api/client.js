@@ -36,6 +36,11 @@ function isRetryable(status) {
   return status === 0 || status === 502 || status === 503 || status === 504
 }
 
+// In-flight GET dedupe: concurrent mounts fire the same query (Sidebar +
+// Dashboard both fetch /projects on first paint); collapse to one round trip.
+// Entries are removed once settled, so 30s polling still refetches.
+const inflightGets = new Map()
+
 async function request(path, options = {}) {
   const token = getToken()
   if (token && isTokenExpired(token)) { clearAuth(); throw new Error('登录已过期') }
@@ -43,6 +48,20 @@ async function request(path, options = {}) {
   if (token) headers['Authorization'] = `Bearer ${token}`
 
   const method = (options.method || 'GET').toUpperCase()
+  // Dedupe key is path-only: safe today because every api.get caller passes
+  // no custom headers. Pass { dedupe: false } for explicit refreshes that
+  // must not collapse onto a concurrent in-flight poll (stale data race).
+  if (method === 'GET' && options.dedupe !== false) {
+    const pending = inflightGets.get(path)
+    if (pending) return pending
+    const p = doRequest(path, options, headers, method)
+    inflightGets.set(path, p)
+    try { return await p } finally { inflightGets.delete(path) }
+  }
+  return doRequest(path, options, headers, method)
+}
+
+async function doRequest(path, options, headers, method) {
   let attempts = 1
   if (method === 'GET') attempts = 2 // one retry for transient failures
 
@@ -78,7 +97,7 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  get: (path) => request(path),
+  get: (path, options) => request(path, options),
   post: (path, data) => request(path, { method: 'POST', body: JSON.stringify(data) }),
   put: (path, data) => request(path, { method: 'PUT', body: JSON.stringify(data) }),
   patch: (path, data) => request(path, { method: 'PATCH', body: data ? JSON.stringify(data) : undefined }),

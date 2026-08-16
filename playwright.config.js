@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }], ['list']],
   timeout: 15000,
   use: {
-    baseURL: 'http://localhost:2222',
+    baseURL: 'http://localhost:2233',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -20,8 +20,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npx vite --port 2222 --strictPort',
-    url: 'http://localhost:2222/lambs/',
+    command: 'npx vite --port 2233 --strictPort',
+    url: 'http://localhost:2233/lambs/',
     reuseExistingServer: !process.env.CI,
     timeout: 30000,
   },
