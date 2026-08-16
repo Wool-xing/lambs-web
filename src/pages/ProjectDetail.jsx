@@ -163,7 +163,7 @@ export default function ProjectDetail() {
       const maxPage = Math.max(1, Math.ceil(remaining / PER_PAGE))
       const nextPage = Math.min(livePage, maxPage)
       setLivePage(nextPage)
-      fetchTableData(tableData.name, nextPage)
+      fetchTableData(tableData.name, nextPage, liveSearch, liveSort?.col, liveSort?.dir)
     } catch (err) { toast(err.message, 'error') }
   }
 
@@ -741,14 +741,14 @@ export default function ProjectDetail() {
                   {totalPages > 1 && (
                     <div className="pagination">
                       <span className="pg-info" style={{ marginRight: 6 }}>共 {tableData.total} 行</span>
-                      <button className="pg-btn" disabled={livePage === 1} onClick={() => { const p = livePage - 1; setLivePage(p); setSelectedPKs(new Set()); fetchTableData(tableData.name, p) }}>‹</button>
+                      <button className="pg-btn" disabled={livePage === 1} onClick={() => { const p = livePage - 1; setLivePage(p); setSelectedPKs(new Set()); fetchTableData(tableData.name, p, liveSearch, liveSort?.col, liveSort?.dir) }}>‹</button>
                       {getPages().map((p, i) => (
                         p === '...'
                           ? <span key={i} className="pg-info">…</span>
                           : <button key={i} className={`pg-btn ${p === livePage ? 'active' : ''}`}
-                              onClick={() => { setLivePage(p); setSelectedPKs(new Set()); fetchTableData(tableData.name, p) }}>{p}</button>
+                              onClick={() => { setLivePage(p); setSelectedPKs(new Set()); fetchTableData(tableData.name, p, liveSearch, liveSort?.col, liveSort?.dir) }}>{p}</button>
                       ))}
-                      <button className="pg-btn" disabled={livePage === totalPages} onClick={() => { const p = livePage + 1; setLivePage(p); setSelectedPKs(new Set()); fetchTableData(tableData.name, p) }}>›</button>
+                      <button className="pg-btn" disabled={livePage === totalPages} onClick={() => { const p = livePage + 1; setLivePage(p); setSelectedPKs(new Set()); fetchTableData(tableData.name, p, liveSearch, liveSort?.col, liveSort?.dir) }}>›</button>
                       <span className="pg-info">{livePage}/{totalPages}</span>
                     </div>
                   )}
