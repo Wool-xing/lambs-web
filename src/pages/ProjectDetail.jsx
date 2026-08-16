@@ -230,7 +230,7 @@ export default function ProjectDetail() {
     fetchTableData(selectedTable, 1, debouncedSearch, liveSort?.col, liveSort?.dir)
     setSelectedPKs(new Set())
     setLiveColWidths({})
-  }, [selectedTable, debouncedSearch, liveSort, fetchTableData])
+  }, [selectedTable, debouncedSearch, fetchTableData])
 
   // Set browser favicon to project logo
   useEffect(() => {
@@ -717,11 +717,16 @@ export default function ProjectDetail() {
                       </span>
                       {cols.map((col, ci) => (
                         <span key={ci} onClick={() => {
-                          if (liveSort?.col === col) {
-                            setLiveSort(liveSort.dir === 'asc' ? { col, dir: 'desc' } : null)
-                          } else {
-                            setLiveSort({ col, dir: 'asc' })
-                          }
+                          // Sort refetches inline and keeps the row selection:
+                          // sorting only reorders the same rows, so clearing
+                          // selectedPKs on the third click (desc→none) was a
+                          // silent selection loss (R3-P3).
+                          const next = liveSort?.col === col
+                            ? (liveSort.dir === 'asc' ? { col, dir: 'desc' } : null)
+                            : { col, dir: 'asc' }
+                          setLiveSort(next)
+                          setLivePage(1)
+                          fetchTableData(selectedTable, 1, debouncedSearch, next?.col, next?.dir)
                         }} style={{ cursor: 'pointer', position: 'relative', paddingRight: ci < cols.length - 1 ? 10 : 0 }}>
                           {col}{liveSort?.col === col ? (liveSort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
                           {ci < cols.length - 1 && <span className="col-resize" onMouseDown={e => liveResizeCol(ci, e)} />}

@@ -66,7 +66,12 @@ export async function setupApiMocks(page, overrides = {}) {
   // forwards them, and a real 401 would wipe the mock session mid-test.
   // Narrow to the API base path — a bare '**/api/**' would also swallow
   // '/lambs/src/api/client.js' and break module loading.
-  await page.route('**/lambs/api/**', (route) => route.fulfill({ json: { success: true, data: {} } }));
+  // Unmocked calls are logged (audit trail): a test silently served by the
+  // catch-all is a mock gap, not a pass (R3-P3).
+  await page.route('**/lambs/api/**', (route) => {
+    console.warn('[helpers] catch-all served unmocked call:', route.request().method(), route.request().url());
+    route.fulfill({ json: { success: true, data: {} } });
+  });
 
   // Auth endpoints
   await page.route('**/api/auth/me', async (route) => {
