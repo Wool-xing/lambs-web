@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useConfirm } from '../components/Modal'
 import { useToast } from '../components/Toast'
-import { api, resolveAsset } from '../api/client'
+import { api, resolveAsset, hashPassword } from '../api/client'
 import { subscribeProjects, fetchProjectsShared } from '../api/projectsStore'
 import Icon from './Icon'
 
@@ -35,7 +35,17 @@ export default function Sidebar() {
     if (newPwd !== cfmPwd) { toast('两次密码不一致', 'error'); return }
     setPwdLoading(true)
     try {
-      await api.put('/auth/me/password', { old: oldPwd, new: newPwd })
+      // R7: hash both passwords with the account salt before sending.
+      let salt = ''
+      try {
+        const s = await api.get(`/auth/salt?username=${encodeURIComponent(user?.username || '')}`)
+        salt = s.data?.salt || ''
+      } catch { /* empty-salt fallback */ }
+      const [oldPayload, newPayload] = await Promise.all([
+        hashPassword(oldPwd, salt),
+        hashPassword(newPwd, salt),
+      ])
+      await api.put('/auth/me/password', { old: oldPayload, new: newPayload })
       toast('密码已修改')
       setShowPwd(false); setOldPwd(''); setNewPwd(''); setCfmPwd('')
     } catch (err) { toast(err.message, 'error') }

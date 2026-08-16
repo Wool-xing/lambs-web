@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/Toast'
 import Icon from '../components/Icon'
 import { applyTheme } from '../components/ThemePicker'
-import { resolveAsset } from '../api/client'
+import { resolveAsset, api, hashPassword } from '../api/client'
 
 export default function Login() {
   const { login, register } = useAuth()
@@ -117,9 +117,16 @@ export default function Login() {
     if (forgotNewPwd !== forgotConfirmPwd) { toast('两次输入的密码不一致', 'error'); return }
     setForgotLoading(true)
     try {
+      // R7: hash the new password with the account salt before sending.
+      let salt = ''
+      try {
+        const s = await api.get(`/auth/salt?username=${encodeURIComponent(forgotUser.trim())}`)
+        salt = s.data?.salt || ''
+      } catch { /* empty-salt fallback */ }
+      const payload = await hashPassword(forgotNewPwd, salt)
       const res = await fetch(apiUrl('/auth/forgot-password/verify'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: forgotUser.trim(), email: forgotEmail.trim(), code, new_password: forgotNewPwd })
+        body: JSON.stringify({ username: forgotUser.trim(), email: forgotEmail.trim(), code, new_password: payload })
       })
       const data = await res.json()
       if (res.ok && data.success) {
