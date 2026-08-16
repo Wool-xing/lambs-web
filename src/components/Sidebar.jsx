@@ -19,6 +19,10 @@ export default function Sidebar() {
   const [expanded, setExpanded] = useState(false)
   const [showPwd, setShowPwd] = useState(false)
   const [avatarFailed, setAvatarFailed] = useState(false)
+
+  // Avatar URL changed (switch account / update avatar): retry the image
+  // instead of keeping the failed placeholder forever (R5 C4).
+  useEffect(() => { setAvatarFailed(false) }, [user?.avatar_url])
   const [oldPwd, setOldPwd] = useState('')
   const [newPwd, setNewPwd] = useState('')
   const [cfmPwd, setCfmPwd] = useState('')

@@ -65,12 +65,13 @@ export async function setupApiMocks(page, overrides = {}) {
   // unmocked API calls must not leak to the real backend. The dev proxy now
   // forwards them, and a real 401 would wipe the mock session mid-test.
   // Narrow to the API base path — a bare '**/api/**' would also swallow
-  // '/lambs/src/api/client.js' and break module loading.
+  // '/Lambs/src/api/client.js' and break module loading.
   // Unmocked calls are logged (audit trail): a test silently served by the
   // catch-all is a mock gap, not a pass (R3-P3).
-  await page.route('**/lambs/api/**', (route) => {
+  await page.route('**/Lambs/api/**', (route) => {
     console.warn('[helpers] catch-all served unmocked call:', route.request().method(), route.request().url());
-    route.fulfill({ json: { success: true, data: {} } });
+    // success:false — 只断言 success 的测试不再被兜底假绿（R5 F3）。
+    route.fulfill({ json: { success: false, data: {} } });
   });
 
   // Auth endpoints
@@ -218,8 +219,8 @@ export async function setupApiMocks(page, overrides = {}) {
  */
 export async function loginAsAdmin(page, path = '/dashboard') {
   await setupApiMocks(page);
-  await page.goto('/lambs/');
+  await page.goto('/Lambs/');
   await page.evaluate((t) => localStorage.setItem('lambs_token', t), MOCK_TOKEN);
-  await page.goto('/lambs/' + path.replace(/^\//, ''));
+  await page.goto('/Lambs/' + path.replace(/^\//, ''));
   await page.waitForLoadState('networkidle');
 }

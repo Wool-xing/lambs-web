@@ -1,5 +1,5 @@
 // Vite dev proxy routes /api → localhost:8000
-// Production nginx routes /lambs/api/ → backend
+// Production nginx routes /Lambs/api/ → backend
 const BASE = import.meta.env.BASE_URL === '/' ? '/api' : import.meta.env.BASE_URL + 'api'
 
 function getToken() {
@@ -105,13 +105,13 @@ export const api = {
 }
 
 // resolveAsset resolves server-relative API paths (like logo URLs returned
-// by the API) against the app base path — "/api/x" must become "/lambs/api/x".
+// by the API) against the app base path — "/api/x" must become "/Lambs/api/x".
 // Only "/api" paths get the prefix: other absolute paths ("/static/...",
 // protocol-relative "//cdn/...") are app/domain-root correct as-is (R3-P3).
 export function resolveAsset(src) {
   if (!src || typeof src !== 'string') return src
   if (src.startsWith('data:') || src.startsWith('http') || src.startsWith('//')) return src
-  if (src.startsWith('/api')) {
+  if (src === '/api' || src.startsWith('/api/')) {
     const base = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')
     if (base && !src.startsWith(base + '/')) return base + src
   }
