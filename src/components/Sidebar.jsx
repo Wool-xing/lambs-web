@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useConfirm } from '../components/Modal'
 import { useToast } from '../components/Toast'
 import { api, resolveAsset } from '../api/client'
+import { subscribeProjects, fetchProjectsShared } from '../api/projectsStore'
 import Icon from './Icon'
 
 const MAX_VISIBLE = 8
@@ -36,17 +37,15 @@ export default function Sidebar() {
     finally { setPwdLoading(false) }
   }
 
-  const fetchProjects = () => {
-    api.get('/projects?sort_by=order').then(res => {
-      if (res.success) setProjects(res.data.projects || [])
-    }).catch(() => {})
-  }
-
   useEffect(() => {
-    fetchProjects()
-    const handler = () => fetchProjects()
+    const unsub = subscribeProjects(setProjects)
+    fetchProjectsShared()
+    const handler = () => fetchProjectsShared(true)
     window.addEventListener('lambs-projects-changed', handler)
-    return () => window.removeEventListener('lambs-projects-changed', handler)
+    return () => {
+      unsub()
+      window.removeEventListener('lambs-projects-changed', handler)
+    }
   }, [])
 
   const [logoImg, setLogoImg] = useState(localStorage.getItem('lambs_brand_logo_img') || '')

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api, resolveAsset } from '../api/client'
+import { fetchProjectsShared } from '../api/projectsStore'
 import { useToast } from '../components/Toast'
 import { useConfirm } from '../components/Modal'
 import { useDrawer } from '../components/Drawer'
@@ -57,16 +58,27 @@ export default function Dashboard() {
     return list
   }, [])
 
-  const fetchProjects = useCallback(async () => {
+  const fetchProjects = useCallback(async (opts = {}) => {
     try {
-      const q = new URLSearchParams({ search: debouncedSearch, status: filter, sort_by: sortBy })
-      const res = await api.get(`/projects?${q}`)
-      if (res.success) {
-        let list = res.data.projects
+      // Default view shares the Sidebar's "sort_by=order" fetch (R3-8: the
+      // same request used to fire twice on first load).
+      const useShared = !debouncedSearch && filter === 'all' && sortBy === 'order'
+      let list
+      if (useShared) {
+        list = await fetchProjectsShared(opts.dedupe === false)
+      } else {
+        const qp = { sort_by: sortBy }
+        if (debouncedSearch) qp.search = debouncedSearch
+        if (filter !== 'all') qp.status = filter
+        const q = new URLSearchParams(qp)
+        const res = await api.get(`/projects?${q}`, opts)
+        list = res.success ? res.data.projects : null
+      }
+      if (list) {
         if (sortBy === 'order') list = applyLocalOrder(list)
         setProjects(list)
       }
-      const s = await api.get('/projects/stats')
+      const s = await api.get('/projects/stats', opts)
       if (s.success) setStats(s.data)
       const now = new Date()
       setLastRefresh(now.toLocaleTimeString('zh-CN', { hour12: false }))
@@ -81,19 +93,25 @@ export default function Dashboard() {
     const timer = setInterval(() => {
       api.get('/projects/stats').then(s => { if (s.success) setStats(s.data) }).catch(() => {})
       api.get('/system/health').then(s => { if (s.success) setSysHealth(s.data) }).catch(() => {})
-      api.get('/projects?sort_by=order').then(r => { if (r.success) setProjects(applyLocalOrder(r.data.projects || [])) }).catch(() => {})
+      fetchProjectsShared(true).then(list => { if (list) setProjects(applyLocalOrder(list)) }).catch(() => {})
     }, 30000)
     api.get('/system/health').then(s => { if (s.success) setSysHealth(s.data) }).catch(() => {})
-    api.get('/settings/audit-logs').then(r => { if (r.success) setActivityLogs(r.data.logs?.slice(0, 10) || []) }).catch(() => {})
-    const actTimer = setInterval(() => {
+    // audit-logs is super_admin-only server-side; fetching it for other roles
+    // wastes a request every 30s and always 403s.
+    if (user?.role === 'super_admin') {
       api.get('/settings/audit-logs').then(r => { if (r.success) setActivityLogs(r.data.logs?.slice(0, 10) || []) }).catch(() => {})
+    }
+    const actTimer = setInterval(() => {
+      if (user?.role === 'super_admin') {
+        api.get('/settings/audit-logs').then(r => { if (r.success) setActivityLogs(r.data.logs?.slice(0, 10) || []) }).catch(() => {})
+      }
     }, 30000)
     return () => { clearInterval(timer); clearInterval(actTimer) }
-  }, [])
+  }, [user?.role])
 
   const refreshDashboard = async () => {
     setRefreshing(true)
-    await fetchProjects()
+    await fetchProjects({ dedupe: false })
     setTimeout(() => setRefreshing(false), 600)
   }
 
@@ -102,7 +120,7 @@ export default function Dashboard() {
     closeDrawer()
     setBatchMode(false)
     setSelected(new Set())
-    fetchProjects()
+    fetchProjects({ dedupe: false })
     window.dispatchEvent(new Event('lambs-projects-changed'))
   }
 
@@ -111,7 +129,7 @@ export default function Dashboard() {
       const res = await api.post(`/projects/${id}/clone`)
       if (res.success) {
         toast(`已克隆为「${res.data.name}」`)
-        fetchProjects()
+        fetchProjects({ dedupe: false })
         window.dispatchEvent(new Event('lambs-projects-changed'))
       } else toast(res.error || '克隆失败', 'error')
     } catch (err) { toast(err.message, 'error') }
@@ -283,7 +301,7 @@ export default function Dashboard() {
                   {batchMode ? '取消' : '选择'}
                 </button>
                 <button className="btn btn-primary btn-sm"
-                  onClick={() => openDrawer('新增项目', <ProjectForm onDone={(s) => { closeDrawer(); fetchProjects(); syncLambsBrand(s) }} />, 620)}>
+                  onClick={() => openDrawer('新增项目', <ProjectForm onDone={(s) => { closeDrawer(); fetchProjects({ dedupe: false }); syncLambsBrand(s) }} />, 620)}>
                   + 新增项目
                 </button>
               </>
@@ -384,7 +402,7 @@ export default function Dashboard() {
       {/* Dropdown menu */}
       {menu && (
         <div className="dropdown" style={{left:menu.x,top:menu.y,opacity:1,pointerEvents:'auto'}} onClick={e=>e.stopPropagation()}>
-          <div className="dd-item" onClick={()=>{setMenu(null);openDrawer(`编辑项目·${menu.project.name}`,<ProjectForm project={menu.project} onDone={(s)=>{closeDrawer();fetchProjects();syncLambsBrand(s)}}/>,620)}}>编辑项目</div>
+          <div className="dd-item" onClick={()=>{setMenu(null);openDrawer(`编辑项目·${menu.project.name}`,<ProjectForm project={menu.project} onDone={(s)=>{closeDrawer();fetchProjects({ dedupe: false });syncLambsBrand(s)}}/>,620)}}>编辑项目</div>
           <div className="dd-item" onClick={()=>{setMenu(null);handleClone(menu.project.id, menu.project.name)}}>克隆项目</div>
           <div className="dd-item" onClick={()=>{setMenu(null);handleToggleStatus(menu.project.id)}}>{menu.project.status === 'online' ? '停用项目' : menu.project.status === 'maintenance' ? '上线项目' : '启用项目'}</div>
           <div className="dd-item" onClick={()=>{setMenu(null);handleTogglePin(menu.project.id)}}>{menu.project.is_pinned?'取消置顶':'置顶项目'}</div>
