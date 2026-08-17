@@ -32,7 +32,7 @@ export default function Dashboard() {
   const [filter, setFilter] = useState('all')
   const [tagFilter, setTagFilter] = useState('')
   const [sortBy, setSortBy] = useState('order')
-  const [sysHealth, setSysHealth] = useState({ cpu_percent: 0, memory_used_mb: 0, memory_total_mb: 0, disk_used_gb: 0, disk_total_gb: 0, uptime_seconds: 0 })
+  const [sysHealth, setSysHealth] = useState({ hostname: '', cpu_percent: 0, memory_used_mb: 0, memory_total_mb: 0, disk_used_gb: 0, disk_total_gb: 0, uptime_seconds: 0, nodes: [] })
   const [batchMode, setBatchMode] = useState(false)
   const [selected, setSelected] = useState(new Set())
   const [menu, setMenu] = useState(null)
@@ -288,8 +288,15 @@ export default function Dashboard() {
           <div className="k">系统监控</div>
           <div className="v">{sysHealth.cpu_percent}%</div>
           <div className="sub">
-            内存 {sysHealth.memory_used_mb}/{sysHealth.memory_total_mb}MB · 磁盘 {sysHealth.disk_used_gb}/{sysHealth.disk_total_gb}GB
+            {sysHealth.hostname || '本机'} · 内存 {sysHealth.memory_used_mb}/{sysHealth.memory_total_mb}MB · 磁盘 {sysHealth.disk_used_gb}/{sysHealth.disk_total_gb}GB
           </div>
+          {(sysHealth.nodes || []).map(n => (
+            <div className="sub" key={n.name} style={n.online ? undefined : { color: 'var(--accent-red)' }}>
+              {n.online
+                ? `${n.name} · CPU ${n.cpu_percent}% · 内存 ${n.memory_used_mb}/${n.memory_total_mb}MB · 磁盘 ${n.disk_used_gb}/${n.disk_total_gb}GB`
+                : `${n.name} · 失联`}
+            </div>
+          ))}
         </div>
       </div>
 
