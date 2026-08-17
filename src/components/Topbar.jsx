@@ -77,7 +77,9 @@ export default function Topbar() {
         <button className="mobile-toggle" onClick={toggleSidebar} aria-label="菜单"><Icon name="menu" size={16} /></button>
         <div className="topbar-title">{info.title}</div>
         <div className="topbar-bc">
-          <span onClick={() => navigate('/dashboard')}>{info.bc}</span>
+          <span role="button" tabIndex={0} aria-label="返回仪表盘"
+            onClick={() => navigate('/dashboard')}
+            onKeyDown={e => { if (e.key === 'Enter') navigate('/dashboard') }}>{info.bc}</span>
         </div>
       </div>
       <div className="topbar-right">
