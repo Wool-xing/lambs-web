@@ -3,7 +3,7 @@ import { api } from '../api/client'
 import Icon from './Icon'
 import { fmtTime } from '../utils/time'
 
-// 系统日志 — renders /logs/aggregated (audit + project status lines).
+// 系统日志 — renders /logs/system (lambs-server's own journald log).
 // Note: the endpoint returns a bare array inside data, not {logs: [...]}.
 const LEVELS = ['all', 'info', 'warn', 'error']
 
@@ -22,7 +22,7 @@ export default function ErrorLogsWidget() {
   const fetchLogs = async (silent = false) => {
     if (!silent) setLoading(true)
     try {
-      const r = await api.get('/logs/aggregated?lines=20')
+      const r = await api.get('/logs/system?lines=30')
       if (r.success) {
         setLogs(Array.isArray(r.data) ? r.data : [])
         setRefreshedAt(new Date())
