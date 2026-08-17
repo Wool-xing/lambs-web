@@ -477,7 +477,7 @@ export default function ProjectDetail() {
       <div className="card" style={{ marginTop: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div className="card-title" style={{ margin: 0 }}>
-            <button className="btn btn-ghost btn-sm" style={{ marginRight: 8 }} onClick={() => navigate('/dashboard')}><Icon name="arrowLeft" size={14} /></button>
+            <button className="btn btn-ghost btn-sm" aria-label="返回仪表盘" style={{ marginRight: 8 }} onClick={() => navigate('/dashboard')}><Icon name="arrowLeft" size={14} /></button>
             {project.name} · 详情
           </div>
           <div style={{ display: 'flex', gap: 8 }}>

@@ -15,7 +15,8 @@ export function ToastProvider({ children }) {
       {children}
       <div className="toast-container">
         {toasts.map(t => (
-          <div key={t.id} className={`toast toast ${t.type}`}>{t.message}</div>
+          // role=alert: screen readers announce the message (R13 a11y).
+          <div key={t.id} role="alert" className={`toast toast ${t.type}`}>{t.message}</div>
         ))}
       </div>
     </ToastContext.Provider>

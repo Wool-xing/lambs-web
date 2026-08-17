@@ -38,7 +38,7 @@ export function DrawerProvider({ children }) {
       {state.open && (
         <>
           <div className="drawer-mask" onClick={closeDrawer} />
-          <div className="drawer" ref={drawerRef} style={state.width ? { width: state.width } : undefined}>
+          <div className="drawer" ref={drawerRef} role="dialog" aria-modal="true" aria-label={state.title} style={state.width ? { width: state.width } : undefined}>
             <div className="drawer-header">
               <div className="drawer-title">{state.title}</div>
               <button className="drawer-close" onClick={closeDrawer} aria-label="关闭抽屉"><Icon name="x" size={16} /></button>

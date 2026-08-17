@@ -379,7 +379,7 @@ export default function Dashboard() {
                     {p.icon_url ? <img src={resolveAsset(p.icon_url)} alt="" onError={e => { e.currentTarget.style.display = 'none' }} /> : logoInitials(p.name)}
                   </div>
                   {!batchMode && (
-                    <button className="project-card-more" onClick={e => { e.stopPropagation(); const r=e.currentTarget.getBoundingClientRect(); setMenu({project:p, x:r.right-160, y:r.bottom+4}) }}><Icon name="moreHorizontal" size={16} /></button>
+                    <button className="project-card-more" aria-label="更多操作" onClick={e => { e.stopPropagation(); const r=e.currentTarget.getBoundingClientRect(); setMenu({project:p, x:r.right-160, y:r.bottom+4}) }}><Icon name="moreHorizontal" size={16} /></button>
                   )}
                 </div>
                 <div className="project-card-name" title={p.name}>{p.is_pinned && <><Icon name="star" size={12} /> </>}{p.name}</div>

@@ -98,9 +98,9 @@ export default function Notifications() {
                 </div>
                 <div className="notif-actions">
                   {!n.read && (
-                    <button className="btn btn-xs btn-ghost" onClick={e => { e.stopPropagation(); handleMarkRead(n.id) }}><Icon name="check" size={12} /></button>
+                    <button className="btn btn-xs btn-ghost" aria-label="标记已读" onClick={e => { e.stopPropagation(); handleMarkRead(n.id) }}><Icon name="check" size={12} /></button>
                   )}
-                  <button className="btn btn-xs btn-ghost" onClick={e => { e.stopPropagation(); handleDismiss(n.id) }}><Icon name="x" size={12} /></button>
+                  <button className="btn btn-xs btn-ghost" aria-label="删除通知" onClick={e => { e.stopPropagation(); handleDismiss(n.id) }}><Icon name="x" size={12} /></button>
                 </div>
               </div>
             )
