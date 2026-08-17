@@ -15,6 +15,13 @@ test.describe('仪表盘页面', () => {
     await expect(statCards.nth(3)).toContainText('系统监控');
   });
 
+  test('系统监控显示本机与 wool 两台来源', async ({ page }) => {
+    const card = page.locator('.stat-card').nth(3);
+    await expect(card).toContainText('Lambs');
+    await expect(card).toContainText('wool');
+    await expect(card).toContainText('3.5%');
+  });
+
   test('显示项目卡片列表', async ({ page }) => {
     const cards = page.locator('.project-card');
     await expect(cards).toHaveCount(MOCK_PROJECTS.length);

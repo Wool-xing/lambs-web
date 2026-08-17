@@ -189,7 +189,7 @@ export async function setupApiMocks(page, overrides = {}) {
   // System health (dashboard stat cards)
   await page.route('**/api/system/health', async (route) => {
     await route.fulfill({
-      json: { success: true, data: { cpu_percent: 12.5, memory_used_mb: 512, memory_total_mb: 2048, disk_used_gb: 20, disk_total_gb: 100, uptime_seconds: 86400 } },
+      json: { success: true, data: { hostname: 'Lambs', cpu_percent: 12.5, memory_used_mb: 512, memory_total_mb: 2048, disk_used_gb: 20, disk_total_gb: 100, uptime_seconds: 86400, nodes: [{ name: 'wool', online: true, cpu_percent: 3.5, memory_used_mb: 509, memory_total_mb: 954, disk_used_gb: 5.1, disk_total_gb: 44.1, uptime_seconds: 12345, fetched_at: 1700000000 }] } },
     });
   });
 
