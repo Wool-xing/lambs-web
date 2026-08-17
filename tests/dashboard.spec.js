@@ -107,9 +107,9 @@ test.describe('仪表盘页面', () => {
     // navigation, otherwise the login-page visit mounts the Sidebar and
     // fires an extra fetch.
     await page.evaluate(() => localStorage.clear());
-    await page.goto('/lambs/');
+    await page.goto('/Lambs/');
     await page.evaluate((t) => localStorage.setItem('lambs_token', t), MOCK_TOKEN);
-    await page.goto('/lambs/dashboard');
+    await page.goto('/Lambs/dashboard');
     await page.waitForTimeout(800);
     expect(seen.length).toBe(1);
   });

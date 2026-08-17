@@ -10,7 +10,7 @@ import './styles/index.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter basename="/lambs">
+    <BrowserRouter basename="/Lambs">
       <AuthProvider>
         <ToastProvider>
           <ConfirmProvider>

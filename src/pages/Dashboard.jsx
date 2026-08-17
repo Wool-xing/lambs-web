@@ -93,7 +93,11 @@ export default function Dashboard() {
     const timer = setInterval(() => {
       api.get('/projects/stats').then(s => { if (s.success) setStats(s.data) }).catch(() => {})
       api.get('/system/health').then(s => { if (s.success) setSysHealth(s.data) }).catch(() => {})
-      fetchProjectsShared(true).then(list => { if (list) setProjects(applyLocalOrder(list)) }).catch(() => {})
+      // Only the default view is refreshed by the poll — an active search /
+      // filter / sort view must not be overwritten mid-interaction (R12).
+      fetchProjectsShared(true).then(list => {
+        if (list && !debouncedSearch && filter === 'all' && sortBy === 'order') setProjects(applyLocalOrder(list))
+      }).catch(() => {})
     }, 30000)
     api.get('/system/health').then(s => { if (s.success) setSysHealth(s.data) }).catch(() => {})
     // audit-logs is super_admin-only server-side; fetching it for other roles
