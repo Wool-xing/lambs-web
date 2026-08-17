@@ -55,12 +55,11 @@ export default function Notifications() {
   const handleDismiss = async (id) => {
     try {
       await api.delete(`/notifications/${id}`)
-      setNotifs(prev => {
-        const filtered = prev.filter(n => n.id !== id)
-        if (filtered.length < 10 && hasMore) { fetchNotifs(1) }
-        return filtered
-      })
+      // Refetch OUTSIDE the state updater — a fetch inside it double-fires
+      // under StrictMode's double-invoked updaters (R12).
+      setNotifs(prev => prev.filter(n => n.id !== id))
       refreshBadge()
+      if (notifs.length < 10 && hasMore) fetchNotifs(1)
     } catch (e) { toast(e.message, 'error') }
   }
 

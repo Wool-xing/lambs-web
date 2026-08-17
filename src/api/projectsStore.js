@@ -42,6 +42,11 @@ export function fetchProjectsShared(force = false) {
       listeners.forEach((l) => l(cache))
     }
     return cache
+  }).catch((err) => {
+    // A rejected promise must not stay cached forever — the sidebar would
+    // fail to load the project list until the next forced refresh (R12).
+    inflight = null
+    throw err
   })
   return inflight
 }
