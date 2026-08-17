@@ -56,4 +56,28 @@ test.describe('系统设置页面', () => {
     const rows = page.locator('.tbl-row').filter({ hasNot: page.locator('.head') }).first();
     await expect(rows).toBeVisible();
   });
+
+  test('统一保存栏：SMTP 改动走底部按钮一次 PUT', async ({ page }) => {
+    let putBody = null;
+    await page.route('**/api/settings/config', async (route) => {
+      if (route.request().method() === 'PUT') {
+        putBody = route.request().postDataJSON();
+        await route.fulfill({ json: { success: true, data: {} } });
+      } else {
+        await route.fulfill({ json: { success: true, data: { jwt_secret: 'k', admin_email: 'a@b.c', port: 3602, refresh_interval: 30, smtp_host: '', smtp_port: '587', smtp_from: '', smtp_user: '', smtp_password: '' } } });
+      }
+    });
+    const bar = page.locator('.settings-save-bar');
+    await expect(bar).toBeVisible();
+    await expect(bar.locator('button:has-text("保存配置")')).toBeVisible();
+    // Edit an SMTP field — the single bar button must persist it
+    const smtpHost = page.locator('.field').filter({ hasText: 'SMTP 服务器' }).locator('input');
+    await smtpHost.fill('smtp.example.com');
+    await expect(bar.locator('text=有未保存的更改')).toBeVisible();
+    await bar.locator('button:has-text("保存配置")').click();
+    await expect.poll(() => putBody).not.toBeNull();
+    expect(putBody.smtp_host).toBe('smtp.example.com');
+    // Saved → dirty hint clears
+    await expect(bar.locator('text=有未保存的更改')).not.toBeVisible();
+  });
 });

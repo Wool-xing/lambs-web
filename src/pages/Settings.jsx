@@ -15,6 +15,8 @@ export default function Settings() {
   const [auditLogs, setAuditLogs] = useState([])
   const [datasources, setDatasources] = useState([])
   const [config, setConfig] = useState({ jwt_secret: '', admin_email: '', port: 3602, refresh_interval: 30 })
+  const [initialConfig, setInitialConfig] = useState(null)
+  const dirty = initialConfig != null && JSON.stringify(config) !== JSON.stringify(initialConfig)
   const [configLoading, setConfigLoading] = useState(false)
   const [showJwt, setShowJwt] = useState(false)
   const [showSmtpPassword, setShowSmtpPassword] = useState(false)
@@ -38,7 +40,7 @@ export default function Settings() {
   useEffect(() => {
     api.get('/settings/audit-logs').then(r => { if (r.success) setAuditLogs(r.data.logs) }).catch(() => {})
     api.get('/settings/datasources').then(r => { if (r.success) setDatasources(r.data.datasources) }).catch(() => {})
-    api.get('/settings/config').then(r => { if (r.success) setConfig(r.data) }).catch(() => {})
+    api.get('/settings/config').then(r => { if (r.success) { setConfig(r.data); setInitialConfig(r.data) } }).catch(() => {})
     api.get('/projects?sort_by=order').then(r => { if (r.success) setProjects(r.data.projects || []) }).catch(() => {})
   }, [])
 
@@ -53,6 +55,7 @@ export default function Settings() {
     setConfigLoading(true)
     try {
       await api.put('/settings/config', config)
+      setInitialConfig(config)
       toast('配置已保存')
     } catch (err) { toast(err.message, 'error') }
     finally { setConfigLoading(false) }
@@ -151,11 +154,6 @@ export default function Settings() {
               onChange={e => upload.handleFile(e.target.files[0])} />
             {logoImg ? <span style={{fontSize:11,color:'var(--accent-red)',cursor:'pointer'}} onClick={() => { upload.reset(); onLogoChange('') }}>移除</span> : <span style={{fontSize:11,color:'var(--text-tertiary)'}}>点击或拖拽上传</span>}
           </div>
-        </div>
-        <div style={{ marginTop: 14 }}>
-          <button className="btn btn-primary btn-sm" onClick={handleSaveConfig} disabled={configLoading}>
-            {configLoading ? '保存中…' : '保存配置'}
-          </button>
         </div>
       </div>
 
@@ -266,6 +264,14 @@ export default function Settings() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Unified save bar — one button for the whole page, at the bottom */}
+      <div className="settings-save-bar">
+        {dirty && <span style={{ fontSize: 11, color: 'var(--accent-amber)' }}>有未保存的更改</span>}
+        <button className="btn btn-primary btn-sm" onClick={handleSaveConfig} disabled={configLoading}>
+          {configLoading ? '保存中…' : '保存配置'}
+        </button>
       </div>
     </>
   )
