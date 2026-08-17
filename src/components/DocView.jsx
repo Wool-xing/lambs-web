@@ -50,7 +50,7 @@ export default function DocView({ id, tableList, selectedTable, onSelectTable, c
     api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}${ds ? `&ds=${ds}` : ''}`).then(res => {
       if (res.success) setDocs(res.data.rows || [])
     }).catch(() => setDocs(null))
-  }, [id])
+  }, [id, ds])
 
   useEffect(() => { fetchDocs(selectedTable) }, [selectedTable, fetchDocs])
 
