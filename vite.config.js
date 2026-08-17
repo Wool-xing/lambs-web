@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       // App requests /lambs/api/* (BASE_URL=/lambs/) — strip the base path.
-      '/lambs/api': {
+      '/Lambs/api': {
         target: 'http://localhost:8000',
         rewrite: (p) => p.replace(/^\/lambs/, ''),
       },

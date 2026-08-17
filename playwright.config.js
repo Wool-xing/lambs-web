@@ -21,7 +21,7 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npx vite --port 2233 --strictPort',
-    url: 'http://localhost:2233/lambs/',
+    url: 'http://localhost:2233/Lambs/',
     reuseExistingServer: !process.env.CI,
     timeout: 30000,
   },
