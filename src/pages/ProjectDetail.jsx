@@ -11,6 +11,7 @@ import DocView from '../components/DocView'
 import KVView from '../components/KVView'
 import VectorView from '../components/VectorView'
 import Icon from '../components/Icon'
+import TaskPanel from '../components/TaskPanel'
 import { fmtTime } from '../utils/time'
 
 export default function ProjectDetail() {
@@ -513,6 +514,9 @@ export default function ProjectDetail() {
             <div className={`tab-item ${adminMode === 'logs' ? 'active' : ''}`} onClick={() => { setAdminMode('logs'); fetchLogs() }}>服务日志</div>
           )}
           <div className={`tab-item ${adminMode === 'backups' ? 'active' : ''}`} onClick={() => { setAdminMode('backups'); fetchBackups() }}>备份管理</div>
+          {user?.role === 'super_admin' && (
+            <div className={`tab-item ${adminMode === 'tasks' ? 'active' : ''}`} onClick={() => setAdminMode('tasks')}>计划任务</div>
+          )}
         </div>
 
         {adminMode === 'logs' && (
@@ -533,6 +537,10 @@ export default function ProjectDetail() {
               )}
             </div>
           </div>
+        )}
+
+        {adminMode === 'tasks' && (
+          <TaskPanel projectId={project.id} superAdmin={user?.role === 'super_admin'} />
         )}
 
         {adminMode === 'backups' && (
