@@ -531,3 +531,19 @@ body.sidebar-open .sidebar-brand{padding:0 16px;justify-content:flex-start}
 .form-section .field:last-child{margin-bottom:0}
 .form-actions-sticky{position:sticky;bottom:-16px;display:flex;gap:9px;margin-top:8px;padding:12px 0 8px;background:rgba(var(--glass-bg),.96)}
 @media(max-width:640px){.form-grid{grid-template-columns:1fr}}
+
+/* Settings page unified save bar — sticky above page bottom */
+.settings-save-bar {
+  position: sticky;
+  bottom: 12px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-top: 16px;
+  z-index: 5;
+}
