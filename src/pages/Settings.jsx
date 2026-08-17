@@ -64,7 +64,13 @@ export default function Settings() {
     let url = `${base}/settings/export/${type}`
     if (projectId) url += `?project_id=${projectId}`
     fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => res.blob())
+      .then(async res => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}))
+          throw new Error(body.error || `导出失败 (${res.status})`)
+        }
+        return res.blob()
+      })
       .then(blob => {
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)
@@ -73,7 +79,7 @@ export default function Settings() {
         URL.revokeObjectURL(a.href)
         toast('导出完成')
       })
-      .catch(() => toast('导出失败', 'error'))
+      .catch(err => toast(err.message || '导出失败', 'error'))
   }
 
   const filteredLogs = useMemo(() => {
@@ -83,7 +89,14 @@ export default function Settings() {
     }
     if (debouncedLogSearch) {
       const s = debouncedLogSearch.toLowerCase()
-      logs = logs.filter(l => l.target.toLowerCase().includes(s) || l.detail.toLowerCase().includes(s) || l.action.toLowerCase().includes(s) || (l.user && l.user.toLowerCase().includes(s)))
+      // null fields (legacy rows) must not crash the filter (R12).
+      logs = logs.filter(l => {
+        const target = (l.target || '').toLowerCase()
+        const detail = (l.detail || '').toLowerCase()
+        const action = (l.action || '').toLowerCase()
+        const usr = String(l.user || '').toLowerCase()
+        return target.includes(s) || detail.includes(s) || action.includes(s) || usr.includes(s)
+      })
     }
     return logs
   }, [auditLogs, logFilter, debouncedLogSearch])

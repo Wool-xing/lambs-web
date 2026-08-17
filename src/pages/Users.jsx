@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/Toast'
@@ -32,10 +32,15 @@ export default function Users() {
     if (user && user.role !== 'super_admin') { navigate('/dashboard') }
   }, [user])
 
+  const usersReqSeq = useRef(0)
   const fetchUsers = useCallback(async (pg) => {
+    const seq = ++usersReqSeq.current
     try {
       const q = new URLSearchParams({ search: debouncedSearch, role: roleFilter, page: String(pg||1), page_size: String(PAGE_SIZE) })
       const res = await api.get(`/users?${q}`)
+      // Stale-page guard: an old response must not splice into a newer
+      // list after a filter/search reset (R12).
+      if (seq !== usersReqSeq.current) return
       if (res.success) {
         if (pg && pg > 1) setUsers(prev => [...prev, ...res.data.users])
         else setUsers(res.data.users)

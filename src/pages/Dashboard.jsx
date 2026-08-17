@@ -171,11 +171,13 @@ export default function Dashboard() {
   const handleBatchToggle = async (target) => {
     const count = selected.size
     if (count === 0) return
+    let failed = 0
     for (const id of selected) {
-      try { await api.patch(`/projects/${id}/status`, { status: target }) } catch { /* skip */ }
+      try { await api.patch(`/projects/${id}/status`, { status: target }) } catch { failed++ }
     }
     const label = target === 'online' ? '已上线' : target === 'maintenance' ? '已设维护' : '已停用'
-    toast(label)
+    // All-failed must not report success (R12: swallowed errors told a lie).
+    toast(failed === 0 ? label : failed === count ? `操作失败：${failed} 个项目` : `完成，${failed} 个失败`)
     setBatchMode(false); setSelected(new Set())
     afterMutate()
   }
@@ -185,10 +187,11 @@ export default function Dashboard() {
     if (count === 0) return
     const ok = await confirm(count >= 2 ? '批量删除' : '删除项目', `确定删除选中的 ${count} 个项目吗？此操作不可恢复。`)
     if (!ok) return
+    let failed = 0
     for (const id of selected) {
-      try { await api.delete(`/projects/${id}`) } catch { /* skip */ }
+      try { await api.delete(`/projects/${id}`) } catch { failed++ }
     }
-    toast('已删除')
+    toast(failed === 0 ? '已删除' : failed === count ? `删除失败：${failed} 个项目` : `已删除，${failed} 个失败`)
     setBatchMode(false); setSelected(new Set())
     afterMutate()
   }
