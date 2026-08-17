@@ -22,7 +22,7 @@ export default class ErrorBoundary extends Component {
           <div style={{ fontSize: 13, color: 'var(--text-tertiary)', maxWidth: 400, textAlign: 'center' }}>
             {this.state.error?.message || '发生了未知错误'}
           </div>
-          <button className="btn btn-primary btn-sm" onClick={() => { this.setState({ hasError: false }); window.location.href = '/lambs/dashboard' }}>
+          <button className="btn btn-primary btn-sm" onClick={() => { this.setState({ hasError: false }); window.location.href = '/Lambs/dashboard' }}>
             返回仪表盘
           </button>
         </div>
