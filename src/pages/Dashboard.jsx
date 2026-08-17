@@ -93,12 +93,16 @@ export default function Dashboard() {
     const timer = setInterval(() => {
       api.get('/projects/stats').then(s => { if (s.success) setStats(s.data) }).catch(() => {})
       api.get('/system/health').then(s => { if (s.success) setSysHealth(s.data) }).catch(() => {})
+    }, 30000)
+    // The full project list is the expensive call (all rows re-downloaded) —
+    // poll it at half the stats rate (R13 perf: 4 requests/30s was heavy).
+    const projTimer = setInterval(() => {
       // Only the default view is refreshed by the poll — an active search /
       // filter / sort view must not be overwritten mid-interaction (R12).
       fetchProjectsShared(true).then(list => {
         if (list && !debouncedSearch && filter === 'all' && sortBy === 'order') setProjects(applyLocalOrder(list))
       }).catch(() => {})
-    }, 30000)
+    }, 60000)
     api.get('/system/health').then(s => { if (s.success) setSysHealth(s.data) }).catch(() => {})
     // audit-logs is super_admin-only server-side; fetching it for other roles
     // wastes a request every 30s and always 403s.
@@ -110,7 +114,7 @@ export default function Dashboard() {
         api.get('/settings/audit-logs').then(r => { if (r.success) setActivityLogs(r.data.logs?.slice(0, 10) || []) }).catch(() => {})
       }
     }, 30000)
-    return () => { clearInterval(timer); clearInterval(actTimer) }
+    return () => { clearInterval(timer); clearInterval(projTimer); clearInterval(actTimer) }
   }, [user?.role])
 
   const refreshDashboard = async () => {
