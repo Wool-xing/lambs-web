@@ -75,6 +75,11 @@ export async function setupApiMocks(page, overrides = {}) {
   });
 
   // Auth endpoints
+  // R7: login/register fetch the per-account salt first — empty salt keeps
+  // the mock payloads at sha256(password), matching the legacy contract.
+  await page.route('**/api/auth/salt*', async (route) => {
+    await route.fulfill({ json: { success: true, data: { salt: '' } } });
+  });
   await page.route('**/api/auth/me', async (route) => {
     await route.fulfill({ json: { success: true, data: userData } });
   });

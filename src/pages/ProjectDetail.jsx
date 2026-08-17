@@ -56,11 +56,19 @@ export default function ProjectDetail() {
     }
   }
 
+  const projectReqSeq = useRef(0)
+
   const fetchProject = async () => {
+    const seq = ++projectReqSeq.current
     try {
       const res = await api.get(`/projects/${id}`)
+      // Stale-response guard: a slow response for a previously visited
+      // project must not overwrite the current one or fire a wrong redirect
+      // (R12, same pattern as the R3-5 table guard).
+      if (seq !== projectReqSeq.current) return
       if (res.success) { setProject(res.data); window.dispatchEvent(new CustomEvent('lambs-project-name', { detail: res.data.name })) }
     } catch (err) {
+      if (seq !== projectReqSeq.current) return
       toast(err.message, 'error')
       navigate('/dashboard')
     }

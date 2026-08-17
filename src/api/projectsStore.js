@@ -12,6 +12,14 @@ let cache = null
 let inflight = null
 const listeners = new Set()
 
+// Logout / token expiry must drop the cache: a stale list would leak the
+// previous account's projects into the next session (R12 security).
+window.addEventListener('lambs-auth-expired', () => {
+  cache = null
+  inflight = null
+  listeners.forEach((l) => l(null))
+})
+
 export function subscribeProjects(fn) {
   listeners.add(fn)
   if (cache) fn(cache)

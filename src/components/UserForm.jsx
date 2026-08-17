@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { api } from '../api/client'
+import { api, hashPassword, newSaltHex } from '../api/client'
+import { useAuth } from '../context/AuthContext'
 import { useToast } from './Toast'
 import TypeSelect from './TypeSelect'
 
 export default function UserForm({ onDone, userData }) {
+  const { user: currentAdmin } = useAuth()
+  const currentAdminUsername = currentAdmin?.username || ''
   const toast = useToast()
   const avatarRef = useRef(null)
   const isEdit = !!userData
@@ -62,8 +65,13 @@ export default function UserForm({ onDone, userData }) {
       if (isEdit) {
         const payload = { username, name, email, role, project_access: JSON.stringify(pa), status, avatar_url: avatarUrl || null }
         if (showPwdSection && newPassword) {
-          payload.password = newPassword
-          payload.old_password = oldPassword
+          // R7: hash both passwords — new with the target account's salt,
+          // the admin's confirmation with the admin's own salt. Plaintext
+          // never leaves the browser (R12, the edit branch was missed in R7).
+          const targetSalt = (await api.get(`/auth/salt?username=${encodeURIComponent(userData.username || '')}`))?.data?.salt || ''
+          const adminSalt = (await api.get(`/auth/salt?username=${encodeURIComponent(currentAdminUsername || '')}`))?.data?.salt || ''
+          payload.password = await hashPassword(newPassword, targetSalt)
+          payload.old_password = await hashPassword(oldPassword, adminSalt)
         }
         await api.put(`/users/${userData.id}`, payload)
         toast(newPassword ? `${name} 已更新（含密码）` : `${name} 已更新`)
@@ -71,7 +79,13 @@ export default function UserForm({ onDone, userData }) {
         if (newPassword && newPassword.length < 6) { toast('密码至少6位', 'error'); setLoading(false); return }
         if (newPassword && newPassword !== confirmPassword) { toast('两次密码不一致', 'error'); setLoading(false); return }
         const payload = { username, name, email, role, project_access: JSON.stringify(pa), avatar_url: avatarUrl || null }
-        if (newPassword) payload.password = newPassword
+        if (newPassword) {
+          // R7: hash with a locally generated salt — plaintext never leaves
+          // the browser.
+          const salt = newSaltHex()
+          payload.password = await hashPassword(newPassword, salt)
+          payload.salt = salt
+        }
         const res = await api.post('/users', payload)
         toast(newPassword ? '用户已创建' : `用户已创建，初始密码：${res.data.password}`)
       }

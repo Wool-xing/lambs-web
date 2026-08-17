@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { api } from '../api/client'
+import { api, hashPassword, newSaltHex } from '../api/client'
 
 const AuthContext = createContext(null)
 
@@ -36,7 +36,15 @@ export function AuthProvider({ children }) {
   }, [fetchMe])
 
   const login = async (username, password, remember) => {
-    const res = await api.post('/auth/login', { username, password })
+    // R7: fetch the account salt, send sha256(password+salt) — raw password
+    // never leaves the browser.
+    let salt = ''
+    try {
+      const s = await api.get(`/auth/salt?username=${encodeURIComponent(username)}`)
+      salt = s.data?.salt || ''
+    } catch { /* salt lookup failure must not block login (empty-salt fallback) */ }
+    const payload = await hashPassword(password, salt)
+    const res = await api.post('/auth/login', { username, password: payload })
     if (res.success) {
       const store = remember ? localStorage : sessionStorage
       store.setItem('lambs_token', res.data.access_token)
@@ -45,7 +53,11 @@ export function AuthProvider({ children }) {
   }
 
   const register = async (username, email, password) => {
-    const res = await api.post('/auth/register', { username, email, password })
+    // New accounts generate their own salt locally and send it alongside
+    // the hashed payload (R7).
+    const salt = newSaltHex()
+    const payload = await hashPassword(password, salt)
+    const res = await api.post('/auth/register', { username, email, password: payload, salt })
     if (res.success) {
       localStorage.setItem('lambs_token', res.data.access_token)
       await fetchMe()

@@ -24,7 +24,7 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
     api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}${ds ? `&ds=${ds}` : ''}`).then(res => {
       if (res.success) setRows(res.data.rows || [])
     }).catch(() => setRows(null))
-  }, [id])
+  }, [id, ds])
 
   useEffect(() => { fetchRows(selectedTable); setEditingStr(false) }, [selectedTable, fetchRows])
 
