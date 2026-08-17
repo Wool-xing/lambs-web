@@ -9,7 +9,7 @@
   --accent-red: #FF5D5D; --accent-red-dim: #3C1414;
   --accent-purple: #B892FF; --accent-purple-dim: #1F1424;
   --accent-blue: #5B9CF5; --accent-blue-dim: #141E3C;
-  --text-primary: #EEF1F5; --text-secondary: #8B93A3; --text-tertiary: #7A8391;
+  --text-primary: #EEF1F5; --text-secondary: #8B93A3; --text-tertiary: #96A0B0; /* darkened from #7A8391: 4.2:1 → ~5.5:1 on panel (R13 a11y AA) */
   --font-display: 'Barlow Condensed', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;

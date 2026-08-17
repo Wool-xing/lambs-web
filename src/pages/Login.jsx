@@ -179,7 +179,7 @@ export default function Login() {
           <label htmlFor="login-pass">密码</label>
           <div className="pwd-wrap">
             <input id="login-pass" type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="请输入密码" autoComplete="current-password" />
-            <span className="pwd-eye" onClick={() => setShowPwd(!showPwd)}><Icon name={showPwd ? 'eyeOff' : 'eye'} size={18} /></span>
+            <button type="button" className="pwd-eye" aria-label={showPwd ? '隐藏密码' : '显示密码'} onClick={() => setShowPwd(!showPwd)}><Icon name={showPwd ? 'eyeOff' : 'eye'} size={18} /></button>
           </div>
         </div>
         <div className="check-row" style={{ marginBottom: 6 }}>
@@ -198,7 +198,7 @@ export default function Login() {
       {/* Forgot Password Modal — Step 1: verify identity */}
       {showForgot && forgotStep === 1 && (
         <div className="modal-overlay open" onClick={closeForgot}>
-          <form className="modal-box" onClick={e => e.stopPropagation()} onSubmit={handleForgotRequest}>
+          <form className="modal-box" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} onSubmit={handleForgotRequest}>
             <div className="modal-title">重置密码</div>
             <div className="modal-desc">输入用户名和注册邮箱，验证码将发送至您的邮箱。</div>
             <div className="field">
@@ -220,7 +220,7 @@ export default function Login() {
       {/* Forgot Password Modal — Step 2: verify code + set password */}
       {showForgot && forgotStep === 2 && (
         <div className="modal-overlay open" onClick={closeForgot}>
-          <form className="modal-box" onClick={e => e.stopPropagation()} onSubmit={handleForgotVerify}>
+          <form className="modal-box" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} onSubmit={handleForgotVerify}>
             <div className="modal-title">重置密码</div>
             <div className="modal-desc">
               验证码已发送至 <strong>{forgotEmail}</strong>，有效期5分钟。
@@ -239,7 +239,7 @@ export default function Login() {
               <label>新密码</label>
               <div className="pwd-wrap">
                 <input type={forgotShowPwd ? 'text' : 'password'} value={forgotNewPwd} onChange={e => setForgotNewPwd(e.target.value)} placeholder="至少6位新密码" />
-                <span className="pwd-eye" onClick={() => setForgotShowPwd(!forgotShowPwd)}><Icon name={forgotShowPwd ? 'eyeOff' : 'eye'} size={18} /></span>
+                <button type="button" className="pwd-eye" aria-label={forgotShowPwd ? '隐藏密码' : '显示密码'} onClick={() => setForgotShowPwd(!forgotShowPwd)}><Icon name={forgotShowPwd ? 'eyeOff' : 'eye'} size={18} /></button>
               </div>
             </div>
             <div className="field">
@@ -257,7 +257,7 @@ export default function Login() {
       {/* Register Modal */}
       {showRegister && (
         <div className="modal-overlay open" onClick={() => setShowRegister(false)}>
-          <form className="modal-box" onClick={e => e.stopPropagation()} onSubmit={handleRegister}>
+          <form className="modal-box" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} onSubmit={handleRegister}>
             <div className="modal-title">注册新账号</div>
             <div className="modal-desc">注册后默认拥有查看者权限，管理员可调整角色。</div>
             <div className="field">
@@ -272,7 +272,7 @@ export default function Login() {
               <label>密码</label>
               <div className="pwd-wrap">
                 <input type={regShowPwd ? 'text' : 'password'} value={regPassword} onChange={e => setRegPassword(e.target.value)} placeholder="至少6位密码" />
-                <span className="pwd-eye" onClick={() => setRegShowPwd(!regShowPwd)}><Icon name={regShowPwd ? 'eyeOff' : 'eye'} size={18} /></span>
+                <button type="button" className="pwd-eye" aria-label={regShowPwd ? '隐藏密码' : '显示密码'} onClick={() => setRegShowPwd(!regShowPwd)}><Icon name={regShowPwd ? 'eyeOff' : 'eye'} size={18} /></button>
               </div>
             </div>
             <div className="modal-actions">

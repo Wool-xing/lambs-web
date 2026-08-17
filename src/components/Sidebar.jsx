@@ -102,13 +102,17 @@ export default function Sidebar() {
         ))}
         {hidden.length > 0 && (
           <div className="nav-item" style={{ fontSize: '10.5px', color: 'var(--text-tertiary)' }}
-            onClick={() => setExpanded(true)}>
+            onClick={() => setExpanded(true)}
+            role="button" tabIndex={0}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(true) } }}>
             展开全部 ({hidden.length}个)
           </div>
         )}
         {expanded && projects.length > MAX_VISIBLE && (
           <div className="nav-item" style={{ fontSize: '10.5px', color: 'var(--text-tertiary)' }}
-            onClick={() => setExpanded(false)}>
+            onClick={() => setExpanded(false)}
+            role="button" tabIndex={0}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(false) } }}>
             收起
           </div>
         )}
