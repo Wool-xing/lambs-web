@@ -46,6 +46,8 @@ body{
 .slide-up{animation:slideUp .25s ease}
 @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){*,::before,::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{transition:opacity .3s ease}
+html.theme-switching body{opacity:.35}
 
 /* ===== LOGIN ===== */
 .login-overlay{

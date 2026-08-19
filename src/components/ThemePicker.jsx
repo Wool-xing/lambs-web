@@ -18,6 +18,18 @@ const PALETTES = {
     '--accent-cyan': '#3FB950', '--accent-cyan-dim': '#0D2814',
     '--glass-bg': '10,12,10',
   },
+  light: {
+    '--bg-deep': '#E6EAF0', '--bg-page': '#EEF2F7', '--bg-panel': '#FFFFFF', '--bg-panel-raised': '#F3F6FA',
+    '--bg-input': '#FFFFFF', '--border': '#D9E0EA', '--border-strong': '#B4BFCE',
+    '--text-primary': '#17202E', '--text-secondary': '#4D5B70', '--text-tertiary': '#71809A',
+    '--accent-cyan': '#0FA3A3', '--accent-cyan-dim': '#D9F0EF',
+    '--accent-amber': '#C77700', '--accent-amber-dim': '#FCEED7',
+    '--accent-green': '#1F9D63', '--accent-green-dim': '#DCF2E7',
+    '--accent-red': '#D64545', '--accent-red-dim': '#FADDDD',
+    '--accent-purple': '#7C5CE0', '--accent-purple-dim': '#E9E3FA',
+    '--accent-blue': '#3B7DD8', '--accent-blue-dim': '#DBE8F9',
+    '--glass-bg': '255,255,255',
+  },
 }
 
 const THEMES = {
@@ -76,6 +88,19 @@ const THEMES = {
     glassAlpha:0.72, blur:20, accentHue:-15,
     accent:'#FF8FAB', accentBg:'rgba(255,143,171,.10)', accentBorder:'rgba(255,143,171,.18)', accentGlow:'rgba(255,143,171,.18)'
   },
+  'moonlight': {
+    label:'月光银', desc:'冷银中性 · 无彩灰调',
+    gradients:'radial-gradient(ellipse at 20% 15%,rgba(185,198,216,.20),transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(140,160,185,.16),transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(200,210,225,.10),transparent 60%)',
+    glassAlpha:0.72, blur:18, accentHue:0,
+    accent:'#B9C6D8', accentBg:'rgba(185,198,216,.12)', accentBorder:'rgba(185,198,216,.22)', accentGlow:'rgba(185,198,216,.16)'
+  },
+  'dawn-light': {
+    label:'晨曦白', desc:'全站唯一浅色 · 清爽晨光',
+    palette:'light',
+    gradients:'radial-gradient(ellipse at 15% 10%,rgba(15,163,163,.14),transparent 55%),radial-gradient(ellipse at 85% 90%,rgba(120,140,255,.12),transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(255,190,120,.10),transparent 60%)',
+    glassAlpha:0.85, blur:18, accentHue:0,
+    accent:'#0FA3A3', accentBg:'rgba(15,163,163,.10)', accentBorder:'rgba(15,163,163,.20)', accentGlow:'rgba(15,163,163,.14)'
+  },
   'royal-gold': {
     label:'鎏金', desc:'奢华质感 · 金辉流转',
     gradients:'radial-gradient(ellipse at 20% 10%,rgba(229,181,103,.24),transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(190,140,60,.18),transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(240,200,120,.12),transparent 58%),radial-gradient(ellipse at 40% 90%,rgba(170,120,50,.10),transparent 45%)',
@@ -114,6 +139,9 @@ export function applyTheme(name) {
   // stayed fixed cyan (R21: accent field was cookie-only dead code).
   document.documentElement.style.setProperty('--accent-cyan', acc.accent)
   document.documentElement.style.setProperty('--accent-cyan-dim', acc.accentBg)
+  // 主题切换 cross-fade：内容层短暂淡出再回，背景渐变交接更顺 (R22)
+  document.documentElement.classList.add('theme-switching')
+  setTimeout(() => document.documentElement.classList.remove('theme-switching'), 300)
   document.cookie = 'lambs_theme_accent=' + encodeURIComponent(JSON.stringify(acc)) + ';path=/;max-age=31536000;SameSite=Lax'
   document.cookie = 'lambs_theme_glass=' + encodeURIComponent(JSON.stringify({alpha:t.glassAlpha,blur:t.blur})) + ';path=/;max-age=31536000;SameSite=Lax'
 }
