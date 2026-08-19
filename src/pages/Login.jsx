@@ -202,12 +202,12 @@ export default function Login() {
             <div className="modal-title">重置密码</div>
             <div className="modal-desc">输入用户名和注册邮箱，验证码将发送至您的邮箱。</div>
             <div className="field">
-              <label>用户名</label>
-              <input value={forgotUser} onChange={e => setForgotUser(e.target.value)} placeholder="请输入用户名" autoFocus />
+              <label htmlFor="forgot-username">用户名</label>
+              <input id="forgot-username" value={forgotUser} onChange={e => setForgotUser(e.target.value)} placeholder="请输入用户名" autoFocus />
             </div>
             <div className="field">
-              <label>注册邮箱</label>
-              <input type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="请输入注册时使用的邮箱" />
+              <label htmlFor="forgot-email">注册邮箱</label>
+              <input id="forgot-email" type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="请输入注册时使用的邮箱" />
             </div>
             <div className="modal-actions">
               <button type="button" className="btn btn-ghost" onClick={closeForgot}>取消</button>

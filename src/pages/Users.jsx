@@ -176,7 +176,7 @@ export default function Users() {
       <div className="modal-overlay open" onClick={() => setResetTarget(null)}>
         <form className="modal-box" style={{maxWidth:380}} onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); doResetPwd() }}>
           <div className="modal-title">重置密码 · {resetTarget.name}</div>
-          <div className="field"><label>新密码</label><input type="password" value={resetNewPwd} onChange={e=>setResetNewPwd(e.target.value)} placeholder="至少6位" autoFocus /></div>
+          <div className="field"><label htmlFor="reset-new-pwd">新密码</label><input id="reset-new-pwd" type="password" value={resetNewPwd} onChange={e=>setResetNewPwd(e.target.value)} placeholder="至少6位" autoFocus /></div>
           <div className="modal-actions">
             <button type="button" className="btn btn-ghost btn-sm" onClick={()=>setResetTarget(null)}>取消</button>
             <button className="btn btn-primary btn-sm">确认重置</button>

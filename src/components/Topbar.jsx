@@ -89,7 +89,7 @@ export default function Topbar() {
     <header className="topbar">
       <div className="topbar-left">
         <button className="mobile-toggle" onClick={toggleSidebar} aria-label="菜单"><Icon name="menu" size={16} /></button>
-        <div className="topbar-title">{info.title}</div>
+        <h1 className="topbar-title">{info.title}</h1>
         <div className="topbar-bc">
           <span role="button" tabIndex={0} aria-label="返回仪表盘"
             onClick={() => navigate('/dashboard')}
