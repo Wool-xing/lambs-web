@@ -22,6 +22,6 @@ test('断网期间 UI 仍可交互（无白屏崩溃）', async ({ page, context
   await expect(page.getByText('网络连接已断开')).toBeVisible();
 
   // Core chrome still renders and responds.
-  await expect(page.getByText('所有项目')).toBeVisible();
+  await expect(page.getByText('所有项目').first()).toBeVisible();
   await page.getByPlaceholder('搜索项目').first().fill('QA');
 });
