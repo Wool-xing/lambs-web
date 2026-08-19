@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom'
 // The panel is portaled to document.body: ancestor stacking contexts
 // (glass cards with backdrop-filter) would otherwise trap it behind later
 // siblings no matter how high its z-index is.
-const OPTIONS = ['直连 PostgreSQL', '直连 SQLite', 'REST API', 'MySQL', 'MongoDB（文档型）', 'Redis（KV型）', '向量数据库（Qdrant）']
+const OPTIONS = ['直连 PostgreSQL', '直连 SQLite', 'REST API', 'MySQL', 'SQL Server', 'MongoDB（文档型）', 'Redis（KV型）', '向量数据库（Qdrant）']
 
 const triggerStyle = {
   width: '100%', height: 37, padding: '0 10px',
