@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '../api/client'
 import { useToast } from './Toast'
+import { useConfirm } from './Modal'
 
 const STATUS_COLOR = { success: 'var(--accent-green)', failed: 'var(--accent-red)', timeout: 'var(--accent-amber)' }
 const STATUS_LABEL = { success: '成功', failed: '失败', timeout: '超时' }
 
 export default function TaskPanel({ projectId, superAdmin }) {
   const toast = useToast()
+  const confirm = useConfirm()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState(null) // null | {id?, name, cron, command, host, enabled}
@@ -51,6 +53,8 @@ export default function TaskPanel({ projectId, superAdmin }) {
   }
 
   const remove = async (t) => {
+    const ok = await confirm('删除任务', `确定删除「${t.name}」吗？此操作不可撤销。`)
+    if (!ok) return
     try { await api.delete(`/tasks/${t.id}`); fetchTasks() }
     catch (err) { toast(err.message || '删除失败', 'error') }
   }

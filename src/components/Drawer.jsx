@@ -32,6 +32,12 @@ export function DrawerProvider({ children }) {
     setState({ open: false, title: '', content: null, width: 0 })
   }, [])
 
+  // Esc 全局关闭桥：App 层 Esc 走这里，状态与 class/inert 保持同步 (R19)
+  useEffect(() => {
+    window._lambs_close_drawer = closeDrawer
+    return () => { delete window._lambs_close_drawer }
+  }, [closeDrawer])
+
   return (
     <DrawerContext.Provider value={{ openDrawer, closeDrawer }}>
       {children}

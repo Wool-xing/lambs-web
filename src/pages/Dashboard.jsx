@@ -33,9 +33,10 @@ export default function Dashboard() {
   const [tagFilter, setTagFilter] = useState('')
   const [sortBy, setSortBy] = useState('order')
   const [sysHealth, setSysHealth] = useState({ hostname: '', cpu_percent: 0, memory_used_mb: 0, memory_total_mb: 0, disk_used_gb: 0, disk_total_gb: 0, uptime_seconds: 0, nodes: [] })
-  // 本机 (app1) 并入节点磁贴流 — 与远程节点同构渲染
+  // 本机 (app1) 并入节点磁贴流 — 与远程节点同构渲染。
+  // online 由健康数据是否取到驱动：API 宕机时不得谎报在线 (R18)。
   const nodesAll = [
-    { name: sysHealth.hostname || '本机', online: true, cpu_percent: sysHealth.cpu_percent, memory_used_mb: sysHealth.memory_used_mb, memory_total_mb: sysHealth.memory_total_mb, disk_used_gb: sysHealth.disk_used_gb, disk_total_gb: sysHealth.disk_total_gb },
+    { name: sysHealth.hostname || '本机', online: !!sysHealth.hostname, cpu_percent: sysHealth.cpu_percent, memory_used_mb: sysHealth.memory_used_mb, memory_total_mb: sysHealth.memory_total_mb, disk_used_gb: sysHealth.disk_used_gb, disk_total_gb: sysHealth.disk_total_gb },
     ...(sysHealth.nodes || []),
   ]
   const [batchMode, setBatchMode] = useState(false)
@@ -44,6 +45,7 @@ export default function Dashboard() {
   const [lastRefresh, setLastRefresh] = useState('')
   const [refreshing, setRefreshing] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [activityLogs, setActivityLogs] = useState([])
   const [showActivity, setShowActivity] = useState(false)
   const debouncedSearch = useDebounce(search)
@@ -87,7 +89,8 @@ export default function Dashboard() {
       if (s.success) setStats(s.data)
       const now = new Date()
       setLastRefresh(now.toLocaleTimeString('zh-CN', { hour12: false }))
-    } catch { /* ignore */ }
+      setLoadError(false)
+    } catch { setLoadError(true) }
     finally { setLoading(false) }
   }, [debouncedSearch, filter, sortBy])
 
@@ -385,7 +388,14 @@ export default function Dashboard() {
         })()}
 
         {/* Grid */}
-        {(tagFilter ? projects.filter(p => (ensureArray(p.tags)).includes(tagFilter)) : projects).length === 0 ? (
+        {loadError ? (
+          <div className="empty-state">
+            <div style={{opacity:.3}}><Icon name="package" size={40} /></div>
+            <div className="t">项目加载失败</div>
+            <div style={{fontSize:11,color:'var(--text-tertiary)',marginTop:4}}>网络异常或服务不可用</div>
+            <button className="btn btn-ghost btn-sm" style={{ marginTop: 10 }} onClick={() => fetchProjects()}>重试</button>
+          </div>
+        ) : (tagFilter ? projects.filter(p => (ensureArray(p.tags)).includes(tagFilter)) : projects).length === 0 ? (
           <div className="empty-state">
             <div style={{opacity:.3}}><Icon name="package" size={40} /></div>
             <div className="t">未找到匹配的项目</div>
@@ -471,7 +481,7 @@ export default function Dashboard() {
             <div style={{ position: 'absolute', left: 4, top: 8, bottom: 8, width: 2, background: 'var(--border)', borderRadius: 1 }} />
             {activityLogs.map((l, i) => {
               const badge = {
-                '登录': ['var(--accent-cyan)', 'rgba(0,199,190,.12)'],
+                '登录': ['var(--accent-cyan)', 'var(--accent-cyan-dim)'],
                 '注册': ['var(--accent-green)', 'rgba(56,210,148,.12)'],
                 '删除数据': ['var(--accent-red)', 'rgba(255,107,107,.12)'],
                 '删除项目': ['var(--accent-red)', 'rgba(255,107,107,.12)'],
@@ -479,7 +489,7 @@ export default function Dashboard() {
                 '重置密码': ['var(--accent-amber)', 'rgba(255,161,59,.12)'],
                 '切换状态': ['var(--accent-amber)', 'rgba(255,161,59,.12)'],
                 '新增数据': ['var(--accent-green)', 'rgba(56,210,148,.12)'],
-                '修改数据': ['var(--accent-cyan)', 'rgba(0,199,190,.12)'],
+                '修改数据': ['var(--accent-cyan)', 'var(--accent-cyan-dim)'],
               }[l.action] || ['var(--text-secondary)', 'var(--bg-panel-raised)']
               const isProjectAction = ['删除项目', '切换状态', '编辑项目', '新增数据', '修改数据', '删除数据'].includes(l.action)
               const jumpTarget = isProjectAction ? `/project/${l.target}` : `/users?search=${encodeURIComponent(l.target)}`

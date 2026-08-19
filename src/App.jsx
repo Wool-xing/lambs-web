@@ -66,10 +66,8 @@ function AppInner() {
         const dd = document.querySelector('.dropdown')
         const hasDropdown = dd && dd.style.opacity !== '0'
         if (showHelp || hasDrawer || hasConfirm || hasDropdown) {
-          if (hasDrawer) {
-            document.body.classList.remove('drawer-open')
-            document.querySelector('.sidebar')?.removeAttribute('inert')
-            document.querySelector('.main')?.removeAttribute('inert')
+          if (hasDrawer && typeof window._lambs_close_drawer === 'function') {
+            window._lambs_close_drawer() // DrawerProvider 同步 state + class/inert
           }
           setShowHelp(false)
           if (hasConfirm) window._lambs_confirm_close()

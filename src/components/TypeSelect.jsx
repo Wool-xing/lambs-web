@@ -79,7 +79,7 @@ export default function TypeSelect({ value, onChange, style, options = OPTIONS }
           style={{
             display: 'block', width: '100%', textAlign: 'left', padding: '7px 10px', fontSize: 12.5,
             borderRadius: 6, border: 'none', cursor: 'pointer',
-            background: o.value === value ? 'rgba(0,199,190,.12)' : 'transparent',
+            background: o.value === value ? 'var(--accent-cyan-dim)' : 'transparent',
             color: o.value === value ? 'var(--accent-cyan)' : 'var(--text-primary)',
           }}
         >
