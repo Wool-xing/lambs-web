@@ -71,6 +71,7 @@ export default function Dashboard() {
   const [batchMode, setBatchMode] = useState(false)
   const [selected, setSelected] = useState(new Set())
   const [menu, setMenu] = useState(null)
+  const [removingId, setRemovingId] = useState(null)
   const [lastRefresh, setLastRefresh] = useState('')
   const [refreshing, setRefreshing] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -184,10 +185,13 @@ export default function Dashboard() {
     const ok = await confirm('删除项目', `确定删除「${name}」吗？所有数据将被移除。`)
     if (!ok) return
     try {
+      // 乐观移除：先淡出卡片（120ms），再请求+刷新 (R22)
+      setRemovingId(id)
+      await new Promise(r => setTimeout(r, 120))
       await api.delete(`/projects/${id}`)
       toast(`项目「${name}」已删除`)
       afterMutate()
-    } catch (err) { toast(err.message, 'error') }
+    } catch (err) { setRemovingId(null); toast(err.message, 'error') }
   }
 
   const handleToggleStatus = async (id) => {
@@ -445,7 +449,7 @@ export default function Dashboard() {
           <div className="project-grid">
             {projects.filter(p => !tagFilter || (ensureArray(p.tags)).includes(tagFilter)).map(p => (
               <div key={p.id}
-                className={`project-card ${p.status === 'offline' ? 'disabled' : ''}`}
+                className={`project-card ${p.status === 'offline' ? 'disabled' : ''}${removingId === p.id ? ' leaving' : ''}`}
                 onClick={() => batchMode ? toggleSelect(p.id) : navigate(`/project/${p.id}`)}
                 draggable={!batchMode}
                 onDragStart={e => handleDragStart(e, p.id)}
@@ -517,7 +521,8 @@ export default function Dashboard() {
             <div className="card-title" style={{ marginBottom: 0 }}>最近动态 <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 400 }}>({activityLogs.length}条)</span></div>
             <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>{showActivity ? '收起' : '展开'}</span>
           </div>
-          {showActivity && (<div style={{ position: 'relative', maxHeight: 240, overflow: 'auto', fontSize: 11.5, lineHeight: 1.6, paddingLeft: 18 }}>
+          <div style={{ display: 'grid', gridTemplateRows: showActivity ? '1fr' : '0fr', transition: 'grid-template-rows var(--dur-med) ease', overflow: 'hidden' }}>
+          <div style={{ position: 'relative', maxHeight: 240, overflow: 'auto', fontSize: 11.5, lineHeight: 1.6, paddingLeft: 18, minHeight: 0 }}>
             <div style={{ position: 'absolute', left: 4, top: 8, bottom: 8, width: 2, background: 'var(--border)', borderRadius: 1 }} />
             {activityLogs.map((l, i) => {
               const badge = {
@@ -558,7 +563,7 @@ export default function Dashboard() {
               <button className="btn btn-ghost btn-xs" onClick={() => navigate('/settings')}>查看全部 →</button>
             </div>
           </div>
-            )}
+          </div>
         </div>
       )}
 

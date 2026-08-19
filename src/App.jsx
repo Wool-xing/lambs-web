@@ -129,7 +129,7 @@ function AppInner() {
         )}
         <div className="content">
           <div className="screen active" style={{flex:1}}>
-          <Suspense fallback={<div className="empty-state"><div className="t">加载中…</div></div>}>
+          <Suspense fallback={<div className="page-skeleton"><div className="sk" style={{height:105}} /><div className="sk" style={{height:200}} /></div>}>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
