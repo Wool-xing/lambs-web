@@ -7,7 +7,7 @@ const PALETTES = {
   dark: {
     '--bg-deep': '#0B0E13', '--bg-page': '#0E1116', '--bg-panel': '#161B22', '--bg-panel-raised': '#1D232C',
     '--bg-input': '#12161C', '--border': '#262D38', '--border-strong': '#38414F',
-    '--text-primary': '#EEF1F5', '--text-secondary': '#8B93A3', '--text-tertiary': '#7A8391',
+    '--text-primary': '#EEF1F5', '--text-secondary': '#8B93A3', '--text-tertiary': '#96A0B0',
     '--accent-cyan': '#00C7BE', '--accent-cyan-dim': '#0B3B39',
     '--glass-bg': '22,27,34',
   },

@@ -18,6 +18,7 @@ export default function Settings() {
   const [initialConfig, setInitialConfig] = useState(null)
   const dirty = initialConfig != null && JSON.stringify(config) !== JSON.stringify(initialConfig)
   const [configLoading, setConfigLoading] = useState(false)
+  const [configLoadFailed, setConfigLoadFailed] = useState(false)
   const [showJwt, setShowJwt] = useState(false)
   const [showSmtpPassword, setShowSmtpPassword] = useState(false)
   const [projects, setProjects] = useState([])
@@ -40,9 +41,19 @@ export default function Settings() {
   useEffect(() => {
     api.get('/settings/audit-logs').then(r => { if (r.success) setAuditLogs(r.data.logs) }).catch(() => {})
     api.get('/settings/datasources').then(r => { if (r.success) setDatasources(r.data.datasources) }).catch(() => {})
-    api.get('/settings/config').then(r => { if (r.success) { setConfig(r.data); setInitialConfig(r.data) } }).catch(() => {})
+    loadConfig()
     api.get('/projects?sort_by=order').then(r => { if (r.success) setProjects(r.data.projects || []) }).catch(() => {})
   }, [])
+
+  // 配置加载失败必须显式降级：静默成功会让表单以默认值显示，
+  // 保存 = 用空 jwt_secret 覆写真实配置 (R17)。
+  const loadConfig = () => {
+    setConfigLoadFailed(false)
+    api.get('/settings/config').then(r => {
+      if (r.success) { setConfig(r.data); setInitialConfig(r.data) }
+      else setConfigLoadFailed(true)
+    }).catch(() => setConfigLoadFailed(true))
+  }
 
   const syncBrandLogo = (dataUrl) => {
     if (window.setLambsFavicon) window.setLambsFavicon(dataUrl)
@@ -268,8 +279,14 @@ export default function Settings() {
 
       {/* Unified save bar — one button for the whole page, at the bottom */}
       <div className="settings-save-bar">
-        {dirty && <span style={{ fontSize: 11, color: 'var(--accent-amber)' }}>有未保存的更改</span>}
-        <button className="btn btn-primary btn-sm" onClick={handleSaveConfig} disabled={configLoading}>
+        {configLoadFailed && (
+          <span style={{ fontSize: 11, color: 'var(--accent-red)' }}>
+            配置加载失败 — 保存已禁用，避免用空值覆写真实配置
+            <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8 }} onClick={loadConfig}>重试</button>
+          </span>
+        )}
+        {!configLoadFailed && dirty && <span style={{ fontSize: 11, color: 'var(--accent-amber)' }}>有未保存的更改</span>}
+        <button className="btn btn-primary btn-sm" onClick={handleSaveConfig} disabled={configLoading || configLoadFailed}>
           {configLoading ? '保存中…' : '保存配置'}
         </button>
       </div>

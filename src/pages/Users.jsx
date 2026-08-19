@@ -107,7 +107,7 @@ export default function Users() {
 
       <div style={{ display: 'flex', gap: 20 }}>
         {/* Role nav desktop */}
-        <div className="role-nav-desktop" style={{ width: 160, flexShrink: 0, borderRight: '1px solid var(--border)', paddingRight: 16 }}>
+        <div className="role-nav" style={{ width: 160, flexShrink: 0, borderRight: '1px solid var(--border)', paddingRight: 16 }}>
           {[{ key: 'all', label: '全部', color: 'transparent' },
             { key: 'super_admin', label: '超级管理员', color: 'var(--accent-purple)' },
             { key: 'project_admin', label: '项目管理员', color: 'var(--accent-cyan)' },

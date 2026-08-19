@@ -32,6 +32,7 @@ export default function Topbar() {
   const navigate = useNavigate()
   const { logout } = useAuth()
   const [unread, setUnread] = useState(0)
+  const [sysOk, setSysOk] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [projectName, setProjectName] = useState('')
 
@@ -57,12 +58,23 @@ export default function Topbar() {
     }).catch(() => {})
   }
 
+  // 健康点由 /system/health 驱动 — API 宕机时必须变灰，
+  // 写死的绿灯会在后端挂了时继续"系统正常" (R18)。
+  const fetchHealth = () => {
+    api.get('/system/health').then(res => {
+      setSysOk(!!(res && res.success))
+    }).catch(() => setSysOk(false))
+  }
+
   useEffect(() => {
     fetchUnread()
+    fetchHealth()
     const t = setInterval(fetchUnread, 30000)
+    const h = setInterval(fetchHealth, 30000)
     window.addEventListener('lambs-notifs-changed', fetchUnread)
     return () => {
       clearInterval(t)
+      clearInterval(h)
       window.removeEventListener('lambs-notifs-changed', fetchUnread)
     }
   }, [location.pathname])
@@ -89,8 +101,8 @@ export default function Topbar() {
         </button>
         <div className="topbar-clock">{time}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span className="ps-dot green" />
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>系统正常</span>
+          <span className={`ps-dot ${sysOk ? 'green' : 'gray'}`} />
+          <span style={{ fontSize: 11, color: sysOk ? 'var(--text-tertiary)' : 'var(--accent-red)' }}>{sysOk ? '系统正常' : '系统失联'}</span>
         </div>
         <button className="topbar-btn" title="退出登录" onClick={() => logout()} style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
           <Icon name="logout" size={14} />

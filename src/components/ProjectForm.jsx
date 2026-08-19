@@ -209,7 +209,7 @@ export default function ProjectForm({ onDone, project }) {
               <span style={{
                 fontSize: 10, padding: '0 8px', borderRadius: 4, whiteSpace: 'nowrap', flexShrink: 0,
                 height: 37, minWidth: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                background: i === 0 ? 'rgba(0,199,190,.12)' : 'var(--bg-panel-raised)',
+                background: i === 0 ? 'var(--accent-cyan-dim)' : 'var(--bg-panel-raised)',
                 color: i === 0 ? 'var(--accent-cyan)' : 'var(--text-tertiary)',
               }}>
                 {i === 0 ? '主源' : '副源'}
