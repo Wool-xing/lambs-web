@@ -33,6 +33,11 @@ export default function Dashboard() {
   const [tagFilter, setTagFilter] = useState('')
   const [sortBy, setSortBy] = useState('order')
   const [sysHealth, setSysHealth] = useState({ hostname: '', cpu_percent: 0, memory_used_mb: 0, memory_total_mb: 0, disk_used_gb: 0, disk_total_gb: 0, uptime_seconds: 0, nodes: [] })
+  // 本机 (app1) 并入节点磁贴流 — 与远程节点同构渲染
+  const nodesAll = [
+    { name: sysHealth.hostname || '本机', online: true, cpu_percent: sysHealth.cpu_percent, memory_used_mb: sysHealth.memory_used_mb, memory_total_mb: sysHealth.memory_total_mb, disk_used_gb: sysHealth.disk_used_gb, disk_total_gb: sysHealth.disk_total_gb },
+    ...(sysHealth.nodes || []),
+  ]
   const [batchMode, setBatchMode] = useState(false)
   const [selected, setSelected] = useState(new Set())
   const [menu, setMenu] = useState(null)
@@ -284,19 +289,39 @@ export default function Dashboard() {
           <div className="v">{stats.online}</div>
           <div className="sub">{stats.online > 0 ? `${stats.online} 个数据源在线 · ${stats.offline} 个离线` : '暂无在线数据源'}</div>
         </div>
-        <div className="stat-card">
-          <div className="k">系统监控</div>
-          <div className="v">{sysHealth.cpu_percent}%</div>
-          <div className="sub">
-            {sysHealth.hostname || '本机'} · 内存 {sysHealth.memory_used_mb}/{sysHealth.memory_total_mb}MB · 磁盘 {sysHealth.disk_used_gb}/{sysHealth.disk_total_gb}GB
+        <div className="stat-card" style={{ gridColumn: '1/-1' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
+            <span className="k">系统监控</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-tertiary)' }}>
+              {nodesAll.filter(n => n.online).length} 在线 · {nodesAll.filter(n => !n.online).length} 失联
+            </span>
           </div>
-          {(sysHealth.nodes || []).map(n => (
-            <div className="sub" key={n.name} style={n.online ? undefined : { color: 'var(--accent-red)' }}>
-              {n.online
-                ? `${n.name} · CPU ${n.cpu_percent}% · 内存 ${n.memory_used_mb}/${n.memory_total_mb}MB · 磁盘 ${n.disk_used_gb}/${n.disk_total_gb}GB`
-                : `${n.name} · 失联`}
-            </div>
-          ))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 10 }}>
+            {nodesAll.map(n => (
+              <div key={n.name} style={{
+                background: 'rgba(var(--glass-bg),.48)',
+                border: `1px solid ${n.online ? 'rgba(255,255,255,.04)' : 'var(--accent-red)'}`,
+                borderRadius: 9, padding: '10px 12px', opacity: n.online ? 1 : .45,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                  <span className={`ps-dot ${n.online ? 'green' : 'gray'}`} />
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600 }}>{n.name}</span>
+                  {!n.online && <span style={{ marginLeft: 'auto', fontSize: 9.5, padding: '1px 7px', borderRadius: 4, background: 'var(--accent-red-dim)', color: 'var(--accent-red)' }}>失联</span>}
+                </div>
+                {n.online && [
+                  ['CPU', n.cpu_percent, `${n.cpu_percent}%`],
+                  ['内存', n.memory_total_mb > 0 ? n.memory_used_mb / n.memory_total_mb * 100 : 0, `${n.memory_used_mb}/${n.memory_total_mb}MB`],
+                  ['磁盘', n.disk_total_gb > 0 ? n.disk_used_gb / n.disk_total_gb * 100 : 0, `${n.disk_used_gb}/${n.disk_total_gb}GB`],
+                ].map(([lab, pct, val]) => (
+                  <div key={lab} style={{ display: 'grid', gridTemplateColumns: '32px 1fr 82px', gap: 8, alignItems: 'center', fontSize: 10, marginTop: 5 }}>
+                    <span style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{lab}</span>
+                    <div className="bar"><span style={{ width: `${pct}%`, ...(pct > 80 ? { background: 'var(--accent-amber)' } : {}) }} /></div>
+                    <span style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>{val}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
