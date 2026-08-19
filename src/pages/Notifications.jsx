@@ -11,6 +11,7 @@ export default function Notifications() {
   const [notifs, setNotifs] = useState([])
   const [unread, setUnread] = useState(0)
   const [loadError, setLoadError] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [typeFilter, setTypeFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -27,6 +28,7 @@ export default function Notifications() {
         setLoadError(false)
       } else setLoadError(true)
     } catch { setLoadError(true) }
+    finally { setLoading(false) }
   }, [typeFilter])
 
   useEffect(() => { setPage(1); fetchNotifs(1) }, [fetchNotifs])
@@ -83,7 +85,11 @@ export default function Notifications() {
         ))}
       </div>
 
-      {loadError ? (
+      {loading ? (
+        <div className="page-skeleton">
+          {[0, 1, 2].map(i => <div key={i} className="sk" style={{ height: 72 }} />)}
+        </div>
+      ) : loadError ? (
         <div className="empty-state">
           <div className="t">通知加载失败</div>
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>网络异常或服务不可用</div>

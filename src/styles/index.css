@@ -151,6 +151,10 @@ body{
 }
 @keyframes badge-in{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes panel-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+/* Skeleton — 通用骨架条 (R22: 页面/列表加载态) */
+.page-skeleton{display:flex;flex-direction:column;gap:12px;padding:20px}
+.sk{background:var(--bg-panel-raised);border-radius:8px;animation:sk-pulse 1.4s ease-in-out infinite}
+@keyframes sk-pulse{0%,100%{opacity:.55}50%{opacity:.95}}
 .topbar-btn .badge:empty{display:none}
 .topbar-clock{font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)}
 
@@ -230,6 +234,7 @@ body{
 }
 .project-card:hover{border-color:rgba(255,255,255,.12);box-shadow:0 4px 20px rgba(0,0,0,.3);background:rgba(var(--glass-bg),.72);transition:border-color var(--dur-fast) ease,box-shadow var(--dur-fast) ease,background var(--dur-fast) ease}
 .project-card.disabled{opacity:.5;transition:opacity var(--dur-med) ease}
+.project-card.leaving{opacity:0;transform:scale(.98);pointer-events:none}
 .project-card.dragging{opacity:.4;transform:scale(.95)}
 .project-card.drag-over{border-color:var(--accent-cyan);box-shadow:0 0 0 2px var(--accent-cyan-dim)}
 .batch-bar{

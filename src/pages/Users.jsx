@@ -85,7 +85,13 @@ export default function Users() {
     return '查看者'
   }
 
-  if (loading) return <div className="empty-state"><div className="t">加载中…</div></div>
+  if (loading) return (
+    <div className="card">
+      <div className="page-skeleton">
+        {[0, 1, 2, 3, 4].map(i => <div key={i} className="sk" style={{ height: 44 }} />)}
+      </div>
+    </div>
+  )
   if (loadError) return (
     <div className="empty-state">
       <div className="t">用户加载失败</div>
