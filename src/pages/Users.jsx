@@ -21,6 +21,7 @@ export default function Users() {
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [resetTarget, setResetTarget] = useState(null)
@@ -46,8 +47,9 @@ export default function Users() {
         else setUsers(res.data.users)
         setCounts(res.data.counts || {})
         setHasMore(res.data.users.length === PAGE_SIZE)
-      }
-    } catch { /* */ }
+        setLoadError(false)
+      } else setLoadError(true)
+    } catch { setLoadError(true) }
     finally { setLoading(false) }
   }, [debouncedSearch, roleFilter])
 
@@ -84,6 +86,13 @@ export default function Users() {
   }
 
   if (loading) return <div className="empty-state"><div className="t">加载中…</div></div>
+  if (loadError) return (
+    <div className="empty-state">
+      <div className="t">用户加载失败</div>
+      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>网络异常或服务不可用</div>
+      <button className="btn btn-ghost btn-sm" style={{ marginTop: 10 }} onClick={() => { setLoading(true); fetchUsers(1) }}>重试</button>
+    </div>
+  )
 
   return (
     <>
