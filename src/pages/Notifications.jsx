@@ -10,6 +10,7 @@ export default function Notifications() {
   const navigate = useNavigate()
   const [notifs, setNotifs] = useState([])
   const [unread, setUnread] = useState(0)
+  const [loadError, setLoadError] = useState(false)
   const [typeFilter, setTypeFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -23,8 +24,9 @@ export default function Notifications() {
         else setNotifs(res.data.notifications)
         setUnread(res.data.unread_count)
         setHasMore(res.data.notifications.length === PAGE_SIZE)
-      }
-    } catch { /* */ }
+        setLoadError(false)
+      } else setLoadError(true)
+    } catch { setLoadError(true) }
   }, [typeFilter])
 
   useEffect(() => { setPage(1); fetchNotifs(1) }, [fetchNotifs])
@@ -81,7 +83,13 @@ export default function Notifications() {
         ))}
       </div>
 
-      {notifs.length === 0 ? (
+      {loadError ? (
+        <div className="empty-state">
+          <div className="t">通知加载失败</div>
+          <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>网络异常或服务不可用</div>
+          <button className="btn btn-ghost btn-sm" style={{ marginTop: 10 }} onClick={() => fetchNotifs(1)}>重试</button>
+        </div>
+      ) : notifs.length === 0 ? (
         <div className="empty-state"><div className="t">暂无通知</div></div>
       ) : (
         <div className="notif-list">

@@ -19,6 +19,7 @@ export default function Settings() {
   const dirty = initialConfig != null && JSON.stringify(config) !== JSON.stringify(initialConfig)
   const [configLoading, setConfigLoading] = useState(false)
   const [configLoadFailed, setConfigLoadFailed] = useState(false)
+  const [listLoadError, setListLoadError] = useState(false)
   const [showJwt, setShowJwt] = useState(false)
   const [showSmtpPassword, setShowSmtpPassword] = useState(false)
   const [projects, setProjects] = useState([])
@@ -39,8 +40,8 @@ export default function Settings() {
   const debouncedLogSearch = useDebounce(logSearch)
 
   useEffect(() => {
-    api.get('/settings/audit-logs').then(r => { if (r.success) setAuditLogs(r.data.logs) }).catch(() => {})
-    api.get('/settings/datasources').then(r => { if (r.success) setDatasources(r.data.datasources) }).catch(() => {})
+    api.get('/settings/audit-logs').then(r => { if (r.success) setAuditLogs(r.data.logs) }).catch(() => setListLoadError(true))
+    api.get('/settings/datasources').then(r => { if (r.success) setDatasources(r.data.datasources) }).catch(() => setListLoadError(true))
     loadConfig()
     api.get('/projects?sort_by=order').then(r => { if (r.success) setProjects(r.data.projects || []) }).catch(() => {})
   }, [])
@@ -132,7 +133,7 @@ export default function Settings() {
               <input type={showJwt ? 'text' : 'password'} value={config.jwt_secret}
                 onChange={e => setConfig({ ...config, jwt_secret: e.target.value })}
                 placeholder="JWT 签名密钥" />
-              <span className="pwd-eye" onClick={() => setShowJwt(!showJwt)}><Icon name={showJwt ? 'eyeOff' : 'eye'} size={18} /></span>
+              <button type="button" className="pwd-eye" aria-pressed={showJwt} aria-label="显示或隐藏密钥" onClick={() => setShowJwt(!showJwt)}><Icon name={showJwt ? 'eyeOff' : 'eye'} size={18} /></button>
             </div>
           </div>
           <div className="field">
@@ -192,7 +193,7 @@ export default function Settings() {
             <label>授权码 / 密码</label>
             <div className="pwd-wrap">
               <input type={showSmtpPassword ? 'text' : 'password'} value={config.smtp_password || ''} onChange={e => setConfig({ ...config, smtp_password: e.target.value })} placeholder="SMTP 授权码（非登录密码）" />
-              <span className="pwd-eye" onClick={() => setShowSmtpPassword(!showSmtpPassword)}><Icon name={showSmtpPassword ? 'eyeOff' : 'eye'} size={18} /></span>
+              <button type="button" className="pwd-eye" aria-pressed={showSmtpPassword} aria-label="显示或隐藏 SMTP 授权码" onClick={() => setShowSmtpPassword(!showSmtpPassword)}><Icon name={showSmtpPassword ? 'eyeOff' : 'eye'} size={18} /></button>
             </div>
           </div>
         </div>
@@ -285,6 +286,7 @@ export default function Settings() {
             <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8 }} onClick={loadConfig}>重试</button>
           </span>
         )}
+        {listLoadError && <span style={{ fontSize: 11, color: 'var(--accent-red)' }}>数据源/审计日志加载失败 — 显示可能不完整 <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8 }} onClick={() => window.location.reload()}>重试</button></span>}
         {!configLoadFailed && dirty && <span style={{ fontSize: 11, color: 'var(--accent-amber)' }}>有未保存的更改</span>}
         <button className="btn btn-primary btn-sm" onClick={handleSaveConfig} disabled={configLoading || configLoadFailed}>
           {configLoading ? '保存中…' : '保存配置'}

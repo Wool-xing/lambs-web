@@ -162,6 +162,13 @@ export default function Dashboard() {
   }
 
   const handleToggleStatus = async (id) => {
+    const p = projects.find(x => x.id === id)
+    if (!p) return
+    // 停用方向确认，与 ProjectDetail 状态切换一致 (R20)
+    if (p.status === 'online') {
+      const ok = await confirm('停用项目', `停用后「${p.name}」将对所有用户不可访问。${p.base_path ? '访问 ' + p.base_path + ' 将显示维护页面。' : ''}`)
+      if (!ok) return
+    }
     try {
       const res = await api.patch(`/projects/${id}/status`)
       const s = res.data.status
