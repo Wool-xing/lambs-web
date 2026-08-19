@@ -10,6 +10,7 @@ export default function UserForm({ onDone, userData }) {
   const toast = useToast()
   const avatarRef = useRef(null)
   const isEdit = !!userData
+  const [fErr, setFErr] = useState({})
   const [username, setUsername] = useState(userData?.username || '')
   const [name, setName] = useState(userData?.name || '')
   const [email, setEmail] = useState(userData?.email || '')
@@ -52,7 +53,10 @@ export default function UserForm({ onDone, userData }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!username || !name || !email) { toast('用户名、姓名和邮箱为必填', 'error'); return }
+    if (!username || !name || !email) {
+      setFErr({ username: !username ? '用户名必填' : '', name: !name ? '姓名必填' : '', email: !email ? '邮箱必填' : '' })
+      return
+    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('邮箱格式不正确', 'error'); return }
     if (showPwdSection && newPassword) {
       if (!oldPassword) { toast('请输入原密码', 'error'); return }
@@ -119,11 +123,11 @@ export default function UserForm({ onDone, userData }) {
       </div>
       <div className="field">
         <label>用户名<span className="req">*</span></label>
-        <input value={username} onChange={e => setUsername(e.target.value)} placeholder="请输入用户名" />
+        <input className={fErr.username ? 'input-error' : ''} value={username} onChange={e => setUsername(e.target.value)} placeholder="请输入用户名" />
       </div>
       <div className="field">
         <label>姓名<span className="req">*</span></label>
-        <input value={name} onChange={e => setName(e.target.value)} placeholder="请输入姓名" />
+        <input className={fErr.name ? 'input-error' : ''} value={name} onChange={e => setName(e.target.value)} placeholder="请输入姓名" />
       </div>
       <div className="field">
         <label>邮箱<span className="req">*</span></label>
