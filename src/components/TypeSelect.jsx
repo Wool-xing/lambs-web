@@ -19,6 +19,7 @@ const panelStyle = {
   position: 'fixed', zIndex: 9999, maxHeight: 320, overflowY: 'auto',
   background: 'var(--bg-panel)', border: '1px solid var(--border-strong)', borderRadius: 10,
   padding: 4, boxShadow: '0 10px 28px rgba(0,0,0,.45)',
+  animation: 'panel-in var(--dur-fast) ease-out',
 }
 
 export default function TypeSelect({ value, onChange, style, options = OPTIONS }) {

@@ -1,5 +1,5 @@
 import TypeSelect from '../components/TypeSelect'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api, resolveAsset } from '../api/client'
@@ -19,6 +19,30 @@ const ensureArray = (v) => {
   return []
 }
 
+// 统计数字滚动：200ms ease-out 数值滚动；reduced-motion 直接置值 (R22)
+function useAnimatedNumber(target) {
+  const [val, setVal] = useState(target)
+  const prevRef = useRef(target)
+  useEffect(() => {
+    const prev = prevRef.current
+    prevRef.current = target
+    if (target === prev) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setVal(target); return }
+    const t0 = performance.now()
+    const dur = 200
+    let raf
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur)
+      const e = 1 - Math.pow(1 - k, 3)
+      setVal(Math.round(prev + (target - prev) * e))
+      if (k < 1) raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [target])
+  return val
+}
+
 export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -35,6 +59,11 @@ export default function Dashboard() {
   const [sysHealth, setSysHealth] = useState({ hostname: '', cpu_percent: 0, memory_used_mb: 0, memory_total_mb: 0, disk_used_gb: 0, disk_total_gb: 0, uptime_seconds: 0, nodes: [] })
   // 本机 (app1) 并入节点磁贴流 — 与远程节点同构渲染。
   // online 由健康数据是否取到驱动：API 宕机时不得谎报在线 (R18)。
+  // 动画 hooks 必须在早退分支之前无条件调用（hooks 数量恒定）
+  const animatedTotalProjects = useAnimatedNumber(stats.total_projects)
+  const animatedTotalUsers = useAnimatedNumber(stats.total_users)
+  const animatedOnline = useAnimatedNumber(stats.online)
+
   const nodesAll = [
     { name: sysHealth.hostname || '本机', online: !!sysHealth.hostname, cpu_percent: sysHealth.cpu_percent, memory_used_mb: sysHealth.memory_used_mb, memory_total_mb: sysHealth.memory_total_mb, disk_used_gb: sysHealth.disk_used_gb, disk_total_gb: sysHealth.disk_total_gb },
     ...(sysHealth.nodes || []),
@@ -286,17 +315,17 @@ export default function Dashboard() {
       <div className="summary-row">
         <div className="stat-card">
           <div className="k">管理项目总数</div>
-          <div className="v">{stats.total_projects}</div>
+          <div className="v">{animatedTotalProjects}</div>
           <div className="sub">在线 {stats.online} · 离线 {stats.offline}</div>
         </div>
         <div className="stat-card">
           <div className="k">累计注册用户</div>
-          <div className="v">{stats.total_users.toLocaleString()}</div>
+          <div className="v">{animatedTotalUsers.toLocaleString()}</div>
           <div className="sub">覆盖所有项目</div>
         </div>
         <div className="stat-card">
           <div className="k">活跃数据源</div>
-          <div className="v">{stats.online}</div>
+          <div className="v">{animatedOnline}</div>
           <div className="sub">{stats.online > 0 ? `${stats.online} 个数据源在线 · ${stats.offline} 个离线` : '暂无在线数据源'}</div>
         </div>
       </div>
@@ -465,7 +494,7 @@ export default function Dashboard() {
 
       {/* Dropdown menu */}
       {menu && (
-        <div className="dropdown" style={{left:menu.x,top:menu.y,opacity:1,pointerEvents:'auto'}} onClick={e=>e.stopPropagation()}>
+        <div className="dropdown open" style={{left:menu.x,top:menu.y}} onClick={e=>e.stopPropagation()}>
           <div className="dd-item" onClick={()=>{setMenu(null);openDrawer(`编辑项目·${menu.project.name}`,<ProjectForm project={menu.project} onDone={(s)=>{closeDrawer();fetchProjects({ dedupe: false });syncLambsBrand(s)}}/>,620)}}>编辑项目</div>
           <div className="dd-item" onClick={()=>{setMenu(null);handleClone(menu.project.id, menu.project.name)}}>克隆项目</div>
           <div className="dd-item" onClick={()=>{setMenu(null);handleToggleStatus(menu.project.id)}}>{menu.project.status === 'online' ? '停用项目' : menu.project.status === 'maintenance' ? '上线项目' : '启用项目'}</div>

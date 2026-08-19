@@ -6,6 +6,7 @@ export const useConfirm = () => useContext(ConfirmContext)
 
 export function ConfirmProvider({ children }) {
   const [state, setState] = useState({ open: false, title: '', desc: '', confirming: false })
+  const [closing, setClosing] = useState(false)
   const [resolver, setResolver] = useState(null)
   const modalRef = useRef(null)
   useFocusTrap(modalRef, state.open)
@@ -18,23 +19,27 @@ export function ConfirmProvider({ children }) {
   }), [])
 
   const close = (result) => {
-    if (state.confirming) return // prevent double click
-    setState({ open: false, title: '', desc: '', confirming: false })
-    if (resolver) { resolver(result); setResolver(null) }
+    if (state.confirming || closing) return // prevent double click
+    // 退场动画：closing 150ms fade 后再卸载+resolve (R22)
+    setClosing(true)
+    setTimeout(() => {
+      setState({ open: false, title: '', desc: '', confirming: false })
+      setClosing(false)
+      if (resolver) { resolver(result); setResolver(null) }
+    }, 150)
   }
 
   const handleConfirm = () => {
     if (state.confirming) return
     setState(prev => ({ ...prev, confirming: true }))
-    if (resolver) { resolver(true); setResolver(null); }
-    setState({ open: false, title: '', desc: '', confirming: false })
+    close(true)
   }
 
   return (
     <ConfirmContext.Provider value={confirm}>
       {children}
       {state.open && (
-        <div className="modal-overlay open" onClick={() => close(false)}>
+        <div className={`modal-overlay open${closing ? ' closing' : ''}`} onClick={() => close(false)}>
           <div className="modal-box" ref={modalRef} role="dialog" aria-modal="true" aria-label={state.title} onClick={e => e.stopPropagation()}>
             <div className="modal-title">{state.title}</div>
             <div className="modal-desc">{state.desc}</div>
