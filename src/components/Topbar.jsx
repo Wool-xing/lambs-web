@@ -102,7 +102,7 @@ export default function Topbar() {
         <div className="topbar-clock">{time}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span className={`ps-dot ${sysOk ? 'green' : 'gray'}`} />
-          <span style={{ fontSize: 11, color: sysOk ? 'var(--text-tertiary)' : 'var(--accent-red)' }}>{sysOk ? '系统正常' : '系统失联'}</span>
+          <span className="topbar-health-text" style={{ fontSize: 11, color: sysOk ? 'var(--text-tertiary)' : 'var(--accent-red)' }}>{sysOk ? '系统正常' : '系统失联'}</span>
         </div>
         <button className="topbar-btn" title="退出登录" onClick={() => logout()} style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
           <Icon name="logout" size={14} />

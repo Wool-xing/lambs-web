@@ -126,7 +126,7 @@ export default function Settings() {
       {/* Global Config */}
       <div className="card">
         <div className="card-title" style={{ marginBottom: 16 }}>全局配置</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))', gap: '14px 20px' }}>
           <div className="field">
             <label>JWT 密钥</label>
             <div className="pwd-wrap">
