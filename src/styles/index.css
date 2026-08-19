@@ -570,3 +570,9 @@ body.sidebar-open .sidebar-brand{padding:0 16px;justify-content:flex-start}
   margin-top: 16px;
   z-index: 5;
 }
+
+/* ── 必填项视觉体系（QA 第 4 轮）────────────────────────── */
+.req{color:var(--accent-red);margin-left:2px}
+.opt{color:var(--text-tertiary);font-weight:400;font-size:11px}
+.field input.input-error,.field select.input-error,.field textarea.input-error{border-color:var(--accent-red);outline:1px solid var(--accent-red)}
+.field-error-msg{color:var(--accent-red);font-size:11px;margin-top:4px;line-height:1.4}

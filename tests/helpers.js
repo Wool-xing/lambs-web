@@ -222,10 +222,12 @@ export async function setupApiMocks(page, overrides = {}) {
  * @param {import('@playwright/test').Page} page
  * @param {string} path - page path without base, e.g. '/dashboard'
  */
-export async function loginAsAdmin(page, path = '/dashboard') {
+export async function loginAsAdmin(page, path = '/dashboard', opts = {}) {
   await setupApiMocks(page);
-  await page.goto('/Lambs/');
+  await page.goto('/Lambs/', { waitUntil: 'domcontentloaded' });
   await page.evaluate((t) => localStorage.setItem('lambs_token', t), MOCK_TOKEN);
-  await page.goto('/Lambs/' + path.replace(/^\//, ''));
-  await page.waitForLoadState('networkidle');
+  await page.goto('/Lambs/' + path.replace(/^\//, ''), { waitUntil: 'domcontentloaded' });
+  // networkidle never settles on throttled connections (polling app) —
+  // throttled specs pass { idle: false }.
+  if (opts.idle !== false) await page.waitForLoadState('networkidle');
 }

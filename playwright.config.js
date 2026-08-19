@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }], ['list']],
   timeout: 15000,
   use: {
-    baseURL: 'http://localhost:2233',
+    baseURL: 'http://127.0.0.1:2233',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -18,10 +18,18 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
   ],
   webServer: {
-    command: 'npx vite --port 2233 --strictPort',
-    url: 'http://localhost:2233/Lambs/',
+    command: 'npx vite --port 2233 --strictPort --host 127.0.0.1',
+    url: 'http://127.0.0.1:2233/Lambs/',
     reuseExistingServer: !process.env.CI,
     timeout: 30000,
   },

@@ -18,6 +18,14 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    # Official playwright image ships all three browsers plus system deps —
+    # runner-level `playwright install --with-deps` hung on apt and bare
+    # installs miss system libraries.
+    container: mcr.microsoft.com/playwright:v1.62.0-noble
+    env:
+      # Playwright image runs as root but $HOME points at pwuser's dir —
+      # firefox refuses to launch unless HOME is owned by the current user.
+      HOME: /root
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,5 +33,4 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
       - run: npm run test

@@ -100,13 +100,17 @@ export default function ProjectForm({ onDone, project }) {
   // the .field input/select styles — apply them explicitly for equal height.
   const rowCtrl = { padding: '9px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, color: 'var(--text-primary)', fontSize: 12.5, fontFamily: 'var(--font-body)' }
   const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState({}) // 字段级校验错误（QA 第 4 轮）
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!name || !repo) { toast('项目名称和仓库名为必填', 'error'); return }
+    if (!name) { setErrors({ name: '项目名称为必填' }); return }
+    // 仓库名可选：未填时用项目名自动生成 slug 作项目 ID（开源低门槛）。
+    const repoFinal = (repo || name).trim().toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '')
+    if (!repoFinal) { setErrors({ repo: '无法从项目名生成仓库名，请手动填写' }); return }
     if (port && port !== '—') {
       const pn = parseInt(port, 10)
-      if (isNaN(pn) || pn < 1 || pn > 65535) { toast('端口号需在 1-65535 之间', 'error'); return }
+      if (isNaN(pn) || pn < 1 || pn > 65535) { setErrors({ port: '端口号需在 1-65535 之间' }); return }
     }
     setLoading(true)
     try {
@@ -114,7 +118,7 @@ export default function ProjectForm({ onDone, project }) {
       const primary = datasources[0]
       const services = svcs.filter(s => s.name && s.start_cmd)
       const payload = {
-        name, repo, description: desc, stack, port,
+        name, repo: repoFinal, description: desc, stack, port,
         db_type: primary ? primary.type : dbType,
         dsn: primary ? primary.dsn : '',
         datasources,
@@ -170,13 +174,15 @@ export default function ProjectForm({ onDone, project }) {
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="field" style={{ marginBottom: 10 }}>
-              <label>项目名称（中文）</label>
-              <input value={name} onChange={e => setName(e.target.value)} placeholder="请输入项目名称" style={{ padding: '8px 12px' }} />
+              <label>项目名称（中文）<span className="req">*</span></label>
+              <input value={name} onChange={e => { setName(e.target.value); if (errors.name) setErrors({ ...errors, name: '' }) }} placeholder="请输入项目名称" className={errors.name ? 'input-error' : ''} style={{ padding: '8px 12px' }} />
+              {errors.name && <div className="field-error-msg">{errors.name}</div>}
             </div>
             {!isEdit ? (
               <div className="field" style={{ marginBottom: 0 }}>
-                <label>GitHub 仓库名</label>
-                <input value={repo} onChange={e => setRepo(e.target.value)} name="gh-repo" placeholder="请输入GitHub仓库名" className="mono-input" autoComplete="off" style={{ padding: '8px 12px' }} />
+                <label>服务器目录名<span className="opt">（可选，留空自动生成）</span></label>
+                <input value={repo} onChange={e => { setRepo(e.target.value); if (errors.repo) setErrors({ ...errors, repo: '' }) }} name="gh-repo" placeholder="服务器目录名（/home/ubuntu/apps/xxx，也作项目 ID）" className={errors.repo ? 'mono-input input-error' : 'mono-input'} autoComplete="off" style={{ padding: '8px 12px' }} />
+                {errors.repo && <div className="field-error-msg">{errors.repo}</div>}
               </div>
             ) : (
               <div className="field" style={{ marginBottom: 0 }}>
@@ -246,7 +252,7 @@ export default function ProjectForm({ onDone, project }) {
                 type={d.show ? 'text' : 'password'}
                 value={d.dsn}
                 onChange={e => onDsnChange(i, e.target.value)}
-                placeholder="连接串 / API 地址"
+                placeholder="如 postgres://user:pass@127.0.0.1:5432/db 或 sqlite:///data/app.db"
                 className="mono-input"
                 autoComplete="new-password"
                 title={d.dsn}
@@ -279,7 +285,8 @@ export default function ProjectForm({ onDone, project }) {
         <div className="form-grid">
           <div className="field">
             <label>服务端口</label>
-            <input value={port} onChange={e => setPort(e.target.value)} placeholder="留空自动分配" className="mono-input" />
+            <input value={port} onChange={e => { setPort(e.target.value); if (errors.port) setErrors({ ...errors, port: '' }) }} placeholder="留空自动分配" className={errors.port ? 'mono-input input-error' : 'mono-input'} />
+            {errors.port && <div className="field-error-msg">{errors.port}</div>}
           </div>
           <div className="field">
             <label>访问路径 <span className="hint">闸门控制</span></label>
