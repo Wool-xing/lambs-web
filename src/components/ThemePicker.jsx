@@ -121,6 +121,11 @@ export function applyTheme(name) {
   document.cookie = 'lambs_theme=' + name + ';path=/;max-age=31536000;SameSite=Lax'
   document.cookie = 'lambs_theme_grad=' + encodeURIComponent(t.gradients) + ';path=/;max-age=31536000;SameSite=Lax'
   const acc = t.accent ? {accent:t.accent, accentBg:t.accentBg, border:t.accentBorder, glow:t.accentGlow} : extractAccent(t.gradients)
+  // Theme accent drives the universal accent pair — 12 themes previously
+  // differed only in background gradients while buttons/selection/badges
+  // stayed fixed cyan (R21: accent field was cookie-only dead code).
+  document.documentElement.style.setProperty('--accent-cyan', acc.accent)
+  document.documentElement.style.setProperty('--accent-cyan-dim', acc.accentBg)
   document.cookie = 'lambs_theme_accent=' + encodeURIComponent(JSON.stringify(acc)) + ';path=/;max-age=31536000;SameSite=Lax'
   document.cookie = 'lambs_theme_glass=' + encodeURIComponent(JSON.stringify({alpha:t.glassAlpha,blur:t.blur})) + ';path=/;max-age=31536000;SameSite=Lax'
 }
