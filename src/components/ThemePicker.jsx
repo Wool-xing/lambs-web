@@ -64,12 +64,6 @@ const THEMES = {
     glassAlpha:0.72, blur:20, accentHue:-120,
     accent:'#3FB950', accentBg:'rgba(63,185,80,.10)', accentBorder:'rgba(63,185,80,.18)', accentGlow:'rgba(63,185,80,.14)'
   },
-  'deep-ocean': {
-    label:'深海蓝', desc:'幽深海域 · 蓝调深邃',
-    gradients:'radial-gradient(ellipse at 20% 15%,rgba(61,139,253,.24),transparent 55%),radial-gradient(ellipse at 75% 70%,rgba(30,90,190,.18),transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(80,160,255,.12),transparent 58%),radial-gradient(ellipse at 30% 90%,rgba(20,70,150,.10),transparent 45%)',
-    glassAlpha:0.72, blur:20, accentHue:210,
-    accent:'#3D8BFD', accentBg:'rgba(61,139,253,.10)', accentBorder:'rgba(61,139,253,.18)', accentGlow:'rgba(61,139,253,.18)'
-  },
   'emerald-forest': {
     label:'翡翠森林', desc:'墨绿葱郁 · 翡翠光泽',
     gradients:'radial-gradient(ellipse at 20% 80%,rgba(47,191,113,.24),transparent 55%),radial-gradient(ellipse at 80% 20%,rgba(20,150,90,.18),transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(70,200,130,.12),transparent 58%),radial-gradient(ellipse at 60% 10%,rgba(30,160,100,.10),transparent 45%)',
@@ -81,12 +75,6 @@ const THEMES = {
     gradients:'radial-gradient(ellipse at 15% 20%,rgba(255,143,171,.24),transparent 55%),radial-gradient(ellipse at 80% 70%,rgba(220,110,150,.18),transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(255,170,190,.12),transparent 58%),radial-gradient(ellipse at 30% 90%,rgba(190,90,130,.10),transparent 45%)',
     glassAlpha:0.72, blur:20, accentHue:-15,
     accent:'#FF8FAB', accentBg:'rgba(255,143,171,.10)', accentBorder:'rgba(255,143,171,.18)', accentGlow:'rgba(255,143,171,.18)'
-  },
-  'sunset': {
-    label:'落日橙', desc:'黄昏灼热 · 橙红余晖',
-    gradients:'radial-gradient(ellipse at 80% 20%,rgba(255,110,60,.26),transparent 55%),radial-gradient(ellipse at 20% 70%,rgba(230,80,40,.18),transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(255,140,80,.12),transparent 58%),radial-gradient(ellipse at 60% 90%,rgba(200,70,35,.10),transparent 45%)',
-    glassAlpha:0.72, blur:20, accentHue:-25,
-    accent:'#FF6E3C', accentBg:'rgba(255,110,60,.10)', accentBorder:'rgba(255,110,60,.18)', accentGlow:'rgba(255,110,60,.18)'
   },
   'royal-gold': {
     label:'鎏金', desc:'奢华质感 · 金辉流转',
