@@ -118,25 +118,25 @@ export default function UserForm({ onDone, userData }) {
         <input ref={avatarRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display: 'none' }} onChange={(e) => handleAvatar(e.target.files[0])} />
       </div>
       <div className="field">
-        <label>用户名</label>
+        <label>用户名<span className="req">*</span></label>
         <input value={username} onChange={e => setUsername(e.target.value)} placeholder="请输入用户名" />
       </div>
       <div className="field">
-        <label>姓名</label>
+        <label>姓名<span className="req">*</span></label>
         <input value={name} onChange={e => setName(e.target.value)} placeholder="请输入姓名" />
       </div>
       <div className="field">
-        <label>邮箱</label>
+        <label>邮箱<span className="req">*</span></label>
         <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="请输入邮箱" />
       </div>
       {!isEdit && (
         <>
           <div className="field">
-            <label>密码 <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（留空则自动生成）</span></label>
+            <label>密码<span className="opt">（可选，留空自动生成）</span></label>
             <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="至少6位，留空自动生成" autoComplete="new-password" />
           </div>
           <div className="field">
-            <label>确认密码</label>
+            <label>确认密码<span className="opt">（可选）</span></label>
             <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="再次输入密码" autoComplete="new-password" />
           </div>
         </>
@@ -160,7 +160,7 @@ export default function UserForm({ onDone, userData }) {
                 <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="输入新密码，至少6位" autoComplete="new-password" />
               </div>
               <div className="field">
-                <label>确认密码</label>
+                <label>确认密码<span className="opt">（可选）</span></label>
                 <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="再次输入新密码" autoComplete="new-password" />
               </div>
               <span style={{ fontSize: 10, color: 'var(--text-tertiary)', cursor: 'pointer', marginBottom: 8, display: 'inline-block' }}

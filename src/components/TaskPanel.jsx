@@ -112,20 +112,20 @@ export default function TaskPanel({ projectId, superAdmin }) {
           <form className="modal-box" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); save() }}>
             <div className="modal-title">{form.id ? '编辑任务' : '新建任务'}</div>
             <div className="field">
-              <label>任务名</label>
+              <label>任务名<span className="req">*</span></label>
               <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="例如：每日扫描" autoFocus />
             </div>
             <div className="field">
-              <label>cron 表达式</label>
+              <label>cron 表达式<span className="req">*</span></label>
               <input value={form.cron} onChange={e => setForm({ ...form, cron: e.target.value })} placeholder="分 时 日 月 周，如 0 2 * * *" />
             </div>
             <div className="field">
-              <label>命令</label>
+              <label>命令<span className="req">*</span></label>
               <textarea value={form.command} onChange={e => setForm({ ...form, command: e.target.value })}
                 placeholder="app1: bash 命令；windows: cmd 命令" rows={3} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, width: '100%', background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '7px 11px', color: 'var(--text-primary)' }} />
             </div>
             <div className="field">
-              <label>执行机</label>
+              <label>执行机<span className="opt">（可选，默认 app1）</span></label>
               <select value={form.host} onChange={e => setForm({ ...form, host: e.target.value })}
                 style={{ width: '100%', background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '7px 11px', color: 'var(--text-primary)', fontSize: 12 }}>
                 <option value="app1">app1（Linux）</option>
