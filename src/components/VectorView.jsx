@@ -151,7 +151,7 @@ export default function VectorView({ id, tableList, selectedTable, onSelectTable
             <tbody>
               {rows.map((row, i) => (
                 <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,.03)' }}>
-                  {cols.map(c => <td key={c} style={{ padding: '6px 12px', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 11 }}>{typeof row[c] === 'object' ? JSON.stringify(row[c]) : String(row[c] ?? '')}</td>)}
+                  {cols.map(c => { const v = typeof row[c] === 'object' ? JSON.stringify(row[c]) : String(row[c] ?? ''); return <td key={c} title={v} style={{ padding: '6px 12px', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 11, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</td> })}
                   {canManageRows && (
                     <td style={{ padding: 6, display: 'flex', gap: 6 }}>
                       <button className="btn btn-ghost btn-sm" onClick={() => handleEdit(row)}>编辑</button>

@@ -238,8 +238,10 @@ export default function ProjectDetail() {
     setLivePage(1)
     fetchTableData(selectedTable, 1, debouncedSearch, liveSort?.col, liveSort?.dir)
     setSelectedPKs(new Set())
-    setLiveColWidths({})
   }, [selectedTable, debouncedSearch, fetchTableData])
+
+  // 列宽只在换表时重置 — 搜索/排序不再清掉用户拖过的宽度 (R23)
+  useEffect(() => { setLiveColWidths({}) }, [selectedTable])
 
   // Set browser favicon to project logo
   useEffect(() => {
@@ -249,7 +251,13 @@ export default function ProjectDetail() {
     return () => { if (window.setLambsFavicon) window.setLambsFavicon(localStorage.getItem('lambs_brand_logo_img')) }
   }, [project?.icon_url])
 
-  if (!project) return <div className="empty-state"><div className="t">加载中…</div></div>
+  if (!project) return (
+    <div className="page-skeleton">
+      <div className="sk" style={{ height: 40 }} />
+      <div className="sk" style={{ height: 90 }} />
+      <div className="sk" style={{ height: 220 }} />
+    </div>
+  )
 
   // Type of the currently selected datasource (primary when none selected)
   const curDBType = ((project?.datasources || []).find(d => d.id === selectedDS)?.type || project?.db_type || '')
@@ -338,7 +346,7 @@ export default function ProjectDetail() {
 
   const deleteBackup = async (filename) => {
     try {
-      await api.delete(`/backups/${id}/download/${filename}`)
+      await api.delete(`/backups/${id}/download/${encodeURIComponent(filename)}`)
       toast('备份已删除')
       fetchBackups()
     } catch (err) { toast(err.message, 'error') }
@@ -668,7 +676,7 @@ export default function ProjectDetail() {
                 {tableData && (
                   <>
                     <button className="btn btn-ghost btn-sm" onClick={() => {
-                      const csv = [tableData.cols.join(','), ...tableData.rows.map(r => tableData.cols.map(c => `"${String(r[c] ?? '').replace(/"/g, '""')}"`).join(','))].join('\n')
+                      const csv = [tableData.cols.join(','), ...tableData.rows.map(r => tableData.cols.map(c => `"${String(r[c] ?? '').replace(/"/g, '""').replace(/^[=+\-@]/, "'$&")}"`).join(','))].join('\n')
                       const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
                       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${project.id}_${tableData.name}.csv`; a.click()
                     }}>导出CSV</button>
@@ -770,11 +778,14 @@ export default function ProjectDetail() {
                                 <input type="checkbox" checked={selectedPKs.has(pkVal)} onChange={() => toggleOne(pkVal)} style={{ cursor: 'pointer' }} />
                               )}
                             </span>
-                            {cols.map((col, ci) => (
-                              <span key={ci} style={col === tableData.pk ? { fontWeight: 600, color: 'var(--accent-cyan)' } : undefined}>
-                                {fmtTime(row[col])}
-                              </span>
-                            ))}
+                            {cols.map((col, ci) => {
+                              const v = fmtTime(row[col])
+                              return (
+                                <span key={ci} title={v ?? ''} style={col === tableData.pk ? { fontWeight: 600, color: 'var(--accent-cyan)' } : undefined}>
+                                  {v}
+                                </span>
+                              )
+                            })}
                           </div>
                         )
                       })

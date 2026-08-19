@@ -472,7 +472,7 @@ export default function Dashboard() {
                       onClick={e => { e.stopPropagation(); toggleSelect(p.id) }} />
                   )}
                   <div className={`project-logo ${p.icon_cls || 'default'}`}>
-                    {p.icon_url ? <img src={resolveAsset(p.icon_url)} alt="" onError={e => { e.currentTarget.style.display = 'none' }} /> : logoInitials(p.name)}
+                    {p.icon_url ? <img src={resolveAsset(p.icon_url)} alt="" loading="lazy" width={34} height={34} onError={e => { e.currentTarget.style.display = 'none' }} /> : logoInitials(p.name)}
                   </div>
                   {!batchMode && (
                     <button className="project-card-more" aria-label="更多操作" onClick={e => { e.stopPropagation(); const r=e.currentTarget.getBoundingClientRect(); setMenu({project:p, x:r.right-160, y:r.bottom+4}) }}><Icon name="moreHorizontal" size={16} /></button>
@@ -549,7 +549,7 @@ export default function Dashboard() {
               const isProjectAction = ['删除项目', '切换状态', '编辑项目', '新增数据', '修改数据', '删除数据'].includes(l.action)
               const jumpTarget = isProjectAction ? `/project/${l.target}` : `/users?search=${encodeURIComponent(l.target)}`
               return (
-                <div key={i} style={{ position: 'relative', display: 'flex', gap: 10, padding: '6px 0', alignItems: 'center' }}>
+                <div key={l.id || i} style={{ position: 'relative', display: 'flex', gap: 10, padding: '6px 0', alignItems: 'center' }}>
                   <span style={{ position: 'absolute', left: -17, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', background: badge[0] }} />
                   <span style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: 10, width: 58, flexShrink: 0 }}>{fmtRelative(l.created_at)}</span>
                   <span style={{ color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
