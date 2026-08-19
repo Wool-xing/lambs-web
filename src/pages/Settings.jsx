@@ -132,7 +132,7 @@ export default function Settings() {
             <div className="pwd-wrap">
               <input type={showJwt ? 'text' : 'password'} value={config.jwt_secret}
                 onChange={e => setConfig({ ...config, jwt_secret: e.target.value })}
-                placeholder="JWT 签名密钥" />
+                placeholder={config.jwt_secret ? 'JWT 签名密钥' : '已设置（安全起见不回显）'} />
               <button type="button" className="pwd-eye" aria-pressed={showJwt} aria-label="显示或隐藏密钥" onClick={() => setShowJwt(!showJwt)}><Icon name={showJwt ? 'eyeOff' : 'eye'} size={18} /></button>
             </div>
           </div>
