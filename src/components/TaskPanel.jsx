@@ -11,6 +11,7 @@ export default function TaskPanel({ projectId, superAdmin }) {
   const confirm = useConfirm()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState({})
   const [form, setForm] = useState(null) // null | {id?, name, cron, command, host, enabled}
   const [expanded, setExpanded] = useState(null)
 
@@ -29,7 +30,10 @@ export default function TaskPanel({ projectId, superAdmin }) {
     : { id: '', name: '', cron: '0 2 * * *', command: '', host: 'app1', enabled: true })
 
   const save = async () => {
-    if (!form.name?.trim() || !form.command?.trim()) { toast('任务名和命令不能为空', 'error'); return }
+    if (!form.name?.trim() || !form.command?.trim()) {
+      setErr({ name: !form.name?.trim() ? '任务名必填' : '', command: !form.command?.trim() ? '命令必填' : '' })
+      return
+    }
     try {
       if (form.id) await api.put(`/tasks/${form.id}`, form)
       else await api.post(`/projects/${projectId}/tasks`, form)
@@ -113,7 +117,7 @@ export default function TaskPanel({ projectId, superAdmin }) {
             <div className="modal-title">{form.id ? '编辑任务' : '新建任务'}</div>
             <div className="field">
               <label>任务名<span className="req">*</span></label>
-              <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="例如：每日扫描" autoFocus />
+              <input className={err.name ? 'input-error' : ''} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="例如：每日扫描" autoFocus />
             </div>
             <div className="field">
               <label>cron 表达式<span className="req">*</span></label>

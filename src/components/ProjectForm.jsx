@@ -122,7 +122,7 @@ export default function ProjectForm({ onDone, project }) {
     const primaryDs = dss[0]
     const hasDsn = !!(primaryDs && primaryDs.dsn && primaryDs.dsn.trim() && primaryDs.dsn !== '—')
     const hasService = !!(port && port !== '—' && (serviceName.trim() || startupCmd.trim()))
-    if (!hasDsn && !hasService) {
+    if (!isEdit && !hasDsn && !hasService) {
       setErrors({ dsn: '需填写数据源连接串，或展开高级设置填写端口+服务信息（否则项目无法被管理）' })
       return
     }
@@ -236,7 +236,7 @@ export default function ProjectForm({ onDone, project }) {
 
       {/* ── 数据源（核心）── */}
       <div className="form-section">
-        <div className="form-section-title">数据源<span className="req">*</span> <span className="hint">连接串必填 — 数据浏览/健康监控/备份都依赖它；纯服务型项目可在高级区配端口+启动命令替代</span></div>
+        <div className="form-section-title">数据源<span className="req">*</span> <span className="hint">新建必填连接串（数据浏览/健康监控/备份依赖它），或配端口+启动命令（服务型）</span></div>
         {dss.map((d, i) => (
           <div key={d.id} style={{ marginBottom: 8 }}>
             <div style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
