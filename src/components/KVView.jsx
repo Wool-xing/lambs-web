@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '../api/client'
 import { useConfirm } from './Modal'
+import { useDebounce } from '../hooks/useDebounce'
 import TypeSelect from './TypeSelect'
 
 // KVView — Redis key-value data browser. Renders per data type:
@@ -12,6 +13,9 @@ const TYPE_LABELS = { string: 'String', hash: 'Hash', list: 'List', set: 'Set', 
 export default function KVView({ id, tableList, selectedTable, onSelectTable, canManageRows, toast, ds }) {
   const [rows, setRows] = useState(null)
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const debouncedSearch = useDebounce(search)
   const [newKey, setNewKey] = useState(false)      // create-key modal
   const [newKeyType, setNewKeyType] = useState('string')
   const [itemForm, setItemForm] = useState(null)   // { type, ...fields } add-item inline
@@ -19,14 +23,17 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
   const [strVal, setStrVal] = useState('')
   const confirm = useConfirm()
 
-  const fetchRows = useCallback((table) => {
+  const fetchRows = useCallback((table, pg = 1, q = '') => {
     if (!table) { setRows(null); return }
-    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}${ds ? `&ds=${ds}` : ''}`).then(res => {
-      if (res.success) setRows(res.data.rows || [])
+    const qs = new URLSearchParams({ table, page: String(pg), page_size: '15' })
+    if (ds) qs.set('ds', ds)
+    if (q) qs.set('search', q)
+    api.get(`/projects/${id}/tables?${qs}`).then(res => {
+      if (res.success) { setRows(res.data.rows || []); setTotal(res.data.total || 0); setPage(pg) }
     }).catch(() => setRows(null))
   }, [id, ds])
 
-  useEffect(() => { fetchRows(selectedTable); setEditingStr(false) }, [selectedTable, fetchRows])
+  useEffect(() => { fetchRows(selectedTable, 1, debouncedSearch); setEditingStr(false) }, [selectedTable, debouncedSearch, fetchRows])
 
   const keyType = rows && rows.length > 0 ? rows[0].type : 'none'
   const filtered = (rows || []).filter(r => JSON.stringify(r).toLowerCase().includes(search.toLowerCase().trim()))
@@ -111,6 +118,16 @@ export default function KVView({ id, tableList, selectedTable, onSelectTable, ca
           <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
             类型: <span style={{ color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)' }}>{TYPE_LABELS[keyType] || keyType}</span>
           </div>
+
+          {total > 15 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: 'var(--text-tertiary)' }}>
+              <span>共 {total} 行 · 第 {page}/{Math.ceil(total / 15)} 页</span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="btn btn-ghost btn-xs" disabled={page <= 1} onClick={() => fetchRows(selectedTable, page - 1, debouncedSearch)}>上一页</button>
+                <button className="btn btn-ghost btn-xs" disabled={page >= Math.ceil(total / 15)} onClick={() => fetchRows(selectedTable, page + 1, debouncedSearch)}>下一页</button>
+              </div>
+            </div>
+          )}
 
           {keyType === 'string' && (
             <div style={{ background: 'rgba(var(--glass-bg),.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 12 }}>

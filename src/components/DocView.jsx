@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { api } from '../api/client'
 import { useConfirm } from './Modal'
 import TypeSelect from './TypeSelect'
+import { useDebounce } from '../hooks/useDebounce'
 
 // DocView — document-oriented (MongoDB) data browser: JSON tree instead of table grid.
 // Reuses the same Lambs API endpoints as the relational table view.
@@ -42,22 +43,31 @@ function JsonNode({ k, v, depth }) {
 export default function DocView({ id, tableList, selectedTable, onSelectTable, canManageRows, toast, ds }) {
   const [docs, setDocs] = useState(null)
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
   const [editing, setEditing] = useState(null) // { isNew: bool, doc: string(json) }
   const confirm = useConfirm()
+  const debouncedSearch = useDebounce(search)
+  const PER_PAGE = 15
 
-  const fetchDocs = useCallback((table) => {
+  // 分页 + 总数，与关系表视图同 API 契约 (R23 大集合首屏)
+  const fetchDocs = useCallback((table, pg = 1, q = '') => {
     if (!table) { setDocs(null); return }
-    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}${ds ? `&ds=${ds}` : ''}`).then(res => {
-      if (res.success) setDocs(res.data.rows || [])
+    const qs = new URLSearchParams({ table, page: String(pg), page_size: String(PER_PAGE) })
+    if (ds) qs.set('ds', ds)
+    if (q) qs.set('search', q)
+    api.get(`/projects/${id}/tables?${qs}`).then(res => {
+      if (res.success) {
+        setDocs(res.data.rows || [])
+        setTotal(res.data.total || 0)
+        setPage(pg)
+      }
     }).catch(() => setDocs(null))
   }, [id, ds])
 
-  useEffect(() => { fetchDocs(selectedTable) }, [selectedTable, fetchDocs])
+  useEffect(() => { fetchDocs(selectedTable, 1, debouncedSearch) }, [selectedTable, debouncedSearch, fetchDocs])
 
-  const filtered = (docs || []).filter(d => {
-    if (!search.trim()) return true
-    return JSON.stringify(d).toLowerCase().includes(search.toLowerCase().trim())
-  })
+  // 搜索走服务端（debounced），本地不再重复过滤 — 分页总数才准确
 
   const saveDoc = async (e) => {
     e.preventDefault()
@@ -111,11 +121,11 @@ export default function DocView({ id, tableList, selectedTable, onSelectTable, c
         <div className="empty-state"><div className="t">从上方下拉选择集合开始浏览</div></div>
       )}
 
-      {docs && filtered.length === 0 && (
+      {docs && docs.length === 0 && (
         <div className="empty-state"><div className="t">未找到匹配的文档</div></div>
       )}
 
-      {docs && filtered.map(d => {
+      {docs && docs.map(d => {
         const pkVal = d._id ?? ''
         return (
           <div key={String(pkVal)} style={{ background: 'rgba(var(--glass-bg),.5)', border: '1px solid var(--border)', borderRadius: 8, padding: 10 }}>
@@ -135,6 +145,16 @@ export default function DocView({ id, tableList, selectedTable, onSelectTable, c
           </div>
         )
       })}
+
+      {docs && total > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11, color: 'var(--text-tertiary)' }}>
+          <span>共 {total} 行 · 第 {page}/{Math.max(1, Math.ceil(total / PER_PAGE))} 页</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-ghost btn-xs" disabled={page <= 1} onClick={() => fetchDocs(selectedTable, page - 1, debouncedSearch)}>上一页</button>
+            <button className="btn btn-ghost btn-xs" disabled={page >= Math.ceil(total / PER_PAGE)} onClick={() => fetchDocs(selectedTable, page + 1, debouncedSearch)}>下一页</button>
+          </div>
+        </div>
+      )}
 
       {editing && (
         <div className="modal-overlay open" onClick={() => setEditing(null)}>

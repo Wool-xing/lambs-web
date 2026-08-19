@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useConfirm } from './Modal'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -31,6 +32,7 @@ export default function Topbar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { logout } = useAuth()
+  const confirm = useConfirm()
   const [unread, setUnread] = useState(0)
   const [sysOk, setSysOk] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -104,7 +106,7 @@ export default function Topbar() {
           <span className={`ps-dot ${sysOk ? 'green' : 'gray'}`} />
           <span className="topbar-health-text" style={{ fontSize: 11, color: sysOk ? 'var(--text-tertiary)' : 'var(--accent-red)' }}>{sysOk ? '系统正常' : '系统失联'}</span>
         </div>
-        <button className="topbar-btn" title="退出登录" onClick={() => logout()} style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+        <button className="topbar-btn" title="退出登录" onClick={async () => { const ok = await confirm('退出登录', '确定退出当前账号吗？'); if (ok) logout() }} style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
           <Icon name="logout" size={14} />
           <span style={{ fontSize: 11 }}>退出</span>
         </button>

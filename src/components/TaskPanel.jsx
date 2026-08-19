@@ -48,14 +48,18 @@ export default function TaskPanel({ projectId, superAdmin }) {
   }
 
   const toggle = async (t) => {
-    try { await api.put(`/tasks/${t.id}`, { ...t, enabled: !t.enabled }); fetchTasks() }
+    try {
+      await api.put(`/tasks/${t.id}`, { ...t, enabled: !t.enabled })
+      toast(t.enabled ? '任务已停用' : '任务已启用')
+      fetchTasks()
+    }
     catch (err) { toast(err.message || '操作失败', 'error') }
   }
 
   const remove = async (t) => {
     const ok = await confirm('删除任务', `确定删除「${t.name}」吗？此操作不可撤销。`)
     if (!ok) return
-    try { await api.delete(`/tasks/${t.id}`); fetchTasks() }
+    try { await api.delete(`/tasks/${t.id}`); toast('任务已删除'); fetchTasks() }
     catch (err) { toast(err.message || '删除失败', 'error') }
   }
 

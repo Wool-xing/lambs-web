@@ -13,15 +13,19 @@ export default function VectorView({ id, tableList, selectedTable, onSelectTable
   const [searchTopK, setSearchTopK] = useState(5)
   const [hits, setHits] = useState(null)
   const [searching, setSearching] = useState(false)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
   const [editing, setEditing] = useState(null) // { id, payloadJson }
 
   const dsParam = ds ? `&ds=${ds}` : ''
 
-  const fetchTableData = useCallback((table) => {
+  const fetchTableData = useCallback((table, pg = 1) => {
     if (!table) { setTableData(null); return }
     setLoading(true)
-    api.get(`/projects/${id}/tables?table=${encodeURIComponent(table)}${dsParam}`).then(res => {
-      if (res.success) setTableData({ name: table, pk: res.data.pk, cols: res.data.columns, rows: res.data.rows })
+    const qs = new URLSearchParams({ table, page: String(pg), page_size: '15' })
+    if (ds) qs.set('ds', ds)
+    api.get(`/projects/${id}/tables?${qs}`).then(res => {
+      if (res.success) { setTableData({ name: table, pk: res.data.pk, cols: res.data.columns, rows: res.data.rows }); setTotal(res.data.total || 0); setPage(pg) }
     }).catch(() => setTableData(null)).finally(() => setLoading(false))
   }, [id, ds])
 
