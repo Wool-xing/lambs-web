@@ -1,10 +1,20 @@
 import { useState, useEffect } from 'react'
 import { api, resolveAsset } from '../api/client'
 import { useToast } from './Toast'
+import { useConfirm } from './Modal'
 import useFileUpload from '../hooks/useFileUpload'
 import TypeSelect from './TypeSelect'
 
 export default function ProjectForm({ onDone, project }) {
+  const confirm = useConfirm()
+
+  // 有输入时取消需确认 — 误触丢弃已填表单 (R23)
+  const handleCancel = async () => {
+    const dirty = !!(name || repo || desc || stack || port || basePath || dss.some(d => d.dsn))
+    if (!dirty) { onDone(); return }
+    const ok = await confirm('放弃修改', '已填写的内容将丢失，确定取消吗？')
+    if (ok) onDone()
+  }
   const toast = useToast()
   const upload = useFileUpload({ maxMB: 5, onError: (m) => toast(m, 'error') })
   const isEdit = !!project
@@ -367,7 +377,7 @@ export default function ProjectForm({ onDone, project }) {
         <button className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
           {loading ? '保存中…' : (isEdit ? '保存' : '确认接入')}
         </button>
-        <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={onDone}>取消</button>
+        <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={handleCancel}>取消</button>
       </div>
     </form>
   )

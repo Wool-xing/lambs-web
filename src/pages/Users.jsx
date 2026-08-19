@@ -60,7 +60,7 @@ export default function Users() {
   const handleDelete = async (u) => {
     const ok = await confirm('删除用户', `确定删除「${u.name}」吗？`)
     if (!ok) return
-    try { await api.delete(`/users/${u.id}`); toast('已删除'); setPage(1); fetchUsers(1) }
+    try { await api.delete(`/users/${u.id}`); toast('已删除'); fetchUsers(page) }
     catch (err) { toast(err.message, 'error') }
   }
 

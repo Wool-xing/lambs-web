@@ -55,7 +55,7 @@ export default function Topbar() {
   }
 
   const fetchUnread = () => {
-    api.get('/notifications?type=all').then(res => {
+    api.get('/notifications?type=all&page_size=1').then(res => {
       if (res.success) setUnread(res.data.unread_count || 0)
     }).catch(() => {})
   }
