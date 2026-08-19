@@ -127,7 +127,7 @@ function AppInner() {
             网络连接已断开，部分功能不可用
           </div>
         )}
-        <div className="content">
+        <main className="content">
           <div className="screen active" style={{flex:1}}>
           <Suspense fallback={<div className="page-skeleton"><div className="sk" style={{height:105}} /><div className="sk" style={{height:200}} /></div>}>
           <Routes>
@@ -141,7 +141,7 @@ function AppInner() {
           </Routes>
           </Suspense>
           </div>
-        </div>
+        </main>
       </div>
       {showHelp && (
         <div className="modal-overlay open" onClick={() => setShowHelp(false)}>
