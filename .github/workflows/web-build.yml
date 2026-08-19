@@ -22,6 +22,10 @@ jobs:
     # runner-level `playwright install --with-deps` hung on apt and bare
     # installs miss system libraries.
     container: mcr.microsoft.com/playwright:v1.62.0-noble
+    env:
+      # Playwright image runs as root but $HOME points at pwuser's dir —
+      # firefox refuses to launch unless HOME is owned by the current user.
+      HOME: /root
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
