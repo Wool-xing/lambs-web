@@ -128,28 +128,28 @@ export default function Settings() {
         <div className="card-title" style={{ marginBottom: 16 }}>全局配置</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))', gap: '14px 20px' }}>
           <div className="field">
-            <label>JWT 密钥</label>
+            <label htmlFor="cfg-jwt">JWT 密钥</label>
             <div className="pwd-wrap">
-              <input type={showJwt ? 'text' : 'password'} value={config.jwt_secret}
+              <input id="cfg-jwt" type={showJwt ? 'text' : 'password'} value={config.jwt_secret}
                 onChange={e => setConfig({ ...config, jwt_secret: e.target.value })}
                 placeholder={config.jwt_secret ? 'JWT 签名密钥' : '已设置（安全起见不回显）'} />
               <button type="button" className="pwd-eye" aria-pressed={showJwt} aria-label="显示或隐藏密钥" onClick={() => setShowJwt(!showJwt)}><Icon name={showJwt ? 'eyeOff' : 'eye'} size={18} /></button>
             </div>
           </div>
           <div className="field">
-            <label>管理员邮箱</label>
-            <input value={config.admin_email}
+            <label htmlFor="cfg-email">管理员邮箱</label>
+            <input id="cfg-email" value={config.admin_email}
               onChange={e => setConfig({ ...config, admin_email: e.target.value })}
               placeholder="admin@lambs.local" />
           </div>
           <div className="field">
-            <label>服务端口</label>
-            <input value={config.port}
+            <label htmlFor="cfg-port">服务端口</label>
+            <input id="cfg-port" value={config.port}
               onChange={e => setConfig({ ...config, port: parseInt(e.target.value) || 3602 })} />
           </div>
           <div className="field">
-            <label>数据刷新间隔（秒）</label>
-            <input value={config.refresh_interval}
+            <label htmlFor="cfg-refresh">数据刷新间隔（秒）</label>
+            <input id="cfg-refresh" value={config.refresh_interval}
               onChange={e => setConfig({ ...config, refresh_interval: parseInt(e.target.value) || 30 })} />
           </div>
         </div>
@@ -174,25 +174,25 @@ export default function Settings() {
         <div className="card-title" style={{ marginBottom: 16 }}>SMTP 邮件配置 <span style={{fontSize:11,color:'var(--text-tertiary)',fontWeight:400}}>（用于忘记密码发送验证码）</span></div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px 20px' }}>
           <div className="field">
-            <label>SMTP 服务器</label>
-            <input value={config.smtp_host || ''} onChange={e => setConfig({ ...config, smtp_host: e.target.value })} placeholder="smtp.qq.com" />
+            <label htmlFor="cfg-smtp-host">SMTP 服务器</label>
+            <input id="cfg-smtp-host" value={config.smtp_host || ''} onChange={e => setConfig({ ...config, smtp_host: e.target.value })} placeholder="smtp.qq.com" />
           </div>
           <div className="field">
-            <label>端口</label>
-            <input value={config.smtp_port || '587'} onChange={e => setConfig({ ...config, smtp_port: e.target.value })} placeholder="587" />
+            <label htmlFor="cfg-smtp-port">端口</label>
+            <input id="cfg-smtp-port" value={config.smtp_port || '587'} onChange={e => setConfig({ ...config, smtp_port: e.target.value })} placeholder="587" />
           </div>
           <div className="field">
-            <label>发件人地址</label>
-            <input value={config.smtp_from || ''} onChange={e => setConfig({ ...config, smtp_from: e.target.value })} placeholder="noreply@example.com" />
+            <label htmlFor="cfg-smtp-from">发件人地址</label>
+            <input id="cfg-smtp-from" value={config.smtp_from || ''} onChange={e => setConfig({ ...config, smtp_from: e.target.value })} placeholder="noreply@example.com" />
           </div>
           <div className="field">
-            <label>邮箱账号</label>
-            <input value={config.smtp_user || ''} onChange={e => setConfig({ ...config, smtp_user: e.target.value })} placeholder="your-email@example.com" />
+            <label htmlFor="cfg-smtp-user">邮箱账号</label>
+            <input id="cfg-smtp-user" value={config.smtp_user || ''} onChange={e => setConfig({ ...config, smtp_user: e.target.value })} placeholder="your-email@example.com" />
           </div>
           <div className="field">
-            <label>授权码 / 密码</label>
+            <label htmlFor="cfg-smtp-pass">授权码 / 密码</label>
             <div className="pwd-wrap">
-              <input type={showSmtpPassword ? 'text' : 'password'} value={config.smtp_password || ''} onChange={e => setConfig({ ...config, smtp_password: e.target.value })} placeholder="SMTP 授权码（非登录密码）" />
+              <input id="cfg-smtp-pass" type={showSmtpPassword ? 'text' : 'password'} value={config.smtp_password || ''} onChange={e => setConfig({ ...config, smtp_password: e.target.value })} placeholder="SMTP 授权码（非登录密码）" />
               <button type="button" className="pwd-eye" aria-pressed={showSmtpPassword} aria-label="显示或隐藏 SMTP 授权码" onClick={() => setShowSmtpPassword(!showSmtpPassword)}><Icon name={showSmtpPassword ? 'eyeOff' : 'eye'} size={18} /></button>
             </div>
           </div>
@@ -224,7 +224,7 @@ export default function Settings() {
       <div className="card">
         <div className="card-title" style={{ marginBottom: 16 }}>操作日志</div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-          <input placeholder="搜索日志…" value={logSearch}
+          <input aria-label="搜索日志" placeholder="搜索日志…" value={logSearch}
             onChange={e => setLogSearch(e.target.value)}
             style={{ background:'var(--bg-input)', border:'1px solid var(--border-strong)', borderRadius:7, padding:'7px 11px', color:'var(--text-primary)', fontSize:12, minWidth:180 }} />
           <TypeSelect value={logFilter} onChange={setLogFilter}
