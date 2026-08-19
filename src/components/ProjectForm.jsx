@@ -103,7 +103,10 @@ export default function ProjectForm({ onDone, project }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!name || !repo) { toast('项目名称和仓库名为必填', 'error'); return }
+    if (!name) { toast('项目名称为必填', 'error'); return }
+    // 仓库名可选：未填时用项目名自动生成 slug 作项目 ID（开源低门槛）。
+    const repoFinal = (repo || name).trim().toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '')
+    if (!repoFinal) { toast('无法从项目名生成仓库名，请手动填写', 'error'); return }
     if (port && port !== '—') {
       const pn = parseInt(port, 10)
       if (isNaN(pn) || pn < 1 || pn > 65535) { toast('端口号需在 1-65535 之间', 'error'); return }
@@ -114,7 +117,7 @@ export default function ProjectForm({ onDone, project }) {
       const primary = datasources[0]
       const services = svcs.filter(s => s.name && s.start_cmd)
       const payload = {
-        name, repo, description: desc, stack, port,
+        name, repo: repoFinal, description: desc, stack, port,
         db_type: primary ? primary.type : dbType,
         dsn: primary ? primary.dsn : '',
         datasources,
@@ -176,7 +179,7 @@ export default function ProjectForm({ onDone, project }) {
             {!isEdit ? (
               <div className="field" style={{ marginBottom: 0 }}>
                 <label>GitHub 仓库名</label>
-                <input value={repo} onChange={e => setRepo(e.target.value)} name="gh-repo" placeholder="请输入GitHub仓库名" className="mono-input" autoComplete="off" style={{ padding: '8px 12px' }} />
+                <input value={repo} onChange={e => setRepo(e.target.value)} name="gh-repo" placeholder="服务器目录名（/home/ubuntu/apps/xxx，也作项目 ID）" className="mono-input" autoComplete="off" style={{ padding: '8px 12px' }} />
               </div>
             ) : (
               <div className="field" style={{ marginBottom: 0 }}>
@@ -246,7 +249,7 @@ export default function ProjectForm({ onDone, project }) {
                 type={d.show ? 'text' : 'password'}
                 value={d.dsn}
                 onChange={e => onDsnChange(i, e.target.value)}
-                placeholder="连接串 / API 地址"
+                placeholder="如 postgres://user:pass@127.0.0.1:5432/db 或 sqlite:///data/app.db"
                 className="mono-input"
                 autoComplete="new-password"
                 title={d.dsn}
