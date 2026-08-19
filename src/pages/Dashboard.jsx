@@ -72,6 +72,8 @@ export default function Dashboard() {
   const [selected, setSelected] = useState(new Set())
   const [menu, setMenu] = useState(null)
   const [removingId, setRemovingId] = useState(null)
+  const [draggingId, setDraggingId] = useState(null)
+  const [dragOverId, setDragOverId] = useState(null)
   const [lastRefresh, setLastRefresh] = useState('')
   const [refreshing, setRefreshing] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -262,11 +264,16 @@ export default function Dashboard() {
 
   const handleDragStart = (e, id) => {
     e.dataTransfer.setData('text/plain', id)
+    setDraggingId(id) // 拖拽视觉反馈 (R23)
   }
+
+  const handleDragEnd = () => { setDraggingId(null); setDragOverId(null) }
+  const handleDragEnter = (e, id) => { e.preventDefault(); setDragOverId(id) }
 
   const handleDrop = async (e, targetId) => {
     e.preventDefault()
     const srcId = e.dataTransfer.getData('text/plain')
+    setDraggingId(null); setDragOverId(null)
     if (!srcId || srcId === targetId) return
     // Auto-switch to custom order sort when user drags
     if (sortBy !== 'order') setSortBy('order')
@@ -449,11 +456,14 @@ export default function Dashboard() {
           <div className="project-grid">
             {projects.filter(p => !tagFilter || (ensureArray(p.tags)).includes(tagFilter)).map(p => (
               <div key={p.id}
-                className={`project-card ${p.status === 'offline' ? 'disabled' : ''}${removingId === p.id ? ' leaving' : ''}`}
+                className={`project-card ${p.status === 'offline' ? 'disabled' : ''}${removingId === p.id ? ' leaving' : ''}${draggingId === p.id ? ' dragging' : ''}${dragOverId === p.id ? ' drag-over' : ''}`}
                 onClick={() => batchMode ? toggleSelect(p.id) : navigate(`/project/${p.id}`)}
                 draggable={!batchMode}
                 onDragStart={e => handleDragStart(e, p.id)}
                 onDragOver={e => e.preventDefault()}
+                onDragEnter={e => handleDragEnter(e, p.id)}
+                onDragLeave={() => setDragOverId(null)}
+                onDragEnd={handleDragEnd}
                 onDrop={e => handleDrop(e, p.id)}
               >
                 <div className="project-card-header">
