@@ -289,39 +289,43 @@ export default function Dashboard() {
           <div className="v">{stats.online}</div>
           <div className="sub">{stats.online > 0 ? `${stats.online} 个数据源在线 · ${stats.offline} 个离线` : '暂无在线数据源'}</div>
         </div>
-        <div className="stat-card" style={{ gridColumn: '1/-1' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-            <span className="k">系统监控</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-tertiary)' }}>
-              {nodesAll.filter(n => n.online).length} 在线 · {nodesAll.filter(n => !n.online).length} 失联
-            </span>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 10 }}>
-            {nodesAll.map(n => (
-              <div key={n.name} style={{
-                background: 'rgba(var(--glass-bg),.48)',
-                border: `1px solid ${n.online ? 'rgba(255,255,255,.04)' : 'var(--accent-red)'}`,
-                borderRadius: 9, padding: '10px 12px', opacity: n.online ? 1 : .45,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                  <span className={`ps-dot ${n.online ? 'green' : 'gray'}`} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600 }}>{n.name}</span>
-                  {!n.online && <span style={{ marginLeft: 'auto', fontSize: 9.5, padding: '1px 7px', borderRadius: 4, background: 'var(--accent-red-dim)', color: 'var(--accent-red)' }}>失联</span>}
-                </div>
-                {n.online && [
-                  ['CPU', n.cpu_percent, `${n.cpu_percent}%`],
-                  ['内存', n.memory_total_mb > 0 ? n.memory_used_mb / n.memory_total_mb * 100 : 0, `${n.memory_used_mb}/${n.memory_total_mb}MB`],
-                  ['磁盘', n.disk_total_gb > 0 ? n.disk_used_gb / n.disk_total_gb * 100 : 0, `${n.disk_used_gb}/${n.disk_total_gb}GB`],
-                ].map(([lab, pct, val]) => (
-                  <div key={lab} style={{ display: 'grid', gridTemplateColumns: '32px 1fr 82px', gap: 8, alignItems: 'center', fontSize: 10, marginTop: 5 }}>
-                    <span style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{lab}</span>
-                    <div className="bar"><span style={{ width: `${pct}%`, ...(pct > 80 ? { background: 'var(--accent-amber)' } : {}) }} /></div>
-                    <span style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>{val}</span>
-                  </div>
-                ))}
+      </div>
+
+      {/* System health band — own row below the stat cards so the 3-card
+          grid keeps its stretch (spanning inside summary-row left a ghost
+          column gap). */}
+      <div className="stat-card" style={{ marginTop: 10 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
+          <span className="k">系统监控</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-tertiary)' }}>
+            {nodesAll.filter(n => n.online).length} 在线 · {nodesAll.filter(n => !n.online).length} 失联
+          </span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 10 }}>
+          {nodesAll.map(n => (
+            <div key={n.name} style={{
+              background: 'rgba(var(--glass-bg),.48)',
+              border: `1px solid ${n.online ? 'rgba(255,255,255,.04)' : 'var(--accent-red)'}`,
+              borderRadius: 9, padding: '10px 12px', opacity: n.online ? 1 : .45,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                <span className={`ps-dot ${n.online ? 'green' : 'gray'}`} />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600 }}>{n.name}</span>
+                {!n.online && <span style={{ marginLeft: 'auto', fontSize: 9.5, padding: '1px 7px', borderRadius: 4, background: 'var(--accent-red-dim)', color: 'var(--accent-red)' }}>失联</span>}
               </div>
-            ))}
-          </div>
+              {n.online && [
+                ['CPU', n.cpu_percent, `${n.cpu_percent}%`],
+                ['内存', n.memory_total_mb > 0 ? n.memory_used_mb / n.memory_total_mb * 100 : 0, `${n.memory_used_mb}/${n.memory_total_mb}MB`],
+                ['磁盘', n.disk_total_gb > 0 ? n.disk_used_gb / n.disk_total_gb * 100 : 0, `${n.disk_used_gb}/${n.disk_total_gb}GB`],
+              ].map(([lab, pct, val]) => (
+                <div key={lab} style={{ display: 'grid', gridTemplateColumns: '32px 1fr 82px', gap: 8, alignItems: 'center', fontSize: 10, marginTop: 5 }}>
+                  <span style={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>{lab}</span>
+                  <div className="bar"><span style={{ width: `${pct}%`, ...(pct > 80 ? { background: 'var(--accent-amber)' } : {}) }} /></div>
+                  <span style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>{val}</span>
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 
