@@ -73,7 +73,16 @@ export default function ProjectForm({ onDone, project }) {
     } catch { return null }
   }
   const onDsnChange = (i, val) => {
-    setDss(prev => prev.map((x, xi) => xi === i ? { ...x, dsn: val } : x))
+    setDss(prev => prev.map((x, xi) => {
+      const nx = { ...x, dsn: val }
+      // 从连接串前缀自动识别数据源类型，减少新手选错 (QA 第 4 轮)。
+      if (xi === i) {
+        const scheme = (val.split('://')[0] || '').split('+')[0].toLowerCase()
+        const guess = { postgres: '直连 PostgreSQL', postgresql: '直连 PostgreSQL', sqlite: 'SQLite', mysql: 'MySQL', mongodb: 'MongoDB', mongo: 'MongoDB', redis: 'Redis', rest: 'REST API', https: 'REST API', http: 'REST API', qdrant: 'Qdrant', mssql: 'SQL Server' }[scheme]
+        if (guess) nx.type = guess
+      }
+      return nx
+    }))
     const g = guessSharedService(val)
     if (g) {
       setSvcs(prev => prev.some(s => s.name === g.name) ? prev : [...prev, g])
@@ -108,6 +117,15 @@ export default function ProjectForm({ onDone, project }) {
     // 仓库名可选：未填时用项目名自动生成 slug 作项目 ID（开源低门槛）。
     const repoFinal = (repo || name).trim().toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '')
     if (!repoFinal) { setErrors({ repo: '无法从项目名生成仓库名，请手动填写' }); return }
+    // 管理契约：有数据源（数据型）或有 端口+服务信息（服务型）才可管理；
+    // 空壳项目（只有名字）数据浏览/备份/进程管理全空 — 拒绝 (QA 第 4 轮深审)。
+    const primaryDs = dss[0]
+    const hasDsn = !!(primaryDs && primaryDs.dsn && primaryDs.dsn.trim() && primaryDs.dsn !== '—')
+    const hasService = !!(port && port !== '—' && (serviceName.trim() || startupCmd.trim()))
+    if (!isEdit && !hasDsn && !hasService) {
+      setErrors({ dsn: '需填写数据源连接串，或展开高级设置填写端口+服务信息（否则项目无法被管理）' })
+      return
+    }
     if (port && port !== '—') {
       const pn = parseInt(port, 10)
       if (isNaN(pn) || pn < 1 || pn > 65535) { setErrors({ port: '端口号需在 1-65535 之间' }); return }
@@ -218,7 +236,7 @@ export default function ProjectForm({ onDone, project }) {
 
       {/* ── 数据源（核心）── */}
       <div className="form-section">
-        <div className="form-section-title">数据源 <span className="hint">第一个为主数据源 · 驱动连接测试/同步/备份</span></div>
+        <div className="form-section-title">数据源<span className="req">*</span> <span className="hint">新建必填连接串（数据浏览/健康监控/备份依赖它），或配端口+启动命令（服务型）</span></div>
         {dss.map((d, i) => (
           <div key={d.id} style={{ marginBottom: 8 }}>
             <div style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
@@ -242,6 +260,7 @@ export default function ProjectForm({ onDone, project }) {
                 onChange={v => setDss(prev => prev.map((x, xi) => xi === i ? { ...x, type: v } : x))}
                 style={{ width: 150, flexShrink: 0 }}
               />
+              {errors.dsn && i === 0 && <div className="field-error-msg" style={{ flexBasis: '100%' }}>{errors.dsn}</div>}
               {dss.length > 1 && (
                 <button type="button" className="btn btn-ghost btn-sm" style={{ marginLeft: 'auto', flexShrink: 0, padding: '4px 8px' }}
                   onClick={() => setDss(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
