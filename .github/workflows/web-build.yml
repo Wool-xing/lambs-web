@@ -33,4 +33,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # slow2g.spec serves the PRODUCTION bundle via vite preview.
+      - run: npm run build
       - run: npm run test
