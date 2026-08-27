@@ -525,6 +525,7 @@ body.drawer-open .drawer{transform:translateX(0)}
 .bar{height:6px;background:var(--bg-panel-raised);border-radius:3px;overflow:hidden}
 .bar span{display:block;height:100%;background:var(--accent-cyan);border-radius:3px;transition:width .4s}
 
+.role-nav-mobile{display:none;margin-bottom:10px}
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
   .sidebar{width:56px}
@@ -541,7 +542,6 @@ body.sidebar-open .nav-item>:not(.nav-dot):not(.icon),body.sidebar-open .sidebar
 body.sidebar-open .sidebar-brand{padding:0 16px;justify-content:flex-start}
 .mobile-toggle{display:none;width:28px;height:28px;border-radius:6px;background:var(--bg-panel-raised);border:none;color:var(--text-secondary);cursor:pointer;align-items:center;justify-content:center;margin-right:8px;flex:none}
 .mobile-toggle:hover{color:var(--text-primary)}
-.role-nav-mobile{display:none;margin-bottom:10px}
 .role-nav-mobile select{width:100%;background:var(--bg-input);border:1px solid var(--border-strong);border-radius:7px;padding:8px 12px;color:var(--text-primary);font-size:13px;font-family:var(--font-body)}
 
 /* ===== FORM SECTIONS (project form) ===== */
