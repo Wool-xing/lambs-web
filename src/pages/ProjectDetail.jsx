@@ -436,14 +436,15 @@ export default function ProjectDetail() {
 
       {(() => {
         const hasProcess = !!(project?.service_name || project?.startup_command)
-        const statusLabel = { online: '在线', offline: '已离线', maintenance: '维护中' }[project?.status] || project?.status
-        const statusColor = project?.status === 'online' ? 'var(--accent-green)' : project?.status === 'maintenance' ? 'var(--accent-amber)' : 'var(--text-tertiary)'
+        const statusLabel = { online: '在线', offline: '离线', maintenance: '维护中' }[project?.status] || project?.status
+        const statusColor = project?.status === 'online' ? 'var(--status-online)' : project?.status === 'maintenance' ? 'var(--status-maintenance)' : 'var(--status-offline)'
         const barStyle = { background: 'var(--bg-panel-raised)', border: '1px solid var(--border-strong)', borderRadius: 8, padding: '10px 16px', fontSize: 12, display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }
         if (hasProcess) {
           if (procStats?.running) {
             return (
               <div style={barStyle}>
-                <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>● 进程运行中</span>
+                <span>状态 <b style={{ color: statusColor }}>{statusLabel}</b></span>
+                <span style={{ color: 'var(--status-online)', fontWeight: 600 }}>● 进程运行中</span>
                 <span>CPU <b style={{ color: 'var(--text-primary)' }}>{procStats.cpu_percent?.toFixed(1)}%</b></span>
                 <span>内存 <b style={{ color: 'var(--text-primary)' }}>{procStats.rss_mb} MB</b></span>
                 <span>运行时长 <b style={{ color: 'var(--text-primary)' }}>{Math.floor(procStats.uptime_sec / 3600)}小时{Math.floor((procStats.uptime_sec % 3600) / 60)}分</b></span>

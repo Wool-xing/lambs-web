@@ -8,7 +8,6 @@ import Icon from '../components/Icon'
 import useFileUpload from '../hooks/useFileUpload'
 import { fmtTime } from '../utils/time'
 
-const VERSION = '2.5'
 
 export default function Settings() {
   const toast = useToast()
@@ -272,7 +271,7 @@ export default function Settings() {
               <span>{ds.repo}</span>
               <span>{ds.stack.split('+')[0].trim()}+{ds.db_type}</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10 }}>{ds.dsn}</span>
-              <span className={`chip ${ds.status === 'online' ? 'chip-online' : 'chip-offline'}`}>{ds.status === 'online' ? '已连接' : ds.status}</span>
+              <span className={`chip ${ds.status === 'online' ? 'chip-online' : 'chip-offline'}`}>{ds.status === 'online' ? '已连接' : '未连接'}</span>
             </div>
           ))}
         </div>

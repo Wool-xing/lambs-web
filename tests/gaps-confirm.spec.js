@@ -37,7 +37,7 @@ test.describe('确认按钮全链路', () => {
     await expect(page.locator('.project-card').first()).not.toContainText('QA通关');
   });
 
-  test('仪表盘卡片菜单停用：确认 → PATCH status + 已停用提示', async ({ page }) => {
+  test('仪表盘卡片菜单停用：确认 → PATCH status + 离线提示', async ({ page }) => {
     await loginAsAdmin(page, '/dashboard');
     let patchUrl = null;
     await page.route('**/api/projects/*/status', (route) => {

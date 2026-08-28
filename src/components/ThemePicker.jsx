@@ -9,6 +9,7 @@ const PALETTES = {
     '--bg-input': '#12161C', '--border': '#262D38', '--border-strong': '#38414F',
     '--text-primary': '#EEF1F5', '--text-secondary': '#8B93A3', '--text-tertiary': '#96A0B0',
     '--accent-cyan': '#00C7BE', '--accent-cyan-dim': '#0B3B39',
+    '--status-online': '#38D294', '--status-offline': '#96A0B0', '--status-maintenance': '#FFA13B',
     '--glass-bg': '22,27,34',
   },
   obsidian: {
@@ -16,6 +17,7 @@ const PALETTES = {
     '--bg-input': '#0A0C0A', '--border': '#1E231E', '--border-strong': '#2C342C',
     '--text-primary': '#E9EFE9', '--text-secondary': '#98A698', '--text-tertiary': '#788678',
     '--accent-cyan': '#3FB950', '--accent-cyan-dim': '#0D2814',
+    '--status-online': '#3FB950', '--status-offline': '#788678', '--status-maintenance': '#D29922',
     '--glass-bg': '10,12,10',
   },
   light: {
@@ -28,6 +30,7 @@ const PALETTES = {
     '--accent-red': '#D64545', '--accent-red-dim': '#FADDDD',
     '--accent-purple': '#7C5CE0', '--accent-purple-dim': '#E9E3FA',
     '--accent-blue': '#3B7DD8', '--accent-blue-dim': '#DBE8F9',
+    '--status-online': '#1F9D63', '--status-offline': '#71809A', '--status-maintenance': '#C77700',
     '--glass-bg': '255,255,255',
   },
 }
