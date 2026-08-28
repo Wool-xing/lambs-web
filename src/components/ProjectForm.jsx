@@ -193,7 +193,7 @@ export default function ProjectForm({ onDone, project }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="field" style={{ marginBottom: 10 }}>
               <label>项目名称（中文）<span className="req">*</span></label>
-              <input value={name} onChange={e => { setName(e.target.value); if (errors.name) setErrors({ ...errors, name: '' }) }} placeholder="请输入项目名称" className={errors.name ? 'input-error' : ''} style={{ padding: '8px 12px' }} />
+              <input autoFocus value={name} onChange={e => { setName(e.target.value); if (errors.name) setErrors({ ...errors, name: '' }) }} placeholder="请输入项目名称" className={errors.name ? 'input-error' : ''} style={{ padding: '8px 12px' }} />
               {errors.name && <div className="field-error-msg">{errors.name}</div>}
             </div>
             {!isEdit ? (
