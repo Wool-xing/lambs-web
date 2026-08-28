@@ -8,7 +8,7 @@
   --accent-cyan: #00C7BE; --accent-cyan-dim: #0B3B39;
   --accent-amber: #FFA13B; --accent-amber-dim: #4A3115;
   --accent-green: #38D294; --accent-green-dim: #123A2C;
-  --accent-red: #FF5D5D; --accent-red-dim: #3C1414;
+  --accent-red: #FF5D5D; --accent-red-dim: #3C1414; --accent-red-strong: #C62828; /* badge bg: white on this = 5.62:1 (≥4.5 WCAG AA) */
   /* Status tokens — 项目状态三态：在线/离线/维护中 (状态术语设计) */
   --status-online: #38D294; --status-offline: #96A0B0; --status-maintenance: #FFA13B;
   --accent-purple: #B892FF; --accent-purple-dim: #1F1424;
@@ -71,6 +71,8 @@ html.theme-switching body{opacity:.35}
 .login-title{font-family:var(--font-display);font-size:22px;font-weight:600;margin-bottom:4px}
 .login-sub{font-size:12px;color:var(--text-tertiary);margin-bottom:24px}
 .login-card .field{text-align:left}
+.login-link{background:none;border:none;padding:0;margin:0;font:inherit;font-size:12px;color:var(--accent-cyan);cursor:pointer}
+.login-link:hover{color:var(--accent-cyan)}
 
 /* ===== APP LAYOUT ===== */
 .app-container{display:flex;height:100vh}
@@ -97,7 +99,7 @@ html.theme-switching body{opacity:.35}
 .sidebar-nav{flex:1;overflow:auto;padding:10px 12px}
 .sidebar-nav::-webkit-scrollbar{width:0}
 .nav-group{
-  font-family:var(--font-mono);font-size:9.5px;color:var(--text-tertiary);
+  font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary);
   letter-spacing:.1em;text-transform:uppercase;margin:16px 8px 6px;
 }
 .nav-group:first-child{margin-top:0}
@@ -150,7 +152,7 @@ html.theme-switching body{opacity:.35}
 .topbar-btn:hover{background:var(--bg-input);color:var(--text-primary)}
 .topbar-btn .badge{
   position:absolute;top:-4px;right:-6px;min-width:16px;height:16px;border-radius:8px;
-  background:var(--accent-red);color:#fff;font-size:10px;font-weight:700;
+  background:var(--accent-red-strong);color:#fff;font-size:10px;font-weight:700;
   display:grid;place-items:center;padding:0 5px;animation:badge-in var(--dur-fast) ease-out;
 }
 @keyframes badge-in{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
@@ -270,13 +272,14 @@ html.theme-switching body{opacity:.35}
 .project-card-more{
   width:28px;height:28px;border-radius:6px;background:transparent;border:none;color:var(--text-tertiary);
   cursor:pointer;display:grid;place-items:center;font-size:16px;
+  padding:8px;margin:-8px; /* 视觉 28×28，命中区 44×44 (WCAG 2.5.8) */
 }
 .project-card-more:hover{background:var(--bg-panel-raised);color:var(--text-primary)}
 .project-card-name{font-family:var(--font-display);font-size:16px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .project-card-desc{font-size:11px;color:var(--text-tertiary);margin-bottom:10px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .project-card-meta{display:flex;gap:18px;font-family:var(--font-mono);font-size:10.5px}
 .pcm-item{display:flex;flex-direction:column;gap:2px}
-.pcm-item .kl{color:var(--text-tertiary);font-size:9px;text-transform:uppercase}
+.pcm-item .kl{color:var(--text-tertiary);font-size:11px;text-transform:uppercase}
 .pcm-item .vl{color:var(--text-primary)}
 .project-card-status{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px}
 .ps-dot{width:6px;height:6px;border-radius:50%}
@@ -455,6 +458,8 @@ body.drawer-open .drawer{transform:translateX(0)}
 .check-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);padding:4px 0}
 .field input:disabled,.field select:disabled,.field textarea:disabled{opacity:.45;cursor:not-allowed;background:var(--bg-deep)}
 .check-row input[type=checkbox]{accent-color:var(--accent-cyan)}
+/* 表格行复选框：视觉 13×13，命中区 44×44 (WCAG 2.5.8)；负 margin 保住布局 */
+.tbl-check{display:inline-flex;align-items:center;justify-content:center;padding:16px;margin:-16px;cursor:pointer}
 .pwd-wrap{position:relative;display:flex;align-items:center}
 .pwd-wrap input{flex:1;padding-right:40px}
 .pwd-eye{position:absolute;right:6px;width:28px;height:28px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--text-secondary);background:none;border:none;padding:0}
