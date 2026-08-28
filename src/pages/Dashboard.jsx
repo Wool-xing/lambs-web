@@ -348,20 +348,20 @@ export default function Dashboard() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
           <span className="k">系统监控</span>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-tertiary)' }}>
-            {nodesAll.filter(n => n.online).length} 在线 · {nodesAll.filter(n => !n.online).length} 失联
+            {nodesAll.filter(n => n.online).length} 在线 · {nodesAll.filter(n => !n.online).length} 离线
           </span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 10 }}>
           {nodesAll.map(n => (
             <div key={n.name} style={{
               background: 'rgba(var(--glass-bg),.48)',
-              border: `1px solid ${n.online ? 'rgba(255,255,255,.04)' : 'var(--accent-red)'}`,
+              border: `1px solid ${n.online ? 'rgba(255,255,255,.04)' : 'var(--status-offline)'}`,
               borderRadius: 9, padding: '10px 12px', opacity: n.online ? 1 : .45,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                 <span className={`ps-dot ${n.online ? 'green' : 'gray'}`} />
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600 }}>{n.name}</span>
-                {!n.online && <span style={{ marginLeft: 'auto', fontSize: 9.5, padding: '1px 7px', borderRadius: 4, background: 'var(--accent-red-dim)', color: 'var(--accent-red)' }}>失联</span>}
+                {!n.online && <span style={{ marginLeft: 'auto', fontSize: 9.5, padding: '1px 7px', borderRadius: 4, background: 'rgba(150,160,176,.14)', color: 'var(--status-offline)' }}>离线</span>}
               </div>
               {n.online && [
                 ['CPU', n.cpu_percent, `${n.cpu_percent}%`],
@@ -492,7 +492,7 @@ export default function Dashboard() {
                 </div>
                 <div className="project-card-status" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span className={`ps-dot ${p.status === 'online' ? 'green' : p.status === 'maintenance' ? 'amber' : 'gray'}`} />
-                  <span style={{ flex: 1 }}>{p.status === 'online' ? '运行中' : p.status === 'offline' ? '已离线' : '维护中'}</span>
+                  <span style={{ flex: 1 }}>{p.status === 'online' ? '在线' : p.status === 'offline' ? '离线' : '维护中'}</span>
                   {(user?.role === 'super_admin' || user?.role === 'project_admin') && (
                     <button className="btn btn-ghost btn-xs" style={{ fontSize: 10, padding: '2px 8px', opacity: 0.6 }}
                       onClick={e => { e.stopPropagation(); handleToggleStatus(p.id) }}>

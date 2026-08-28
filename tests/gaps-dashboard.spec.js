@@ -137,7 +137,7 @@ test.describe('仪表盘 最近动态', () => {
     await loginAsAdmin(page, '/dashboard');
     // 覆盖为项目型动态（切换状态 → 跳转 /project/:id），reload 后生效
     await page.route('**/api/settings/audit-logs', (route) =>
-      route.fulfill({ json: { success: true, data: { logs: [{ id: 'x1', created_at: '2026-08-27T10:00:00', action: '切换状态', target: 'qa-tools-hub', detail: '项目已上线' }] } } }));
+      route.fulfill({ json: { success: true, data: { logs: [{ id: 'x1', created_at: '2026-08-27T10:00:00', action: '切换状态', target: 'qa-tools-hub', detail: '项目已在线' }] } } }));
     await page.reload();
 
     const header = page.locator('.card-header', { hasText: '最近动态' });
