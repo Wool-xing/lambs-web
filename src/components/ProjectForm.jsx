@@ -184,7 +184,7 @@ export default function ProjectForm({ onDone, project }) {
               ) : (
                 <>
                   <span className="upload-hint">点击上传</span>
-                  <span className="upload-info" style={{ fontSize: 9, marginTop: 0, zIndex: 1, position: 'relative', textAlign: 'center', lineHeight: 1.3 }}>PNG/JPG/SVG/WebP · 5MB</span>
+                  <span className="upload-info" style={{ fontSize: 11, marginTop: 0, zIndex: 1, position: 'relative', textAlign: 'center', lineHeight: 1.3 }}>PNG/JPG/SVG/WebP · 5MB</span>
                 </>
               )}
             </div>

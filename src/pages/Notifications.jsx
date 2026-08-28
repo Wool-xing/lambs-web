@@ -69,6 +69,16 @@ export default function Notifications() {
 
   const typeLabel = (t) => t === 'alert' ? '告警' : t === 'info' ? '信息' : '成功'
 
+  // 引擎裸错误（dial tcp / i/o timeout 等）不直接暴露给用户：
+  // 展示友好文案，原始错误保留在 title 供排查。
+  const friendlyContent = (n) => {
+    const raw = n.content || ''
+    if (/dial tcp|i\/o timeout|internal error/i.test(raw)) {
+      return <div className="content" title={raw}>执行失败：暂时无法连接执行机，请稍后重试</div>
+    }
+    return <div className="content">{raw}</div>
+  }
+
   return (
     <div className="card">
       <div className="card-header">
@@ -107,7 +117,7 @@ export default function Notifications() {
                 <span className={`notif-dot ${notifDot}`} />
                 <div className="notif-body">
                   <div className="title">{n.title}</div>
-                  <div className="content">{n.content}</div>
+                  {friendlyContent(n)}
                   <div className="meta">{fmtTime(n.created_at)}</div>
                 </div>
                 <div className="notif-actions">

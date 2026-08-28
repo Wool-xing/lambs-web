@@ -262,6 +262,19 @@ export default function ProjectDetail() {
   // Type of the currently selected datasource (primary when none selected)
   const curDBType = ((project?.datasources || []).find(d => d.id === selectedDS)?.type || project?.db_type || '')
 
+  // ARIA tabs keyboard: roving tabindex + arrow keys + Enter/Space activation (WCAG 2.1.1)
+  const onTabKeyDown = (e) => {
+    const tabs = [...e.currentTarget.parentElement.querySelectorAll('[role="tab"]')]
+    const idx = tabs.indexOf(e.currentTarget)
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); return }
+    let next = -1
+    if (e.key === 'ArrowRight') next = (idx + 1) % tabs.length
+    else if (e.key === 'ArrowLeft') next = (idx - 1 + tabs.length) % tabs.length
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = tabs.length - 1
+    if (next >= 0) { e.preventDefault(); tabs[next].focus(); tabs[next].click() }
+  }
+
   const handleDelete = async () => {
     const ok = await confirm('删除项目', `确定删除「${project.name}」吗？所有数据将被移除。`)
     if (!ok) return
@@ -514,17 +527,22 @@ export default function ProjectDetail() {
         </div>
 
         {/* Admin tabs */}
-        <div className="tabs" style={{ marginBottom: 12 }}>
-          <div className={`tab-item ${adminMode === 'data' ? 'active' : ''}`} onClick={() => setAdminMode('data')}>数据浏览</div>
+        <div className="tabs" style={{ marginBottom: 12 }} role="tablist">
+          <div role="tab" aria-selected={adminMode === 'data'} tabIndex={adminMode === 'data' ? 0 : -1}
+            className={`tab-item ${adminMode === 'data' ? 'active' : ''}`} onClick={() => setAdminMode('data')} onKeyDown={onTabKeyDown}>数据浏览</div>
           {canAdmin && (
-            <div className={`tab-item ${adminMode === 'members' ? 'active' : ''}`} onClick={() => { setAdminMode('members'); fetchMembers() }}>成员管理</div>
+            <div role="tab" aria-selected={adminMode === 'members'} tabIndex={adminMode === 'members' ? 0 : -1}
+              className={`tab-item ${adminMode === 'members' ? 'active' : ''}`} onClick={() => { setAdminMode('members'); fetchMembers() }} onKeyDown={onTabKeyDown}>成员管理</div>
           )}
           {project?.service_name && (
-            <div className={`tab-item ${adminMode === 'logs' ? 'active' : ''}`} onClick={() => { setAdminMode('logs'); fetchLogs() }}>服务日志</div>
+            <div role="tab" aria-selected={adminMode === 'logs'} tabIndex={adminMode === 'logs' ? 0 : -1}
+              className={`tab-item ${adminMode === 'logs' ? 'active' : ''}`} onClick={() => { setAdminMode('logs'); fetchLogs() }} onKeyDown={onTabKeyDown}>服务日志</div>
           )}
-          <div className={`tab-item ${adminMode === 'backups' ? 'active' : ''}`} onClick={() => { setAdminMode('backups'); fetchBackups() }}>备份管理</div>
+          <div role="tab" aria-selected={adminMode === 'backups'} tabIndex={adminMode === 'backups' ? 0 : -1}
+            className={`tab-item ${adminMode === 'backups' ? 'active' : ''}`} onClick={() => { setAdminMode('backups'); fetchBackups() }} onKeyDown={onTabKeyDown}>备份管理</div>
           {user?.role === 'super_admin' && (
-            <div className={`tab-item ${adminMode === 'tasks' ? 'active' : ''}`} onClick={() => setAdminMode('tasks')}>计划任务</div>
+            <div role="tab" aria-selected={adminMode === 'tasks'} tabIndex={adminMode === 'tasks' ? 0 : -1}
+              className={`tab-item ${adminMode === 'tasks' ? 'active' : ''}`} onClick={() => setAdminMode('tasks')} onKeyDown={onTabKeyDown}>计划任务</div>
           )}
         </div>
 
@@ -737,7 +755,7 @@ export default function ProjectDetail() {
                     <div className="tbl-row head" style={gridStyle}>
                       <span>
                         {canManageRows && tableData.pk && (
-                          <input type="checkbox" checked={allChecked} onChange={toggleAll} style={{ cursor: 'pointer' }} />
+                          <label className="tbl-check"><input type="checkbox" aria-label="全选本页" checked={allChecked} onChange={toggleAll} style={{ cursor: 'pointer' }} /></label>
                         )}
                       </span>
                       {cols.map((col, ci) => {
@@ -776,7 +794,7 @@ export default function ProjectDetail() {
                           <div key={ri} className="tbl-row" style={gridStyle}>
                             <span style={{ paddingLeft: 10 }}>
                               {canManageRows && pkVal !== null && (
-                                <input type="checkbox" checked={selectedPKs.has(pkVal)} onChange={() => toggleOne(pkVal)} style={{ cursor: 'pointer' }} />
+                                <label className="tbl-check"><input type="checkbox" aria-label={`选择第 ${ri + 1} 行`} checked={selectedPKs.has(pkVal)} onChange={() => toggleOne(pkVal)} style={{ cursor: 'pointer' }} /></label>
                               )}
                             </span>
                             {cols.map((col, ci) => {

@@ -186,12 +186,12 @@ export default function Login() {
           <input type="checkbox" id="remember-me" checked={remember} onChange={e => setRemember(e.target.checked)} />
           <label htmlFor="remember-me" style={{ cursor: 'pointer' }}>记住我</label>
         </div>
-        <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} disabled={loading}>
+        <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', minHeight: 44 }} disabled={loading}>
           {loading ? '登录中…' : '登 录'}
         </button>
         <div style={{ marginTop: 14, textAlign: 'center', display: 'flex', justifyContent: 'center', gap: 24 }}>
-          <span style={{ fontSize: 12, color: 'var(--accent-cyan)', cursor: 'pointer' }} onClick={openForgot}>忘记密码？</span>
-          <span style={{ fontSize: 12, color: 'var(--accent-cyan)', cursor: 'pointer' }} onClick={openRegister}>注册新账号</span>
+          <button type="button" className="login-link" onClick={openForgot}>忘记密码？</button>
+          <button type="button" className="login-link" onClick={openRegister}>注册新账号</button>
         </div>
       </form>
 
