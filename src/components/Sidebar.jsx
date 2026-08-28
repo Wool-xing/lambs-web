@@ -65,6 +65,8 @@ export default function Sidebar() {
 
   const [logoImg, setLogoImg] = useState(localStorage.getItem('lambs_brand_logo_img') || '')
   const isActive = (path) => location.pathname === path
+  // div onClick 需要键盘可达：Enter/Space 触发 (WCAG 2.1.1)
+  const navKey = (e, fn) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn() } }
 
   useEffect(() => {
     const h = () => setLogoImg(localStorage.getItem('lambs_brand_logo_img') || '')
@@ -87,13 +89,14 @@ export default function Sidebar() {
       </div>
       <nav className="sidebar-nav">
         <div className="nav-group">总览</div>
-        <div className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`} onClick={() => navigate('/dashboard')}>
+        <div className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`} role="button" tabIndex={0} onKeyDown={e => navKey(e, () => navigate('/dashboard'))} onClick={() => navigate('/dashboard')}>
           <Icon name="dashboard" size={16} /> 仪表盘
         </div>
 
         <div className="nav-group">项目</div>
         {visible.map(p => (
           <div key={p.id} className={`nav-item ${location.pathname === `/project/${p.id}` ? 'active' : ''}`}
+            role="button" tabIndex={0} onKeyDown={e => navKey(e, () => navigate(`/project/${p.id}`))}
             onClick={() => navigate(`/project/${p.id}`)}>
             <span className={`nav-dot ${p.status === 'online' ? 'online' : p.status === 'maintenance' ? 'warn' : 'off'}`} />
             {p.name}
@@ -119,15 +122,15 @@ export default function Sidebar() {
 
         <div className="nav-group">管理</div>
         {user?.role === 'super_admin' && (
-          <div className={`nav-item ${isActive('/users') ? 'active' : ''}`} onClick={() => navigate('/users')}>
+          <div className={`nav-item ${isActive('/users') ? 'active' : ''}`} role="button" tabIndex={0} onKeyDown={e => navKey(e, () => navigate('/users'))} onClick={() => navigate('/users')}>
             <Icon name="users" size={16} /> 用户管理
           </div>
         )}
-        <div className={`nav-item ${isActive('/notifications') ? 'active' : ''}`} onClick={() => navigate('/notifications')}>
+        <div className={`nav-item ${isActive('/notifications') ? 'active' : ''}`} role="button" tabIndex={0} onKeyDown={e => navKey(e, () => navigate('/notifications'))} onClick={() => navigate('/notifications')}>
           <Icon name="bell" size={16} /> 通知中心
         </div>
         {user?.role === 'super_admin' && (
-          <div className={`nav-item ${isActive('/settings') ? 'active' : ''}`} onClick={() => navigate('/settings')}>
+          <div className={`nav-item ${isActive('/settings') ? 'active' : ''}`} role="button" tabIndex={0} onKeyDown={e => navKey(e, () => navigate('/settings'))} onClick={() => navigate('/settings')}>
             <Icon name="settings" size={16} /> 系统设置
           </div>
         )}
@@ -147,8 +150,8 @@ export default function Sidebar() {
           </div>
         </div>
         <div style={{display:'flex',gap:12}}>
-          <span style={{fontSize:10,color:'var(--text-tertiary)',cursor:'pointer'}} onClick={() => setShowPwd(true)}>修改密码</span>
-          <span style={{fontSize:10,color:'var(--text-tertiary)',cursor:'pointer'}} onClick={doLogout}>退出登录</span>
+          <span style={{fontSize:10,color:'var(--text-tertiary)',cursor:'pointer'}} role="button" tabIndex={0} onKeyDown={e => navKey(e, () => setShowPwd(true))} onClick={() => setShowPwd(true)}>修改密码</span>
+          <span style={{fontSize:10,color:'var(--text-tertiary)',cursor:'pointer'}} role="button" tabIndex={0} onKeyDown={e => navKey(e, doLogout)} onClick={doLogout}>退出登录</span>
         </div>
       </div>
       {showPwd && (

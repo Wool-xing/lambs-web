@@ -482,7 +482,7 @@ export default function Dashboard() {
                 <div className="project-card-desc">{p.description}</div>
                 {(ensureArray(p.tags)).length > 0 && (
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4, marginBottom: 2 }}>
-                    {(ensureArray(p.tags)).map(t => <span key={t} className="chip" style={{ fontSize: 9 }}>{t}</span>)}
+                    {(ensureArray(p.tags)).map(t => <span key={t} className="chip" style={{ fontSize: 11 }}>{t}</span>)}
                   </div>
                 )}
                 <div className="project-card-meta">
@@ -494,7 +494,7 @@ export default function Dashboard() {
                   <span className={`ps-dot ${p.status === 'online' ? 'green' : p.status === 'maintenance' ? 'amber' : 'gray'}`} />
                   <span style={{ flex: 1 }}>{p.status === 'online' ? '在线' : p.status === 'offline' ? '离线' : '维护中'}</span>
                   {(user?.role === 'super_admin' || user?.role === 'project_admin') && (
-                    <button className="btn btn-ghost btn-xs" style={{ fontSize: 10, padding: '2px 8px', opacity: 0.6 }}
+                    <button className="btn btn-ghost btn-xs" style={{ fontSize: 10, opacity: 0.6, minWidth: 44, minHeight: 44 }}
                       onClick={e => { e.stopPropagation(); handleToggleStatus(p.id) }}>
                       {p.status === 'online' ? '停用' : p.status === 'maintenance' ? '上线' : '启用'}
                     </button>
