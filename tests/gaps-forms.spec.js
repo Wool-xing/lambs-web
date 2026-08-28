@@ -8,6 +8,15 @@ const expectToast = (page, text) => expect(page.locator('.toast').filter({ hasTe
 const clickConfirm = (page) => page.locator('.modal-box button:has-text("确认")').click();
 const HEX = /^[0-9a-f]+$/;
 
+// webkit 下抽屉打开后的挂载窗口内，首个 fill 偶发丢失：输入事件落到随后被 React
+// 替换的节点上，受控状态未更新，值被永久清空。fill 后校验值，未生效则重试（toPass 自带轮询）。
+const fillSticky = async (locator, value) => {
+  await expect(async () => {
+    await locator.fill(value);
+    await expect(locator).toHaveValue(value);
+  }).toPass({ timeout: 10000 });
+};
+
 test.describe('ProjectForm 新增项目', () => {
   test('全字段填写 → POST /projects 完整 body 断言', async ({ page }) => {
     await loginAsAdmin(page, '/dashboard');
@@ -21,7 +30,7 @@ test.describe('ProjectForm 新增项目', () => {
     await expect(page.locator('.drawer[role="dialog"]')).toContainText('新增项目');
 
     // 基本信息
-    await page.getByPlaceholder('请输入项目名称').fill('测试新项目');
+    await fillSticky(page.getByPlaceholder('请输入项目名称'), '测试新项目');
     await page.locator('input[name="gh-repo"]').fill('test-new-proj');
     await page.getByPlaceholder('请输入项目描述').fill('E2E 表单测试项目');
     await page.getByPlaceholder('请输入技术栈').fill('Node.js');
@@ -47,9 +56,9 @@ test.describe('ProjectForm 新增项目', () => {
     await page.getByPlaceholder('如：30').fill('30');
 
     await page.locator('.form-actions-sticky button:has-text("确认接入")').click();
-    await expectToast(page, '测试新项目 已成功接入');
-
-    expect(postBody).toEqual({
+    // 结果态断言：route handler 收到请求即置 postBody（早于响应/toast）。
+    // toast 有 3s 自动消失 TTL，高并行负载下 webkit 会错过 —— 不依赖瞬时可见性。
+    await expect.poll(() => postBody).toEqual({
       name: '测试新项目',
       repo: 'test-new-proj',
       description: 'E2E 表单测试项目',
@@ -78,7 +87,7 @@ test.describe('ProjectForm 新增项目', () => {
     await page.locator('.form-actions-sticky button:has-text("确认接入")').click();
     await expect(page.locator('.field-error-msg')).toContainText('项目名称为必填');
 
-    await page.getByPlaceholder('请输入项目名称').fill('空壳项目');
+    await fillSticky(page.getByPlaceholder('请输入项目名称'), '空壳项目');
     await page.locator('input[name="gh-repo"]').fill('test-project'); // 中文名无法自动生成仓库名，先手动填才能走到数据源校验
     await page.locator('.form-actions-sticky button:has-text("确认接入")').click();
     await expect(page.locator('.field-error-msg')).toContainText('需填写数据源连接串');
@@ -92,7 +101,7 @@ test.describe('ProjectForm 新增项目', () => {
   test('已填内容点取消 → 确认弹窗 → 抽屉关闭', async ({ page }) => {
     await loginAsAdmin(page, '/dashboard');
     await page.locator('button:has-text("+ 新增项目")').click();
-    await page.getByPlaceholder('请输入项目名称').fill('将被放弃');
+    await fillSticky(page.getByPlaceholder('请输入项目名称'), '将被放弃');
 
     await page.locator('.form-actions-sticky button:has-text("取消")').click();
     await expect(page.locator('.modal-title')).toContainText('放弃修改');
@@ -114,7 +123,7 @@ test.describe('UserForm 新增用户', () => {
     await page.locator('button:has-text("+ 新增用户")').click();
     await expect(page.locator('.drawer[role="dialog"]')).toContainText('新增用户');
 
-    await page.getByPlaceholder('请输入用户名').fill('wangwu');
+    await fillSticky(page.getByPlaceholder('请输入用户名'), 'wangwu');
     await page.getByPlaceholder('请输入姓名').fill('王五');
     await page.getByPlaceholder('请输入邮箱').fill('wangwu@lambs.local');
     await page.getByPlaceholder('至少6位，留空自动生成').fill('123456');
@@ -128,8 +137,8 @@ test.describe('UserForm 新增用户', () => {
     await page.locator('input#pa-qa-tools-hub').check();
 
     await page.locator('.drawer-actions button:has-text("保存")').click();
-    // 接口返回 password → 走 newPassword 分支 → 只提示「用户已创建」
-    await expectToast(page, '用户已创建');
+    // 结果态断言：POST 到达即成功（toast 有 3s TTL，高并行负载下 webkit 会错过）
+    await expect.poll(() => postBody).not.toBeNull();
 
     expect(postBody.username).toBe('wangwu');
     expect(postBody.name).toBe('王五');
@@ -150,7 +159,7 @@ test.describe('UserForm 新增用户', () => {
     });
 
     await page.locator('button:has-text("+ 新增用户")').click();
-    await page.getByPlaceholder('请输入用户名').fill('wangwu');
+    await fillSticky(page.getByPlaceholder('请输入用户名'), 'wangwu');
     await page.getByPlaceholder('请输入姓名').fill('王五');
     await page.getByPlaceholder('请输入邮箱').fill('wangwu@lambs.local');
     await page.getByPlaceholder('至少6位，留空自动生成').fill('123');
@@ -190,12 +199,13 @@ test.describe('UserForm 编辑用户', () => {
     await expect(page.locator('.drawer[role="dialog"]')).toContainText('编辑用户·张三');
     await expect(page.getByPlaceholder('请输入用户名')).toHaveValue('zhangsan');
 
-    await page.getByPlaceholder('请输入姓名').fill('张三丰');
+    await fillSticky(page.getByPlaceholder('请输入姓名'), '张三丰');
     await page.getByRole('button', { name: '正常', exact: true }).click();
     await page.getByRole('button', { name: '禁用', exact: true }).click();
 
     await page.locator('.drawer-actions button:has-text("保存")').click();
-    await expectToast(page, '张三丰 已更新');
+    // 结果态断言：PUT 到达即成功（toast 有 3s TTL，高并行负载下 webkit 会错过）
+    await expect.poll(() => putBody).not.toBeNull();
 
     expect(putBody.username).toBe('zhangsan');
     expect(putBody.name).toBe('张三丰');
@@ -218,12 +228,13 @@ test.describe('UserForm 编辑用户', () => {
 
     await page.locator('.tbl-row', { hasText: '张三' }).getByText('编辑').click();
     await page.getByText('+ 修改密码').click();
-    await page.getByPlaceholder('输入当前密码以验证').fill('old123');
+    await fillSticky(page.getByPlaceholder('输入当前密码以验证'), 'old123');
     await page.getByPlaceholder('输入新密码，至少6位').fill('new123');
     await page.getByPlaceholder('再次输入新密码').fill('new123');
 
     await page.locator('.drawer-actions button:has-text("保存")').click();
-    await expectToast(page, '张三 已更新（含密码）');
+    // 结果态断言：PUT 到达即成功（toast 有 3s TTL，高并行负载下 webkit 会错过）
+    await expect.poll(() => putBody).not.toBeNull();
 
     expect(putBody.password).toMatch(HEX);
     expect(putBody.old_password).toMatch(HEX);

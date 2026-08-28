@@ -53,9 +53,13 @@ test.describe('仪表盘页面', () => {
 
   test('搜索项目名称', async ({ page }) => {
     const searchInput = page.locator('input[placeholder*="搜索"]');
+    // Debounce 250ms — 等 debounce 后的搜索请求发出（确定性），不赌固定 sleep
+    const searchReq = page.waitForRequest((req) => {
+      const u = new URL(req.url());
+      return u.pathname.endsWith('/api/projects') && u.searchParams.get('search') === 'QA';
+    });
     await searchInput.fill('QA');
-    // Debounce 250ms, wait a bit
-    await page.waitForTimeout(400);
+    await searchReq;
     // Should filter to only QA通关
     const cards = page.locator('.project-card');
     await expect(cards).toHaveCount(1);

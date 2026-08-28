@@ -9,7 +9,8 @@ const expectToast = (page, text) => expect(page.locator('.toast').filter({ hasTe
 test.describe('通知中心 已读与删除', () => {
   test('全部已读 → POST read-all + 未读样式清除', async ({ page }) => {
     await loginAsAdmin(page, '/notifications');
-    await expect(page.locator('.notif-item.unread')).toHaveCount(4);
+    // 全量并行下 webkit 首屏列表请求可能 >5s —— 首条 count 断言放宽窗口
+    await expect(page.locator('.notif-item.unread')).toHaveCount(4, { timeout: 10000 });
     let postUrl = null;
     await page.route('**/api/notifications/read-all', (route) => {
       postUrl = route.request().url();
@@ -24,7 +25,7 @@ test.describe('通知中心 已读与删除', () => {
 
   test('标已读 → POST /n1/read + 未读计数减少', async ({ page }) => {
     await loginAsAdmin(page, '/notifications');
-    await expect(page.locator('.notif-item.unread')).toHaveCount(4);
+    await expect(page.locator('.notif-item.unread')).toHaveCount(4, { timeout: 10000 });
     let readUrl = null;
     await page.route('**/api/notifications/n1/read', (route) => {
       readUrl = route.request().url();
@@ -32,13 +33,14 @@ test.describe('通知中心 已读与删除', () => {
     });
 
     await page.locator('.notif-item', { hasText: 'QA通关 - 服务异常' }).getByRole('button', { name: '标记已读' }).click();
-    expect(readUrl).toContain('/api/notifications/n1/read');
+    // 请求到达 route handler 是异步的 —— poll 等待而非立即断言（firefox 下会竞态拿到 null）
+    await expect.poll(() => readUrl).toContain('/api/notifications/n1/read');
     await expect(page.locator('.notif-item.unread')).toHaveCount(3);
   });
 
   test('删除通知 → DELETE /n1 + 列表移除', async ({ page }) => {
     await loginAsAdmin(page, '/notifications');
-    await expect(page.locator('.notif-item')).toHaveCount(4);
+    await expect(page.locator('.notif-item')).toHaveCount(4, { timeout: 10000 });
     let deleteUrl = null;
     await page.route(/\/api\/notifications\/n1$/, (route) => {
       deleteUrl = route.request().url();
@@ -46,7 +48,8 @@ test.describe('通知中心 已读与删除', () => {
     });
 
     await page.locator('.notif-item', { hasText: 'QA通关 - 服务异常' }).getByRole('button', { name: '删除通知' }).click();
-    expect(deleteUrl).toContain('/api/notifications/n1');
+    // 同「标已读」：请求到达 route handler 前 deleteUrl 仍是 null，poll 等待
+    await expect.poll(() => deleteUrl).toContain('/api/notifications/n1');
     await expect(page.locator('.notif-item')).toHaveCount(3);
     await expect(page.getByText('QA通关 - 服务异常')).toBeHidden();
   });
