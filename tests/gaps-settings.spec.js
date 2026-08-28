@@ -31,8 +31,9 @@ test.describe('设置页 品牌 Logo', () => {
     await loginAsAdmin(page, '/settings');
     await page.locator('input[type="file"]').setInputFiles({ name: 'logo.png', mimeType: 'image/png', buffer: PNG_1PX });
 
-    const saved = await page.evaluate(() => localStorage.getItem('lambs_brand_logo_img'));
-    expect(saved).toMatch(/^data:image\/png;base64,/);
+    // FileReader → dataURL → localStorage 是异步链路，webkit 下 setInputFiles 返回时可能未写完 —— poll 等待
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('lambs_brand_logo_img')))
+      .toMatch(/^data:image\/png;base64,/);
     await expect(page.locator('.upload-zone img')).toBeVisible();
     await expect(page.getByText('移除')).toBeVisible();
 
@@ -63,13 +64,16 @@ test.describe('设置页 数据导出', () => {
     await exportTrigger.scrollIntoViewIfNeeded();
     await page.waitForTimeout(250);
     await exportTrigger.click();
-    await page.getByRole('button', { name: 'QA通关', exact: true }).click();
+    // 侧边栏「QA通关」nav 也是 role=button → 用 .last() 命中下拉面板选项（面板 portal 到 body 末尾）
+    await page.getByRole('button', { name: 'QA通关', exact: true }).last().click();
 
     const downloadPromise = page.waitForEvent('download', { timeout: 5000 });
     // has-text("导出") 会命中「按项目导出用户/导出系统用户」→ 用精确名称
     await page.getByRole('button', { name: '导出', exact: true }).click();
     const download = await downloadPromise;
-    expect(download.suggestedFilename()).toBe('lambs-project-users_qa-tools-hub.csv');
+    // a.download 是 lambs-project-users/qa-tools-hub.csv：chromium 把 / 净化成 _，webkit 保留 —— 只断言包含
+    expect(download.suggestedFilename()).toContain('lambs-project-users');
+    expect(download.suggestedFilename()).toContain('qa-tools-hub.csv');
   });
 });
 
