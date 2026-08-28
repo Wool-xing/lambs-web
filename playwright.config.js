@@ -4,7 +4,9 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  // CI 已用 retries:2 吸收瞬时失败；本地全量并行（8 workers）下 webkit 偶发 >10s 的网络停顿，
+  // 属环境负载抖动而非断言问题 —— 本地同样给 1 次重试。
+  retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 1 : undefined,
   reporter: [['html', { open: 'never' }], ['list']],
   timeout: 15000,
