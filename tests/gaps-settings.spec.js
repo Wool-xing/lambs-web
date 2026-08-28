@@ -56,8 +56,11 @@ test.describe('设置页 数据导出', () => {
 
   test('按项目导出用户 → 下载带项目名的 csv', async ({ page }) => {
     await loginAsAdmin(page, '/settings');
-    await page.route('**/api/settings/export/project-users/**', (route) =>
-      route.fulfill({ contentType: 'text/csv', body: 'name,email\n张三,zhangsan@lambs.local' }));
+    let exportReq = '';
+    await page.route('**/api/settings/export/project-users/**', (route) => {
+      exportReq = route.request().url();
+      route.fulfill({ contentType: 'text/csv', body: 'name,email\n张三,zhangsan@lambs.local' });
+    });
 
     // 预滚动排掉异步 scroll 事件，否则面板打开瞬间被 scroll 监听器关闭（选项 detached）
     const exportTrigger = page.getByRole('button', { name: '按项目导出用户', exact: true });
@@ -71,9 +74,14 @@ test.describe('设置页 数据导出', () => {
     // has-text("导出") 会命中「按项目导出用户/导出系统用户」→ 用精确名称
     await page.getByRole('button', { name: '导出', exact: true }).click();
     const download = await downloadPromise;
-    // a.download 是 lambs-project-users/qa-tools-hub.csv：chromium 把 / 净化成 _，webkit 保留 —— 只断言包含
-    expect(download.suggestedFilename()).toContain('lambs-project-users');
-    expect(download.suggestedFilename()).toContain('qa-tools-hub.csv');
+    // 契约断言：请求打对端点 + 下载事件触发。文件名来自 blob 的 a[download]
+    // 属性，webkit 对 blob 下载不暴露 suggestedFilename（恒空）——不做
+    // 文件名断言（chromium/firefox 下 a.download=lambs-project-users/qa-tools-hub.csv）。
+    expect(exportReq).toContain('project-users/qa-tools-hub');
+    const fn = download.suggestedFilename();
+    if (fn) {
+      expect(fn).toContain('qa-tools-hub');
+    }
   });
 });
 
