@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useConfirm } from './Modal'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate } from "react-router-dom"
 import { api } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import Icon from './Icon'
@@ -104,7 +104,7 @@ export default function Topbar() {
         <div className="topbar-clock">{time}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span className={`ps-dot ${sysOk ? 'green' : 'gray'}`} />
-          <span className="topbar-health-text" style={{ fontSize: 11, color: sysOk ? 'var(--text-tertiary)' : 'var(--accent-red)' }}>{sysOk ? '系统正常' : '系统失联'}</span>
+          <span className="topbar-health-text" style={{ fontSize: 11, color: sysOk ? 'var(--text-tertiary)' : 'var(--status-offline)' }}>{sysOk ? '系统正常' : '系统离线'}</span>
         </div>
         <button className="topbar-btn" title="退出登录" onClick={async () => { const ok = await confirm('退出登录', '确定退出当前账号吗？'); if (ok) logout() }} style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
           <Icon name="logout" size={14} />
