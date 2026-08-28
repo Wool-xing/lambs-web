@@ -124,10 +124,10 @@ test.describe('UserForm 新增用户', () => {
     await expect(page.locator('.drawer[role="dialog"]')).toContainText('新增用户');
 
     await fillSticky(page.getByPlaceholder('请输入用户名'), 'wangwu');
-    await page.getByPlaceholder('请输入姓名').fill('王五');
-    await page.getByPlaceholder('请输入邮箱').fill('wangwu@lambs.local');
-    await page.getByPlaceholder('至少6位，留空自动生成').fill('123456');
-    await page.getByPlaceholder('再次输入密码').fill('123456');
+    await fillSticky(page.getByPlaceholder('请输入姓名'), '王五');
+    await fillSticky(page.getByPlaceholder('请输入邮箱'), 'wangwu@lambs.local');
+    await fillSticky(page.getByPlaceholder('至少6位，留空自动生成'), '123456');
+    await fillSticky(page.getByPlaceholder('再次输入密码'), '123456');
 
     // 角色切到项目管理员
     await page.getByRole('button', { name: '查看者', exact: true }).click();
