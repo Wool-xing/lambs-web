@@ -54,7 +54,7 @@ export default function UserForm({ onDone, userData }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!username || !name || !email) {
-      setFErr({ username: !username ? '用户名必填' : '', name: !name ? '姓名必填' : '', email: !email ? '邮箱必填' : '' })
+      setFErr({ username: !username ? '账号必填' : '', name: !name ? '用户名必填' : '', email: !email ? '邮箱必填' : '' })
       return
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('邮箱格式不正确', 'error'); return }
@@ -122,12 +122,12 @@ export default function UserForm({ onDone, userData }) {
         <input ref={avatarRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display: 'none' }} onChange={(e) => handleAvatar(e.target.files[0])} />
       </div>
       <div className="field">
-        <label>用户名<span className="req">*</span></label>
+        <label>账号<span className="req">*</span></label>
         <input className={fErr.username ? 'input-error' : ''} value={username} onChange={e => setUsername(e.target.value)} placeholder="请输入用户名" />
       </div>
       <div className="field">
-        <label>姓名<span className="req">*</span></label>
-        <input className={fErr.name ? 'input-error' : ''} value={name} onChange={e => setName(e.target.value)} placeholder="请输入姓名" />
+        <label>用户名<span className="req">*</span></label>
+        <input className={fErr.name ? 'input-error' : ''} value={name} onChange={e => setName(e.target.value)} placeholder="请输入用户名" />
       </div>
       <div className="field">
         <label>邮箱<span className="req">*</span></label>

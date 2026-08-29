@@ -123,8 +123,8 @@ test.describe('UserForm 新增用户', () => {
     await page.locator('button:has-text("+ 新增用户")').click();
     await expect(page.locator('.drawer[role="dialog"]')).toContainText('新增用户');
 
-    await fillSticky(page.getByPlaceholder('请输入用户名'), 'wangwu');
-    await fillSticky(page.getByPlaceholder('请输入姓名'), '王五');
+    await fillSticky(page.getByPlaceholder('请输入账号'), 'wangwu');
+    await fillSticky(page.getByPlaceholder('请输入用户名'), '王五');
     await fillSticky(page.getByPlaceholder('请输入邮箱'), 'wangwu@lambs.local');
     await fillSticky(page.getByPlaceholder('至少6位，留空自动生成'), '123456');
     await fillSticky(page.getByPlaceholder('再次输入密码'), '123456');
@@ -159,8 +159,8 @@ test.describe('UserForm 新增用户', () => {
     });
 
     await page.locator('button:has-text("+ 新增用户")').click();
-    await fillSticky(page.getByPlaceholder('请输入用户名'), 'wangwu');
-    await page.getByPlaceholder('请输入姓名').fill('王五');
+    await fillSticky(page.getByPlaceholder('请输入账号'), 'wangwu');
+    await page.getByPlaceholder('请输入用户名').fill('王五');
     await page.getByPlaceholder('请输入邮箱').fill('wangwu@lambs.local');
     await page.getByPlaceholder('至少6位，留空自动生成').fill('123');
     await page.getByPlaceholder('再次输入密码').fill('123');
@@ -197,9 +197,9 @@ test.describe('UserForm 编辑用户', () => {
 
     await page.locator('.tbl-row', { hasText: '张三' }).getByText('编辑').click();
     await expect(page.locator('.drawer[role="dialog"]')).toContainText('编辑用户·张三');
-    await expect(page.getByPlaceholder('请输入用户名')).toHaveValue('zhangsan');
+    await expect(page.getByPlaceholder('请输入账号')).toHaveValue('zhangsan');
 
-    await fillSticky(page.getByPlaceholder('请输入姓名'), '张三丰');
+    await fillSticky(page.getByPlaceholder('请输入用户名'), '张三丰');
     await page.getByRole('button', { name: '正常', exact: true }).click();
     await page.getByRole('button', { name: '禁用', exact: true }).click();
 

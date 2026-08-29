@@ -139,13 +139,13 @@ export default function Users() {
 
         {/* User table */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <input placeholder="搜索姓名或邮箱…" value={search}
+          <input placeholder="搜索账号、用户名或邮箱…" value={search}
             onChange={e => setSearch(e.target.value)}
             style={{ background: 'var(--bg-input)', border: '1px solid var(--border-strong)', borderRadius: 7, padding: '8px 12px', color: 'var(--text-primary)', fontSize: 12, maxWidth: 260 }} />
 
           <div className="tbl">
             <div className="tbl-row head" style={{ gridTemplateColumns: '.9fr 1.1fr .8fr .7fr .7fr 1fr' }}>
-              <span>姓名</span><span>邮箱</span><span>角色</span><span>状态</span><span>最近登录</span><span>操作</span>
+              <span>用户名</span><span>邮箱</span><span>角色</span><span>状态</span><span>最近登录</span><span>操作</span>
             </div>
             {users.length === 0 ? (
               <div className="empty-state"><div className="t">未找到匹配的用户</div></div>
