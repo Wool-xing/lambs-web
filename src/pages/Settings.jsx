@@ -19,7 +19,6 @@ export default function Settings() {
   const [configLoading, setConfigLoading] = useState(false)
   const [configLoadFailed, setConfigLoadFailed] = useState(false)
   const [listLoadError, setListLoadError] = useState(false)
-  const [showJwt, setShowJwt] = useState(false)
   const [showSmtpPassword, setShowSmtpPassword] = useState(false)
   const [projects, setProjects] = useState([])
   const [exportProject, setExportProject] = useState('')
@@ -128,12 +127,10 @@ export default function Settings() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))', gap: '14px 20px' }}>
           <div className="field">
             <label htmlFor="cfg-jwt">JWT 密钥</label>
-            <div className="pwd-wrap">
-              <input id="cfg-jwt" type={showJwt ? 'text' : 'password'} value={config.jwt_secret}
-                onChange={e => setConfig({ ...config, jwt_secret: e.target.value })}
-                placeholder={config.jwt_secret ? 'JWT 签名密钥' : '已设置（安全起见不回显）'} />
-              <button type="button" className="pwd-eye" aria-pressed={showJwt} aria-label="显示或隐藏密钥" onClick={() => setShowJwt(!showJwt)}><Icon name={showJwt ? 'eyeOff' : 'eye'} size={18} /></button>
-            </div>
+            <input id="cfg-jwt" disabled
+              placeholder="由环境变量 JWT_SECRET 提供（不在页面配置）"
+              title="部署时在 .env 中生成，页面保存不会修改它" />
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>部署时由 .env 自动生成，安全起见不回显</div>
           </div>
           <div className="field">
             <label htmlFor="cfg-email">管理员邮箱</label>
@@ -143,18 +140,21 @@ export default function Settings() {
           </div>
           <div className="field">
             <label htmlFor="cfg-port">服务端口</label>
-            <input id="cfg-port" value={config.port}
-              onChange={e => setConfig({ ...config, port: parseInt(e.target.value) || 3602 })} />
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>主服务监听端口，修改后需重启服务生效</div>
+            <input id="cfg-port" value={config.port || ''}
+              onChange={e => setConfig({ ...config, port: parseInt(e.target.value) || 3602 })}
+              placeholder="3602（默认）" />
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>主服务监听端口，留空 = 默认 3602，修改后需重启服务生效</div>
           </div>
           <div className="field">
             <label htmlFor="cfg-refresh">数据刷新间隔（秒）</label>
-            <input id="cfg-refresh" value={config.refresh_interval}
-              onChange={e => setConfig({ ...config, refresh_interval: parseInt(e.target.value) || 30 })} />
+            <input id="cfg-refresh" value={config.refresh_interval || ''}
+              onChange={e => setConfig({ ...config, refresh_interval: parseInt(e.target.value) || 30 })}
+              placeholder="30（默认）" />
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>前端轮询数据频率，留空 = 默认 30 秒</div>
           </div>
         </div>
         <div className="field" style={{ marginTop: 14 }}>
-          <label>品牌 Logo <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（侧边栏左上角显示，PNG/JPG/SVG/WebP，≤5MB）</span></label>
+          <label>品牌 Logo <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（侧边栏左上角显示）</span></label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <div className="upload-zone" style={{width:56,height:56,borderRadius:7}}
               onClick={() => logoRef.current?.click()}
@@ -164,7 +164,10 @@ export default function Settings() {
             </div>
             <input ref={logoRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{display:'none'}}
               onChange={e => upload.handleFile(e.target.files[0])} />
-            {logoImg ? <span style={{fontSize:11,color:'var(--accent-red)',cursor:'pointer'}} onClick={() => { upload.reset(); onLogoChange('') }}>移除</span> : <span style={{fontSize:11,color:'var(--text-tertiary)'}}>点击或拖拽上传</span>}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {logoImg ? <span style={{fontSize:11,color:'var(--accent-red)',cursor:'pointer'}} onClick={() => { upload.reset(); onLogoChange('') }}>移除</span> : <span style={{fontSize:11,color:'var(--text-secondary)'}}>点击或拖拽上传</span>}
+              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>PNG / JPG / SVG / WebP · ≤5MB</span>
+            </div>
           </div>
         </div>
       </div>
