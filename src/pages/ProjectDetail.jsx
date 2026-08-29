@@ -418,6 +418,16 @@ export default function ProjectDetail() {
     } catch (err) { toast(err.message, 'error') }
   }
 
+  const resetMemberPwd = async (m) => {
+    const np = window.prompt(`重置 ${m.name} 的登录密码（至少6位）`)
+    if (np == null) return
+    if (np.length < 6) { toast('新密码至少6位', 'error'); return }
+    try {
+      await api.post(`/users/${m.id}/reset-password`, { new_password: np })
+      toast(`${m.name} 密码已重置`)
+    } catch (err) { toast(err.message || '重置失败', 'error') }
+  }
+
   return (
     <>
       {/* Status banners */}
@@ -620,12 +630,17 @@ export default function ProjectDetail() {
                     <span style={{ fontSize: 13, fontWeight: 500 }}>{m.name}</span>
                     <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 8, fontFamily: 'var(--font-mono)' }}>{m.email}</span>
                     <span className={`chip ${m.role === 'super_admin' ? 'chip-sa' : m.role === 'project_admin' ? 'chip-pa' : 'chip-vi'}`} style={{ marginLeft: 8, fontSize: 10 }}>
-                      {m.role === 'super_admin' ? '超管' : m.role === 'project_admin' ? '管理员' : '查看者'}
+                      {m.role === 'super_admin' ? '系统管理员' : m.role === 'project_admin' ? '管理员' : '查看者'}
                     </span>
                   </div>
-                  {m.role !== 'super_admin' && (
-                    <span style={{ fontSize: 11, color: 'var(--accent-red)', cursor: 'pointer' }} onClick={() => removeMember(m.id)}>移除</span>
-                  )}
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    {m.role !== 'super_admin' && (
+                      <span style={{ fontSize: 11, color: 'var(--accent-cyan)', cursor: 'pointer' }} onClick={() => resetMemberPwd(m)}>重置密码</span>
+                    )}
+                    {m.role !== 'super_admin' && (
+                      <span style={{ fontSize: 11, color: 'var(--accent-red)', cursor: 'pointer' }} onClick={() => removeMember(m.id)}>移除</span>
+                    )}
+                  </div>
                 </div>
               ))
             )}

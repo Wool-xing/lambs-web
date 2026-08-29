@@ -92,7 +92,7 @@ export default function TypeSelect({ value, onChange, style, options = OPTIONS }
 
   return (
     <div ref={ref} style={{ position: 'relative', ...style }}>
-      <button type="button" style={triggerStyle} onClick={toggle}>
+      <button type="button" style={{ ...triggerStyle, height: style?.height || 37 }} onClick={toggle}>
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{display}</span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
           style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}>

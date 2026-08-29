@@ -48,7 +48,7 @@ test.describe('忘记密码两步流', () => {
   test('step1 校验：用户名与邮箱必填', async ({ page }) => {
     await page.getByText('忘记密码？').click();
     await page.locator('.modal-box button:has-text("发送验证码")').click();
-    await expectToast(page, '请输入用户名');
+    await expectToast(page, '请输入账号');
 
     await page.locator('#forgot-username').fill('admin');
     await page.locator('.modal-box button:has-text("发送验证码")').click();
@@ -158,10 +158,10 @@ test.describe('注册弹窗', () => {
 
   test('字段校验：用户名/邮箱/邮箱格式/密码长度', async ({ page }) => {
     await page.locator('.modal-box button:has-text("注册")').click();
-    await expectToast(page, '请输入用户名');
+    await expectToast(page, '请输入账号');
 
     // #login-username 也是同占位符 → 限定在注册弹窗内
-    await page.locator('.modal-box').getByPlaceholder('请输入用户名').fill('newuser');
+    await page.locator('.modal-box').getByPlaceholder('请输入账号').fill('newuser');
     await page.locator('.modal-box button:has-text("注册")').click();
     await expectToast(page, '请输入邮箱');
 
@@ -180,7 +180,7 @@ test.describe('注册弹窗', () => {
 
   test('合法表单 → 注册成功提示', async ({ page }) => {
     // #login-username 也是同占位符 → 限定在注册弹窗内
-    await page.locator('.modal-box').getByPlaceholder('请输入用户名').fill('newuser');
+    await page.locator('.modal-box').getByPlaceholder('请输入账号').fill('newuser');
     await page.getByPlaceholder('请输入邮箱').fill('newuser@lambs.local');
     await page.getByPlaceholder('至少6位密码').fill('pass123');
     await page.locator('.modal-box button:has-text("注册")').click();
