@@ -125,7 +125,7 @@ test.describe('UserForm 新增用户', () => {
 
     await fillSticky(page.getByPlaceholder('请输入账号'), 'wangwu');
     await fillSticky(page.getByPlaceholder('请输入用户名'), '王五');
-    await fillSticky(page.getByPlaceholder('请输入邮箱'), 'wangwu@lambs.local');
+    await fillSticky(page.getByPlaceholder('请输入邮箱'), 'wangwu@example.com');
     await fillSticky(page.getByPlaceholder('至少6位，留空自动生成'), '123456');
     await fillSticky(page.getByPlaceholder('再次输入密码'), '123456');
 
@@ -134,7 +134,7 @@ test.describe('UserForm 新增用户', () => {
     await page.getByRole('button', { name: '项目管理员', exact: true }).click();
 
     // 勾选一个项目访问权限
-    await page.locator('input#pa-qa-tools-hub').check();
+    await page.locator('input#pa-demo-project').check();
 
     await page.locator('.drawer-actions button:has-text("保存")').click();
     // 结果态断言：POST 到达即成功（toast 有 3s TTL，高并行负载下 webkit 会错过）
@@ -142,9 +142,9 @@ test.describe('UserForm 新增用户', () => {
 
     expect(postBody.username).toBe('wangwu');
     expect(postBody.name).toBe('王五');
-    expect(postBody.email).toBe('wangwu@lambs.local');
+    expect(postBody.email).toBe('wangwu@example.com');
     expect(postBody.role).toBe('project_admin');
-    expect(postBody.project_access).toBe('["qa-tools-hub"]');
+    expect(postBody.project_access).toBe('["demo-project"]');
     expect(postBody.avatar_url).toBeNull();
     expect(postBody.password).toMatch(HEX);
     expect(postBody.salt).toMatch(HEX);
@@ -161,7 +161,7 @@ test.describe('UserForm 新增用户', () => {
     await page.locator('button:has-text("+ 新增用户")').click();
     await fillSticky(page.getByPlaceholder('请输入账号'), 'wangwu');
     await page.getByPlaceholder('请输入用户名').fill('王五');
-    await page.getByPlaceholder('请输入邮箱').fill('wangwu@lambs.local');
+    await page.getByPlaceholder('请输入邮箱').fill('wangwu@example.com');
     await page.getByPlaceholder('至少6位，留空自动生成').fill('123');
     await page.getByPlaceholder('再次输入密码').fill('123');
     await page.locator('.drawer-actions button:has-text("保存")').click();

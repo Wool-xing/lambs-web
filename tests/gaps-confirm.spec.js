@@ -21,7 +21,7 @@ test.describe('确认按钮全链路', () => {
     await page.route(/\/api\/projects\/(?!stats|reorder)[^/]+$/, (route) => {
       if (route.request().method() === 'DELETE') {
         deleteUrl = route.request().url();
-        deleted.add('qa-tools-hub');
+        deleted.add('demo-project');
       }
       route.fulfill({ json: { success: true } });
     });
@@ -31,10 +31,10 @@ test.describe('确认按钮全链路', () => {
     await expect(page.locator('.modal-title')).toHaveText('删除项目');
     await clickConfirm(page);
 
-    await expectToast(page, '项目「QA通关」已删除');
-    expect(deleteUrl).toContain('/api/projects/qa-tools-hub');
+    await expectToast(page, '项目「示例项目」已删除');
+    expect(deleteUrl).toContain('/api/projects/demo-project');
     await expect(page.locator('.project-card')).toHaveCount(MOCK_PROJECTS.length - 1);
-    await expect(page.locator('.project-card').first()).not.toContainText('QA通关');
+    await expect(page.locator('.project-card').first()).not.toContainText('示例项目');
   });
 
   test('仪表盘卡片菜单停用：确认 → PATCH status + 离线提示', async ({ page }) => {
@@ -51,11 +51,11 @@ test.describe('确认按钮全链路', () => {
     await clickConfirm(page);
 
     await expectToast(page, '已停用');
-    expect(patchUrl).toContain('/api/projects/qa-tools-hub/status');
+    expect(patchUrl).toContain('/api/projects/demo-project/status');
   });
 
   test('项目详情删除：确认 → DELETE + 跳回仪表盘', async ({ page }) => {
-    await loginAsAdmin(page, '/project/qa-tools-hub');
+    await loginAsAdmin(page, '/project/demo-project');
     let deleteUrl = null;
     await page.route(/\/api\/projects\/(?!stats|reorder)[^/]+$/, (route) => {
       if (route.request().method() === 'DELETE') deleteUrl = route.request().url();
@@ -66,13 +66,13 @@ test.describe('确认按钮全链路', () => {
     await expect(page.locator('.modal-title')).toHaveText('删除项目');
     await clickConfirm(page);
 
-    await expectToast(page, '项目「QA通关」已删除');
-    expect(deleteUrl).toContain('/api/projects/qa-tools-hub');
+    await expectToast(page, '项目「示例项目」已删除');
+    expect(deleteUrl).toContain('/api/projects/demo-project');
     await page.waitForURL('**/dashboard', { timeout: 5000 });
   });
 
   test('项目详情停用：确认 → PATCH status → 离线横幅出现', async ({ page }) => {
-    await loginAsAdmin(page, '/project/qa-tools-hub');
+    await loginAsAdmin(page, '/project/demo-project');
     let patchUrl = null;
     await page.route('**/api/projects/*/status', (route) => {
       if (route.request().method() === 'PATCH') patchUrl = route.request().url();
@@ -84,14 +84,14 @@ test.describe('确认按钮全链路', () => {
     await clickConfirm(page);
 
     await expectToast(page, '已停用');
-    expect(patchUrl).toContain('/api/projects/qa-tools-hub/status');
+    expect(patchUrl).toContain('/api/projects/demo-project/status');
     await expect(page.getByText('该项目已被管理员停用')).toBeVisible();
   });
 
   test('项目详情恢复（离线 → 启用）：确认 → 横幅消失', async ({ page }) => {
-    await loginAsAdmin(page, '/project/qa-tools-hub');
+    await loginAsAdmin(page, '/project/demo-project');
     // 覆盖项目为离线状态（mount 时读取 → 需在 reload 前注册）
-    await page.route(/\/api\/projects\/qa-tools-hub$/, (route) =>
+    await page.route(/\/api\/projects\/demo-project$/, (route) =>
       route.fulfill({ json: { success: true, data: { ...MOCK_PROJECTS[0], status: 'offline' } } }));
     await page.route('**/api/projects/*/status', (route) =>
       route.fulfill({ json: { success: true, data: { status: 'online' } } }));
@@ -134,13 +134,13 @@ test.describe('确认按钮全链路', () => {
   });
 
   test('备份恢复：确认 → POST restore + 恢复提示', async ({ page }) => {
-    await loginAsAdmin(page, '/project/qa-tools-hub');
-    await page.route(/\/api\/projects\/qa-tools-hub$/, (route) =>
+    await loginAsAdmin(page, '/project/demo-project');
+    await page.route(/\/api\/projects\/demo-project$/, (route) =>
       route.fulfill({ json: { success: true, data: { ...MOCK_PROJECTS[0], dsn: 'sqlite:///qa.db' } } }));
-    await page.route('**/api/backups/qa-tools-hub', (route) =>
+    await page.route('**/api/backups/demo-project', (route) =>
       route.fulfill({ json: { success: true, data: { backups: [{ filename: 'qa-20260827.db', created: '2026-08-27', size_mb: 1.2 }] } } }));
     let restoreUrl = null;
-    await page.route('**/api/backups/qa-tools-hub/restore/*', (route) => {
+    await page.route('**/api/backups/demo-project/restore/*', (route) => {
       restoreUrl = route.request().url();
       route.fulfill({ json: { success: true } });
     });
@@ -152,7 +152,7 @@ test.describe('确认按钮全链路', () => {
     await clickConfirm(page);
 
     await expectToast(page, '数据库已恢复');
-    expect(restoreUrl).toContain('/api/backups/qa-tools-hub/restore/qa-20260827.db');
+    expect(restoreUrl).toContain('/api/backups/demo-project/restore/qa-20260827.db');
   });
 
   test('侧边栏退出登录：确认 → 清空 token 回到登录页', async ({ page }) => {

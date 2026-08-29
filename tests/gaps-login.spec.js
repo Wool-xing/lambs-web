@@ -63,12 +63,12 @@ test.describe('忘记密码两步流', () => {
     });
     await page.getByText('忘记密码？').click();
     await page.locator('#forgot-username').fill('admin');
-    await page.locator('#forgot-email').fill('admin@lambs.local');
+    await page.locator('#forgot-email').fill('admin@example.com');
     await page.locator('.modal-box button:has-text("发送验证码")').click();
 
     await expectToast(page, '验证码已发送至您的邮箱');
-    expect(requestBody).toEqual({ username: 'admin', email: 'admin@lambs.local' });
-    await expect(page.locator('.modal-box', { hasText: '重置密码' })).toContainText('admin@lambs.local');
+    expect(requestBody).toEqual({ username: 'admin', email: 'admin@example.com' });
+    await expect(page.locator('.modal-box', { hasText: '重置密码' })).toContainText('admin@example.com');
     await expect(page.locator('.modal-box', { hasText: '重置密码' })).toContainText('秒后可重发');
   });
 
@@ -77,7 +77,7 @@ test.describe('忘记密码两步流', () => {
       route.fulfill({ json: { success: true, data: { message: 'ok' } } }));
     await page.getByText('忘记密码？').click();
     await page.locator('#forgot-username').fill('admin');
-    await page.locator('#forgot-email').fill('admin@lambs.local');
+    await page.locator('#forgot-email').fill('admin@example.com');
     await page.locator('.modal-box button:has-text("发送验证码")').click();
     await expect(page.locator('.modal-box', { hasText: '验证码已发送至' })).toBeVisible();
 
@@ -108,7 +108,7 @@ test.describe('忘记密码两步流', () => {
 
     await page.getByText('忘记密码？').click();
     await page.locator('#forgot-username').fill('admin');
-    await page.locator('#forgot-email').fill('admin@lambs.local');
+    await page.locator('#forgot-email').fill('admin@example.com');
     await page.locator('.modal-box button:has-text("发送验证码")').click();
     await page.getByPlaceholder('请输入6位数字验证码').fill('123456');
     await page.getByPlaceholder('至少6位新密码').fill('newpass123');
@@ -117,7 +117,7 @@ test.describe('忘记密码两步流', () => {
 
     await expectToast(page, '密码已重置，请使用新密码登录');
     expect(verifyBody.username).toBe('admin');
-    expect(verifyBody.email).toBe('admin@lambs.local');
+    expect(verifyBody.email).toBe('admin@example.com');
     expect(verifyBody.code).toBe('123456');
     expect(verifyBody.new_password).toMatch(/^[0-9a-f]{64}$/);
     await expect(page.locator('.modal-overlay.open')).toBeHidden();
@@ -131,7 +131,7 @@ test.describe('忘记密码两步流', () => {
     });
     await page.getByText('忘记密码？').click();
     await page.locator('#forgot-username').fill('admin');
-    await page.locator('#forgot-email').fill('admin@lambs.local');
+    await page.locator('#forgot-email').fill('admin@example.com');
     await page.locator('.modal-box button:has-text("发送验证码")').click();
     await expect(page.locator('.modal-box', { hasText: '验证码已发送至' })).toBeVisible();
 
@@ -172,7 +172,7 @@ test.describe('注册弹窗', () => {
     await page.locator('.modal-box button:has-text("注册")').click();
     await expectToast(page, '邮箱格式不正确');
 
-    await page.getByPlaceholder('请输入邮箱').fill('newuser@lambs.local');
+    await page.getByPlaceholder('请输入邮箱').fill('newuser@example.com');
     await page.getByPlaceholder('至少6位密码').fill('123');
     await page.locator('.modal-box button:has-text("注册")').click();
     await expectToast(page, '密码至少6位');
@@ -181,7 +181,7 @@ test.describe('注册弹窗', () => {
   test('合法表单 → 注册成功提示', async ({ page }) => {
     // #login-username 也是同占位符 → 限定在注册弹窗内
     await page.locator('.modal-box').getByPlaceholder('请输入账号').fill('newuser');
-    await page.getByPlaceholder('请输入邮箱').fill('newuser@lambs.local');
+    await page.getByPlaceholder('请输入邮箱').fill('newuser@example.com');
     await page.getByPlaceholder('至少6位密码').fill('pass123');
     await page.locator('.modal-box button:has-text("注册")').click();
     await expectToast(page, '注册成功！已自动登录');

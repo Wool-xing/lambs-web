@@ -76,7 +76,7 @@ test.describe('顶栏 铃铛徽标', () => {
 
 test.describe('系统日志组件', () => {
   const LOGS = [
-    { time: '2026-08-27T10:00:00', level: 'info', project_name: 'qa-tools-hub', message: '服务启动完成' },
+    { time: '2026-08-27T10:00:00', level: 'info', project_name: 'demo-project', message: '服务启动完成' },
     { time: '2026-08-27T10:01:00', level: 'error', project_name: 'tg-cloud-drive', message: '数据库连接失败' },
   ];
 
@@ -150,7 +150,7 @@ test.describe('抽屉与 toast', () => {
 
   test('成功类 toast 渲染（克隆项目）', async ({ page }) => {
     await loginAsAdmin(page, '/dashboard');
-    await page.route('**/api/projects/qa-tools-hub/clone', (route) =>
+    await page.route('**/api/projects/demo-project/clone', (route) =>
       route.fulfill({ json: { success: true, data: { name: '克隆测试' } } }));
     await page.locator('.project-card-more').first().click();
     await page.locator('.dropdown.open .dd-item:has-text("克隆项目")').click();
