@@ -126,12 +126,6 @@ export default function Settings() {
         <div className="card-title" style={{ marginBottom: 16 }}>全局配置</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,260px),1fr))', gap: '14px 20px' }}>
           <div className="field">
-            <label htmlFor="cfg-jwt">JWT 密钥</label>
-            <input id="cfg-jwt" disabled
-              placeholder="在 .env 的 JWT_SECRET 配置"
-              title="部署时在 .env 中生成，页面保存不会修改它" />
-          </div>
-          <div className="field">
             <label htmlFor="cfg-email">管理员邮箱</label>
             <input id="cfg-email" value={config.admin_email}
               onChange={e => setConfig({ ...config, admin_email: e.target.value })}
