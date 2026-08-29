@@ -2,14 +2,14 @@ import { test, expect } from '@playwright/test';
 import { loginAsAdmin } from './helpers.js';
 
 const MOCK_TASKS = [
-  { id: 't1', project_id: 'qa-tools-hub', name: '每日扫描', cron: '0 2 * * *', command: 'python main.py --target 127.0.0.1', host: 'windows', enabled: true, last_run_at: '2026-08-18 02:00:00', last_status: 'success', last_log: 'scan done\n2 modules finished' },
-  { id: 't2', project_id: 'qa-tools-hub', name: '健康检查', cron: '*/5 * * * *', command: 'echo ok', host: 'app1', enabled: false, last_run_at: '', last_status: '', last_log: '' },
+  { id: 't1', project_id: 'demo-project', name: '每日扫描', cron: '0 2 * * *', command: 'python main.py --target 127.0.0.1', host: 'windows', enabled: true, last_run_at: '2026-08-18 02:00:00', last_status: 'success', last_log: 'scan done\n2 modules finished' },
+  { id: 't2', project_id: 'demo-project', name: '健康检查', cron: '*/5 * * * *', command: 'echo ok', host: 'app1', enabled: false, last_run_at: '', last_status: '', last_log: '' },
 ];
 
 test.describe('计划任务面板', () => {
   test.beforeEach(async ({ page }) => {
-    await loginAsAdmin(page, '/project/qa-tools-hub');
-    await page.route('**/api/projects/qa-tools-hub/tasks', async (route) => {
+    await loginAsAdmin(page, '/project/demo-project');
+    await page.route('**/api/projects/demo-project/tasks', async (route) => {
       if (route.request().method() === 'GET') {
         await route.fulfill({ json: { success: true, data: { tasks: MOCK_TASKS } } });
       } else {
@@ -31,7 +31,7 @@ test.describe('计划任务面板', () => {
 
   test('新建任务 → 表单提交正确 body', async ({ page }) => {
     let postBody = null;
-    await page.route('**/api/projects/qa-tools-hub/tasks', async (route) => {
+    await page.route('**/api/projects/demo-project/tasks', async (route) => {
       if (route.request().method() === 'POST') {
         postBody = route.request().postDataJSON();
         await route.fulfill({ json: { success: true, data: { id: 't3' } } });

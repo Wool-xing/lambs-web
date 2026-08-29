@@ -56,7 +56,7 @@ test.describe('设置页 数据导出', () => {
     let exportReq = '';
     await page.route('**/api/settings/export/project-users/**', (route) => {
       exportReq = route.request().url();
-      route.fulfill({ contentType: 'text/csv', body: 'name,email\n张三,zhangsan@lambs.local' });
+      route.fulfill({ contentType: 'text/csv', body: 'name,email\n张三,zhangsan@example.com' });
     });
 
     // 预滚动排掉异步 scroll 事件，否则面板打开瞬间被 scroll 监听器关闭（选项 detached）
@@ -64,8 +64,8 @@ test.describe('设置页 数据导出', () => {
     await exportTrigger.scrollIntoViewIfNeeded();
     await page.waitForTimeout(250);
     await exportTrigger.click();
-    // 侧边栏「QA通关」nav 也是 role=button → 用 .last() 命中下拉面板选项（面板 portal 到 body 末尾）
-    await page.getByRole('button', { name: 'QA通关', exact: true }).last().click();
+    // 侧边栏「示例项目」nav 也是 role=button → 用 .last() 命中下拉面板选项（面板 portal 到 body 末尾）
+    await page.getByRole('button', { name: '示例项目', exact: true }).last().click();
 
     const downloadPromise = page.waitForEvent('download', { timeout: 5000 });
     // has-text("导出") 会命中「按项目导出用户/导出系统用户」→ 用精确名称
@@ -73,11 +73,11 @@ test.describe('设置页 数据导出', () => {
     const download = await downloadPromise;
     // 契约断言：请求打对端点 + 下载事件触发。文件名来自 blob 的 a[download]
     // 属性，webkit 对 blob 下载不暴露 suggestedFilename（恒空）——不做
-    // 文件名断言（chromium/firefox 下 a.download=lambs-project-users/qa-tools-hub.csv）。
-    expect(exportReq).toContain('project-users/qa-tools-hub');
+    // 文件名断言（chromium/firefox 下 a.download=lambs-project-users/demo-project.csv）。
+    expect(exportReq).toContain('project-users/demo-project');
     const fn = download.suggestedFilename();
     if (fn) {
-      expect(fn).toContain('qa-tools-hub');
+      expect(fn).toContain('demo-project');
     }
   });
 });
@@ -103,7 +103,7 @@ test.describe('设置页 操作日志', () => {
     await filterTrigger.click();
     await page.getByRole('button', { name: '新增项目', exact: true }).click();
     await expect(page.getByText('共 1 条')).toBeVisible();
-    await expect(page.locator('.card', { hasText: '操作日志' })).toContainText('PetTrust');
+    await expect(page.locator('.card', { hasText: '操作日志' })).toContainText('示例项目B');
 
     // 组合筛选无匹配
     await page.getByLabel('搜索日志').fill('不存在的关键词');
@@ -123,7 +123,7 @@ test.describe('设置页 配置加载失败', () => {
         route.fulfill({ status: 500, json: { detail: 'boom' } });
         return;
       }
-      route.fulfill({ json: { success: true, data: { jwt_secret: 'lambs-jwt-secret-key', admin_email: 'admin@lambs.local', port: 3602, refresh_interval: 30 } } });
+      route.fulfill({ json: { success: true, data: { jwt_secret: 'lambs-jwt-secret-key', admin_email: 'admin@example.com', port: 3602, refresh_interval: 30 } } });
     });
     await page.reload();
 

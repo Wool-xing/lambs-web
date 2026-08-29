@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { loginAsAdmin, MOCK_PROJECTS } from './helpers.js';
 
 // E 组缺口：仪表盘 更多菜单 / 批量栏 / 拖拽排序 / 最近动态 / 加载失败重试 / 空态
-// 注意：第一张卡 QA通关 is_pinned:true，更多菜单第 4 项是「取消置顶」。
+// 注意：第一张卡 示例项目 is_pinned:true，更多菜单第 4 项是「取消置顶」。
 
 const expectToast = (page, text) => expect(page.locator('.toast').filter({ hasText: text })).toBeVisible();
 
@@ -15,13 +15,13 @@ test.describe('仪表盘 卡片更多菜单', () => {
     await expect(items).toContainText(['编辑项目', '克隆项目', '停用项目', '取消置顶', '删除项目']);
 
     await items.filter({ hasText: '编辑项目' }).click();
-    await expect(page.locator('.drawer[role="dialog"]')).toContainText('编辑项目·QA通关');
+    await expect(page.locator('.drawer[role="dialog"]')).toContainText('编辑项目·示例项目');
   });
 
   test('更多菜单 克隆项目 → POST /clone + 成功提示', async ({ page }) => {
     await loginAsAdmin(page, '/dashboard');
     let cloneUrl = null;
-    await page.route('**/api/projects/qa-tools-hub/clone', (route) => {
+    await page.route('**/api/projects/demo-project/clone', (route) => {
       cloneUrl = route.request().url();
       route.fulfill({ json: { success: true, data: { name: '克隆测试' } } });
     });
@@ -29,7 +29,7 @@ test.describe('仪表盘 卡片更多菜单', () => {
     await page.locator('.project-card-more').first().click();
     await page.locator('.dropdown.open .dd-item:has-text("克隆项目")').click();
     await expectToast(page, '已克隆为「克隆测试」');
-    expect(cloneUrl).toContain('/api/projects/qa-tools-hub/clone');
+    expect(cloneUrl).toContain('/api/projects/demo-project/clone');
   });
 
   test('更多菜单 停用项目 → 弹窗确认 → 取消不调接口', async ({ page }) => {
@@ -59,7 +59,7 @@ test.describe('仪表盘 卡片更多菜单', () => {
     await page.locator('.project-card-more').first().click();
     await page.locator('.dropdown.open .dd-item:has-text("取消置顶")').click();
     await expectToast(page, '已取消置顶');
-    expect(pinUrl).toContain('/api/projects/qa-tools-hub/pin');
+    expect(pinUrl).toContain('/api/projects/demo-project/pin');
   });
 });
 
@@ -104,7 +104,7 @@ test.describe('仪表盘 批量栏', () => {
 
     await expectToast(page, '已删除');
     expect(deleted).toHaveLength(2);
-    expect(deleted[0]).toContain('/api/projects/qa-tools-hub');
+    expect(deleted[0]).toContain('/api/projects/demo-project');
     expect(deleted[1]).toContain('/api/projects/tg-cloud-drive');
     await expect(page.locator('.batch-bar')).toBeHidden();
   });
@@ -119,16 +119,16 @@ test.describe('仪表盘 拖拽排序', () => {
     await page.evaluate(() => {
       const cards = document.querySelectorAll('.project-card');
       const dt = new DataTransfer();
-      dt.setData('text/plain', 'qa-tools-hub');
+      dt.setData('text/plain', 'demo-project');
       cards[2].dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
     });
 
     const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('lambs-project-order')));
-    expect(saved).toEqual(['tg-cloud-drive', 'subsai', 'qa-tools-hub', 'smb-ai-os', 'silver-guardian']);
-    await expect(page.locator('.project-card').first()).toContainText('TG云盘');
+    expect(saved).toEqual(['tg-cloud-drive', 'subsai', 'demo-project', 'smb-ai-os', 'silver-guardian']);
+    await expect(page.locator('.project-card').first()).toContainText('示例项目C');
 
     await page.reload();
-    await expect(page.locator('.project-card').first()).toContainText('TG云盘');
+    await expect(page.locator('.project-card').first()).toContainText('示例项目C');
   });
 });
 
@@ -137,7 +137,7 @@ test.describe('仪表盘 最近动态', () => {
     await loginAsAdmin(page, '/dashboard');
     // 覆盖为项目型动态（切换状态 → 跳转 /project/:id），reload 后生效
     await page.route('**/api/settings/audit-logs', (route) =>
-      route.fulfill({ json: { success: true, data: { logs: [{ id: 'x1', created_at: '2026-08-27T10:00:00', action: '切换状态', target: 'qa-tools-hub', detail: '项目已在线' }] } } }));
+      route.fulfill({ json: { success: true, data: { logs: [{ id: 'x1', created_at: '2026-08-27T10:00:00', action: '切换状态', target: 'demo-project', detail: '项目已在线' }] } } }));
     await page.reload();
 
     const header = page.locator('.card-header', { hasText: '最近动态' });
@@ -146,12 +146,12 @@ test.describe('仪表盘 最近动态', () => {
 
     await header.click();
     await expect(header).toContainText('收起');
-    const row = page.locator('.card', { hasText: '最近动态' }).getByText('qa-tools-hub');
+    const row = page.locator('.card', { hasText: '最近动态' }).getByText('demo-project');
     await expect(row).toBeVisible();
     await expect(page.locator('.card', { hasText: '最近动态' })).toContainText('切换状态');
 
     await row.click();
-    await page.waitForURL('**/project/qa-tools-hub', { timeout: 5000 });
+    await page.waitForURL('**/project/demo-project', { timeout: 5000 });
   });
 
   test('无动态时不渲染最近动态卡片', async ({ page }) => {

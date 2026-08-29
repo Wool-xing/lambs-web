@@ -129,7 +129,7 @@ export default function Settings() {
             <label htmlFor="cfg-email">管理员邮箱</label>
             <input id="cfg-email" value={config.admin_email}
               onChange={e => setConfig({ ...config, admin_email: e.target.value })}
-              placeholder="admin@lambs.local" />
+              placeholder="admin@example.com" />
           </div>
           <div className="field">
             <label htmlFor="cfg-port">服务端口</label>

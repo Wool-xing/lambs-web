@@ -9,7 +9,7 @@ test.describe('用户管理 分页加载', () => {
     const all = Array.from({ length: 25 }, (_, i) => ({
       id: `u_${String(i + 10).padStart(3, '0')}`,
       name: `测试用户${i + 1}`,
-      email: `user${i + 1}@lambs.local`,
+      email: `user${i + 1}@example.com`,
       role: 'viewer',
       status: 'active',
       last_login: '2026-08-27 10:00',
