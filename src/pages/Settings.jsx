@@ -130,7 +130,6 @@ export default function Settings() {
             <input id="cfg-jwt" disabled
               placeholder="由环境变量 JWT_SECRET 提供（不在页面配置）"
               title="部署时在 .env 中生成，页面保存不会修改它" />
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>部署时由 .env 自动生成，安全起见不回显</div>
           </div>
           <div className="field">
             <label htmlFor="cfg-email">管理员邮箱</label>
@@ -142,15 +141,13 @@ export default function Settings() {
             <label htmlFor="cfg-port">服务端口</label>
             <input id="cfg-port" value={config.port || ''}
               onChange={e => setConfig({ ...config, port: parseInt(e.target.value) || 3602 })}
-              placeholder="3602（默认）" />
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>主服务监听端口，留空 = 默认 3602，修改后需重启服务生效</div>
+              placeholder="3602（默认）· 重启生效" />
           </div>
           <div className="field">
             <label htmlFor="cfg-refresh">数据刷新间隔（秒）</label>
             <input id="cfg-refresh" value={config.refresh_interval || ''}
               onChange={e => setConfig({ ...config, refresh_interval: parseInt(e.target.value) || 30 })}
-              placeholder="30（默认）" />
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>前端轮询数据频率，留空 = 默认 30 秒</div>
+              placeholder="30（默认）· 前端轮询频率" />
           </div>
         </div>
         <div className="field" style={{ marginTop: 14 }}>
@@ -160,14 +157,11 @@ export default function Settings() {
               onClick={() => logoRef.current?.click()}
               onDragOver={e => { e.preventDefault() }}
               onDrop={e => { e.preventDefault(); upload.handleFile(e.dataTransfer.files[0]) }}>
-              {logoImg ? <img src={resolveAsset(logoImg)} alt="" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:7}} /> : <span className="upload-hint" style={{fontSize:11}}>Logo</span>}
+              {logoImg ? <img src={resolveAsset(logoImg)} alt="" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:7}} /> : <span className="upload-hint" style={{fontSize:11,lineHeight:1.4,textAlign:'center',padding:'0 4px'}}>上传 Logo</span>}
             </div>
             <input ref={logoRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{display:'none'}}
               onChange={e => upload.handleFile(e.target.files[0])} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {logoImg ? <span style={{fontSize:11,color:'var(--accent-red)',cursor:'pointer'}} onClick={() => { upload.reset(); onLogoChange('') }}>移除</span> : <span style={{fontSize:11,color:'var(--text-secondary)'}}>点击或拖拽上传</span>}
-              <span style={{ fontSize: 11, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>PNG / JPG / SVG / WebP · ≤5MB</span>
-            </div>
+            {logoImg ? <span style={{fontSize:11,color:'var(--accent-red)',cursor:'pointer'}} onClick={() => { upload.reset(); onLogoChange('') }}>移除</span> : <span style={{fontSize:11,color:'var(--text-secondary)'}}>点击或拖拽上传 · PNG / JPG / SVG / WebP · ≤5MB</span>}
           </div>
         </div>
       </div>

@@ -185,11 +185,8 @@ export default function ProjectForm({ onDone, project }) {
               {iconUrl ? (
                 <img src={resolveAsset(iconUrl)} alt="" />
               ) : (
-                <span className="upload-hint">点击上传</span>
+                <span className="upload-hint" style={{ fontSize: 11, lineHeight: 1.4, textAlign: 'center', padding: '0 8px' }}>上传 PNG / JPG 格式</span>
               )}
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 6, maxWidth: 102, textAlign: 'center', lineHeight: 1.4 }}>
-              PNG / JPG / SVG / WebP · ≤5MB
             </div>
             <input id="logo-input" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display: 'none' }} onChange={e => upload.handleFile(e.target.files[0])} />
           </div>
