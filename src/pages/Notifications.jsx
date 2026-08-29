@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { api } from '../api/client'
 import { useToast } from '../components/Toast'
+import { useConfirm } from '../components/Modal'
 import { useNavigate } from 'react-router-dom'
 import Icon from '../components/Icon'
 import { fmtTime } from '../utils/time'
 
 export default function Notifications() {
   const toast = useToast()
+  const confirm = useConfirm()
   const navigate = useNavigate()
   const [notifs, setNotifs] = useState([])
   const [unread, setUnread] = useState(0)
@@ -57,7 +59,7 @@ export default function Notifications() {
   }
 
   const handleClearAll = async () => {
-    const ok = confirm('清空通知', '将删除所有你能看到的通知，确定清空吗？')
+    const ok = await confirm('清空通知', '将删除所有你能看到的通知，确定清空吗？')
     if (!ok) return
     try {
       await api.delete('/notifications')
