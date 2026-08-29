@@ -42,7 +42,7 @@ test('2G 生产包：应用可用且数据最终到达', async ({ page, browserN
   await page.route('**/Lambs/api/**', (route) => {
     const url = route.request().url();
     const json = (d) => route.fulfill({ json: { success: true, data: d } });
-    if (url.includes('/auth/me')) return json({ id: 'u_test001', name: 'admin', email: 'admin@lambs.local', role: 'super_admin', status: 'active', project_access: ['all'] });
+    if (url.includes('/auth/me')) return json({ id: 'u_test001', name: 'admin', email: 'admin@example.com', role: 'super_admin', status: 'active', project_access: ['all'] });
     if (url.includes('/projects')) return json({ projects: [], stats: null, nodes: [] });
     if (url.includes('/notifications')) return json({ notifications: [], unread_count: 0, total: 0, page: 1, page_size: 20 });
     if (url.includes('/system/health')) return json({ hostname: 'test', cpu_percent: 1 });

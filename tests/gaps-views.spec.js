@@ -9,12 +9,12 @@ const clickConfirm = (page) => page.locator('.modal-box button:has-text("确认"
 
 // 覆盖项目详情为指定 db_type，并脚本化 tables/list + tables 端点
 async function openView(page, dbType, tablesRoute, tablesDataRoute) {
-  await loginAsAdmin(page, '/project/qa-tools-hub');
-  await page.route(/\/api\/projects\/qa-tools-hub$/, (route) =>
+  await loginAsAdmin(page, '/project/demo-project');
+  await page.route(/\/api\/projects\/demo-project$/, (route) =>
     route.fulfill({ json: { success: true, data: { ...MOCK_PROJECTS[0], db_type: dbType, dsn: 'mock:///db' } } }));
-  await page.route(/\/api\/projects\/qa-tools-hub\/tables\/list/, (route) =>
+  await page.route(/\/api\/projects\/demo-project\/tables\/list/, (route) =>
     route.fulfill({ json: { success: true, data: { tables: tablesRoute } } }));
-  await page.route(/\/api\/projects\/qa-tools-hub\/tables\?/, (route) => tablesDataRoute(route));
+  await page.route(/\/api\/projects\/demo-project\/tables\?/, (route) => tablesDataRoute(route));
   await page.reload();
 }
 
@@ -71,7 +71,7 @@ test.describe('DocView MongoDB 文档浏览', () => {
       const rows = search ? [] : DOCS.users;
       route.fulfill({ json: { success: true, data: { rows, total: rows.length, pk: '_id' } } });
     });
-    await page.route(/\/api\/projects\/qa-tools-hub\/data\/row\?table=users/, (route) => {
+    await page.route(/\/api\/projects\/demo-project\/data\/row\?table=users/, (route) => {
       if (route.request().method() === 'POST') postBody = route.request().postDataJSON();
       route.fulfill({ json: { success: true } });
     });
@@ -92,7 +92,7 @@ test.describe('DocView MongoDB 文档浏览', () => {
     let putBody = null;
     await openView(page, 'MongoDB', ['users'], (route) =>
       route.fulfill({ json: { success: true, data: { rows: DOCS.users, total: 2, pk: '_id' } } }));
-    await page.route(/\/api\/projects\/qa-tools-hub\/data\/row\?table=users/, (route) => {
+    await page.route(/\/api\/projects\/demo-project\/data\/row\?table=users/, (route) => {
       if (route.request().method() === 'PUT') {
         putUrl = route.request().url();
         putBody = route.request().postDataJSON();
@@ -118,7 +118,7 @@ test.describe('DocView MongoDB 文档浏览', () => {
     let deleteUrl = null;
     await openView(page, 'MongoDB', ['users'], (route) =>
       route.fulfill({ json: { success: true, data: { rows: DOCS.users, total: 2, pk: '_id' } } }));
-    await page.route(/\/api\/projects\/qa-tools-hub\/data\/row\?table=users/, (route) => {
+    await page.route(/\/api\/projects\/demo-project\/data\/row\?table=users/, (route) => {
       if (route.request().method() === 'DELETE') deleteUrl = route.request().url();
       route.fulfill({ json: { success: true } });
     });
@@ -158,7 +158,7 @@ test.describe('KVView Redis 键值浏览', () => {
     let putBody = null;
     await openView(page, 'Redis', ['config'], (route) =>
       route.fulfill({ json: { success: true, data: { rows: KV_DATA.config, total: 1 } } }));
-    await page.route(/\/api\/projects\/qa-tools-hub\/data\/row\?table=config/, (route) => {
+    await page.route(/\/api\/projects\/demo-project\/data\/row\?table=config/, (route) => {
       if (route.request().method() === 'PUT') {
         putUrl = route.request().url();
         putBody = route.request().postDataJSON();
@@ -182,7 +182,7 @@ test.describe('KVView Redis 键值浏览', () => {
     let postBody = null;
     await openView(page, 'Redis', ['hash1'], (route) =>
       route.fulfill({ json: { success: true, data: { rows: KV_DATA.hash1, total: 1 } } }));
-    await page.route(/\/api\/projects\/qa-tools-hub\/data\/row\?table=hash1/, (route) => {
+    await page.route(/\/api\/projects\/demo-project\/data\/row\?table=hash1/, (route) => {
       if (route.request().method() === 'POST') postBody = route.request().postDataJSON();
       route.fulfill({ json: { success: true } });
     });
@@ -210,7 +210,7 @@ test.describe('KVView Redis 键值浏览', () => {
       const table = u.searchParams.get('table') || '';
       route.fulfill({ json: { success: true, data: { rows: KV_DATA[table] || [], total: (KV_DATA[table] || []).length } } });
     });
-    await page.route(/\/api\/projects\/qa-tools-hub\/data\/row\?table=/, (route) => {
+    await page.route(/\/api\/projects\/demo-project\/data\/row\?table=/, (route) => {
       if (route.request().method() === 'POST') {
         postUrl = route.request().url();
         postBody = route.request().postDataJSON();
@@ -236,7 +236,7 @@ test.describe('KVView Redis 键值浏览', () => {
     let deleteUrl = null;
     await openView(page, 'Redis', ['config'], (route) =>
       route.fulfill({ json: { success: true, data: { rows: KV_DATA.config, total: 1 } } }));
-    await page.route(/\/api\/projects\/qa-tools-hub\/data\/row\?table=config/, (route) => {
+    await page.route(/\/api\/projects\/demo-project\/data\/row\?table=config/, (route) => {
       if (route.request().method() === 'DELETE') deleteUrl = route.request().url();
       route.fulfill({ json: { success: true } });
     });
@@ -269,7 +269,7 @@ test.describe('VectorView Qdrant 向量浏览', () => {
     let searchBody = null;
     await openView(page, '向量数据库（Qdrant）', ['items'], (route) =>
       route.fulfill({ json: { success: true, data: { columns: ['id', 'payload'], rows: VECTOR_ROWS, total: 1 } } }));
-    await page.route(/\/api\/projects\/qa-tools-hub\/vector-search$/, (route) => {
+    await page.route(/\/api\/projects\/demo-project\/vector-search$/, (route) => {
       searchBody = route.request().postDataJSON();
       route.fulfill({ json: { success: true, data: { hits: [{ id: 'p2', score: 0.85 }] } } });
     });
@@ -288,7 +288,7 @@ test.describe('VectorView Qdrant 向量浏览', () => {
     let putBody = null;
     await openView(page, '向量数据库（Qdrant）', ['items'], (route) =>
       route.fulfill({ json: { success: true, data: { columns: ['id', 'payload'], rows: VECTOR_ROWS, total: 1 } } }));
-    await page.route(/\/api\/projects\/qa-tools-hub\/data\/row\?table=items/, (route) => {
+    await page.route(/\/api\/projects\/demo-project\/data\/row\?table=items/, (route) => {
       if (route.request().method() === 'PUT') putBody = route.request().postDataJSON();
       route.fulfill({ json: { success: true } });
     });
@@ -309,7 +309,7 @@ test.describe('VectorView Qdrant 向量浏览', () => {
     let deleteUrl = null;
     await openView(page, '向量数据库（Qdrant）', ['items'], (route) =>
       route.fulfill({ json: { success: true, data: { columns: ['id', 'payload'], rows: VECTOR_ROWS, total: 1 } } }));
-    await page.route(/\/api\/projects\/qa-tools-hub\/data\/row\?table=items/, (route) => {
+    await page.route(/\/api\/projects\/demo-project\/data\/row\?table=items/, (route) => {
       if (route.request().method() === 'PUT') putUrl = route.request().url();
       if (route.request().method() === 'DELETE') deleteUrl = route.request().url();
       route.fulfill({ json: { success: true } });

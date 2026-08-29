@@ -14,7 +14,7 @@ test.describe('通知中心页面', () => {
 
   test('通知显示标题和内容', async ({ page }) => {
     const firstItem = page.locator('.notif-item').first();
-    await expect(firstItem.locator('.title')).toContainText('QA通关');
+    await expect(firstItem.locator('.title')).toContainText('示例项目');
     await expect(firstItem.locator('.content')).toContainText('健康检查');
   });
 
@@ -59,7 +59,7 @@ test.describe('通知中心页面', () => {
     // The first notification has project_id
     await page.locator('.notif-item').first().click();
     await page.waitForURL('**/project/**', { timeout: 5000 });
-    expect(page.url()).toMatch(/project\/qa-tools-hub/);
+    expect(page.url()).toMatch(/project\/demo-project/);
   });
 
   test('删除通知 → dismiss 按钮点击', async ({ page }) => {

@@ -29,8 +29,8 @@ test.describe('仪表盘页面', () => {
 
   test('置顶项目显示星标', async ({ page }) => {
     const firstCard = page.locator('.project-card').first();
-    // QA通关 has is_pinned: true, should show star icon
-    await expect(firstCard).toContainText('QA通关');
+    // 示例项目 has is_pinned: true, should show star icon
+    await expect(firstCard).toContainText('示例项目');
   });
 
   test('筛选：在线 → 离线 → 维护中 → 全部', async ({ page }) => {
@@ -60,10 +60,10 @@ test.describe('仪表盘页面', () => {
     });
     await searchInput.fill('QA');
     await searchReq;
-    // Should filter to only QA通关
+    // Should filter to only 示例项目
     const cards = page.locator('.project-card');
     await expect(cards).toHaveCount(1);
-    await expect(cards.first()).toContainText('QA通关');
+    await expect(cards.first()).toContainText('示例项目');
   });
 
   test('排序切换', async ({ page }) => {
@@ -80,7 +80,7 @@ test.describe('仪表盘页面', () => {
   test('点击项目卡片 → 跳转详情页', async ({ page }) => {
     await page.locator('.project-card').first().click();
     await page.waitForURL('**/project/**', { timeout: 5000 });
-    expect(page.url()).toMatch(/project\/qa-tools-hub/);
+    expect(page.url()).toMatch(/project\/demo-project/);
   });
 
   test('批量模式：选择 → 全选 → 取消', async ({ page }) => {

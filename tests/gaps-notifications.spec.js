@@ -32,7 +32,7 @@ test.describe('通知中心 已读与删除', () => {
       route.fulfill({ json: { success: true } });
     });
 
-    await page.locator('.notif-item', { hasText: 'QA通关 - 服务异常' }).getByRole('button', { name: '标记已读' }).click();
+    await page.locator('.notif-item', { hasText: '示例项目 - 服务异常' }).getByRole('button', { name: '标记已读' }).click();
     // 请求到达 route handler 是异步的 —— poll 等待而非立即断言（firefox 下会竞态拿到 null）
     await expect.poll(() => readUrl).toContain('/api/notifications/n1/read');
     await expect(page.locator('.notif-item.unread')).toHaveCount(3);
@@ -47,11 +47,11 @@ test.describe('通知中心 已读与删除', () => {
       route.fulfill({ json: { success: true } });
     });
 
-    await page.locator('.notif-item', { hasText: 'QA通关 - 服务异常' }).getByRole('button', { name: '删除通知' }).click();
+    await page.locator('.notif-item', { hasText: '示例项目 - 服务异常' }).getByRole('button', { name: '删除通知' }).click();
     // 同「标已读」：请求到达 route handler 前 deleteUrl 仍是 null，poll 等待
     await expect.poll(() => deleteUrl).toContain('/api/notifications/n1');
     await expect(page.locator('.notif-item')).toHaveCount(3);
-    await expect(page.getByText('QA通关 - 服务异常')).toBeHidden();
+    await expect(page.getByText('示例项目 - 服务异常')).toBeHidden();
   });
 });
 
