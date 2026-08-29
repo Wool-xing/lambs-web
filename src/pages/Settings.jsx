@@ -151,7 +151,7 @@ export default function Settings() {
           </div>
         </div>
         <div className="field" style={{ marginTop: 14 }}>
-          <label>品牌 Logo <span style={{fontSize:10,color:'var(--text-tertiary)',fontWeight:400}}>（侧边栏左上角显示）</span></label>
+          <label>品牌 Logo</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <div className="upload-zone" style={{width:56,height:56,borderRadius:7}}
               onClick={() => logoRef.current?.click()}
@@ -161,7 +161,7 @@ export default function Settings() {
             </div>
             <input ref={logoRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{display:'none'}}
               onChange={e => upload.handleFile(e.target.files[0])} />
-            {logoImg ? <span style={{fontSize:11,color:'var(--accent-red)',cursor:'pointer'}} onClick={() => { upload.reset(); onLogoChange('') }}>移除</span> : <span style={{fontSize:11,color:'var(--text-secondary)'}}>点击或拖拽上传 · PNG / JPG / SVG / WebP · ≤5MB</span>}
+            {logoImg ? <span style={{fontSize:11,color:'var(--accent-red)',cursor:'pointer'}} onClick={() => { upload.reset(); onLogoChange('') }}>移除</span> : <span style={{fontSize:11,color:'var(--text-secondary)'}}>点击或拖拽上传</span>}
           </div>
         </div>
       </div>
