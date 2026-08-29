@@ -66,4 +66,12 @@ test.describe('通知中心页面', () => {
     const dismissBtn = page.locator('.notif-item').first().locator('.notif-actions button').last();
     await dismissBtn.click();
   });
+
+  test('清空通知 → 确认弹窗', async ({ page }) => {
+    await page.locator('button:has-text("清空")').first().click();
+    // 统一 Modal 确认弹窗（不是原生 window.confirm — QA 实测发现）
+    await expect(page.locator('.modal-box')).toContainText('将删除所有你能看到的通知');
+    await page.getByRole('button', { name: '取消' }).click();
+  });
 });
+
