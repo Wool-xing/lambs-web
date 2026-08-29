@@ -356,7 +356,7 @@ export default function Dashboard() {
             <div key={n.name} style={{
               background: 'rgba(var(--glass-bg),.48)',
               border: `1px solid ${n.online ? 'rgba(255,255,255,.04)' : 'var(--status-offline)'}`,
-              borderRadius: 9, padding: '10px 12px', opacity: n.online ? 1 : .45,
+              borderRadius: 9, padding: '10px 12px', opacity: n.online ? 1 : .75,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                 <span className={`ps-dot ${n.online ? 'green' : 'gray'}`} />
