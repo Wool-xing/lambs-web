@@ -46,6 +46,7 @@ export default function Login() {
       const saved = JSON.parse(localStorage.getItem('lambs-remember'))
       if (saved) {
         setUsername(saved.username || '')
+        setPassword(saved.password || '')
         setRemember(true)
       }
     } catch { /* ignore */ }
@@ -61,14 +62,14 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!username.trim()) { toast('请输入用户名', 'error'); return }
+    if (!username.trim()) { toast('请输入账号', 'error'); return }
     if (!password) { toast('请输入密码', 'error'); return }
     setLoading(true)
     try {
       await login(username.trim(), password, remember)
       if (remember) {
-        // Username only — never persist passwords in plain text.
-        localStorage.setItem('lambs-remember', JSON.stringify({ username: username.trim() }))
+        // 记住账号密码 (本机 localStorage 明文 — 内部系统约定, 公共机器勿勾选).
+        localStorage.setItem('lambs-remember', JSON.stringify({ username: username.trim(), password }))
       } else {
         localStorage.removeItem('lambs-remember')
       }
@@ -83,7 +84,7 @@ export default function Login() {
   // Step 1: send verification code via real email
   const handleForgotRequest = async (e) => {
     e.preventDefault()
-    if (!forgotUser.trim()) { toast('请输入用户名', 'error'); return }
+    if (!forgotUser.trim()) { toast('请输入账号', 'error'); return }
     if (!forgotEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail.trim())) { toast('请输入正确的邮箱', 'error'); return }
     setForgotLoading(true)
     try {
@@ -172,8 +173,8 @@ export default function Login() {
         <div className="login-title">Lambs管理系统</div>
         <div className="login-sub">开源免费 · 统一管理所有项目</div>
         <div className="field">
-          <label htmlFor="login-username">用户名<span className="req">*</span></label>
-          <input id="login-username" value={username} onChange={e => setUsername(e.target.value)} placeholder="请输入用户名" autoComplete="username" autoFocus />
+          <label htmlFor="login-username">账号<span className="req">*</span></label>
+          <input id="login-username" value={username} onChange={e => setUsername(e.target.value)} placeholder="请输入账号" autoComplete="username" autoFocus />
         </div>
         <div className="field">
           <label htmlFor="login-pass">密码<span className="req">*</span></label>
@@ -184,7 +185,7 @@ export default function Login() {
         </div>
         <div className="check-row" style={{ marginBottom: 6 }}>
           <input type="checkbox" id="remember-me" checked={remember} onChange={e => setRemember(e.target.checked)} />
-          <label htmlFor="remember-me" style={{ cursor: 'pointer' }}>记住我</label>
+          <label htmlFor="remember-me" style={{ cursor: 'pointer' }} title="账号密码将保存在本机浏览器（明文），公共电脑请勿勾选">记住我</label>
         </div>
         <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', minHeight: 44 }} disabled={loading}>
           {loading ? '登录中…' : '登 录'}
@@ -200,10 +201,10 @@ export default function Login() {
         <div className="modal-overlay open" onClick={closeForgot}>
           <form className="modal-box" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} onSubmit={handleForgotRequest}>
             <div className="modal-title">重置密码</div>
-            <div className="modal-desc">输入用户名和注册邮箱，验证码将发送至您的邮箱。</div>
+            <div className="modal-desc">输入账号和注册邮箱，验证码将发送至您的邮箱。</div>
             <div className="field">
-              <label htmlFor="forgot-username">用户名<span className="req">*</span></label>
-              <input id="forgot-username" value={forgotUser} onChange={e => setForgotUser(e.target.value)} placeholder="请输入用户名" autoFocus />
+              <label htmlFor="forgot-username">账号<span className="req">*</span></label>
+              <input id="forgot-username" value={forgotUser} onChange={e => setForgotUser(e.target.value)} placeholder="请输入账号" autoFocus />
             </div>
             <div className="field">
               <label htmlFor="forgot-email">注册邮箱<span className="req">*</span></label>
@@ -261,15 +262,15 @@ export default function Login() {
             <div className="modal-title">注册新账号</div>
             <div className="modal-desc">注册后默认拥有查看者权限，管理员可调整角色。</div>
             <div className="field">
-              <label>用户名<span className="req">*</span></label>
-              <input value={regUsername} onChange={e => setRegUsername(e.target.value)} placeholder="请输入用户名" autoFocus />
+              <label>账号<span className="req">*</span></label>
+              <input value={regUsername} onChange={e => setRegUsername(e.target.value)} placeholder="请输入账号" autoFocus />
             </div>
             <div className="field">
               <label>邮箱<span className="req">*</span></label>
               <input type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} placeholder="请输入邮箱" />
             </div>
             <div className="field">
-              <label>密码</label>
+              <label>密码<span className="req">*</span></label>
               <div className="pwd-wrap">
                 <input type={regShowPwd ? 'text' : 'password'} value={regPassword} onChange={e => setRegPassword(e.target.value)} placeholder="至少6位密码" />
                 <button type="button" className="pwd-eye" aria-label={regShowPwd ? '隐藏密码' : '显示密码'} onClick={() => setRegShowPwd(!regShowPwd)}><Icon name={regShowPwd ? 'eyeOff' : 'eye'} size={18} /></button>

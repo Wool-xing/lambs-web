@@ -145,6 +145,7 @@ export default function Settings() {
             <label htmlFor="cfg-port">服务端口</label>
             <input id="cfg-port" value={config.port}
               onChange={e => setConfig({ ...config, port: parseInt(e.target.value) || 3602 })} />
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>主服务监听端口，修改后需重启服务生效</div>
           </div>
           <div className="field">
             <label htmlFor="cfg-refresh">数据刷新间隔（秒）</label>
@@ -209,7 +210,7 @@ export default function Settings() {
             导出系统用户
           </button>
           <TypeSelect value={exportProject} onChange={setExportProject}
-            style={{ minWidth: 170 }}
+            style={{ minWidth: 170, height: 30 }}
             options={[{ value: '', label: '按项目导出用户' }, ...projects.map(p => ({ value: p.id, label: p.name }))]} />
           <button className="btn btn-ghost btn-sm"
             onClick={() => { if (exportProject) handleExport(`project-users/${exportProject}`) }}

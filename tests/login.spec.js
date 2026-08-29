@@ -26,7 +26,7 @@ test.describe('登录页面', () => {
   test('空用户名提交 → 显示错误 toast', async ({ page }) => {
     await page.locator('.login-card button.btn-primary').click();
     await expect(page.locator('.toast.error')).toBeVisible({ timeout: 3000 });
-    await expect(page.locator('.toast.error')).toContainText('请输入用户名');
+    await expect(page.locator('.toast.error')).toContainText('请输入账号');
   });
 
   test('空密码提交 → 显示错误 toast', async ({ page }) => {
@@ -75,7 +75,7 @@ test.describe('登录页面', () => {
   test('忘记密码表单提交 → API 调用成功', async ({ page }) => {
     await setupApiMocks(page);
     await page.click('text=忘记密码？');
-    await page.fill('.modal-box input[placeholder="请输入用户名"]', 'admin');
+    await page.fill('.modal-box input[placeholder="请输入账号"]', 'admin');
     await page.locator('.modal-box button.btn-primary').click();
     await expect(page.locator('.toast')).toBeVisible({ timeout: 3000 });
   });
@@ -97,7 +97,7 @@ test.describe('登录页面', () => {
       await route.fulfill({ json: { success: true, data: { id: '1', username: 'newuser', name: 'newuser', email: 'new@test.com', role: 'viewer', status: 'active' } } });
     });
     await page.click('text=注册新账号');
-    await page.fill('.modal-box input[placeholder="请输入用户名"]', 'newuser');
+    await page.fill('.modal-box input[placeholder="请输入账号"]', 'newuser');
     await page.fill('.modal-box input[placeholder="请输入邮箱"]', 'new@test.com');
     await page.fill('.modal-box input[placeholder*="密码"]', 'password123');
     await page.locator('.modal-box button.btn-primary').click();

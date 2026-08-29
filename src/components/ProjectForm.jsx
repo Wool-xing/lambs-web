@@ -8,9 +8,10 @@ import TypeSelect from './TypeSelect'
 export default function ProjectForm({ onDone, project }) {
   const confirm = useConfirm()
 
-  // 有输入时取消需确认 — 误触丢弃已填表单 (R23)
+  // 有改动时取消需确认 — 误触丢弃已填表单 (R23)。脏判断按"与初始值差异"，
+  // 不是"有内容"：编辑已有项目直接取消不该弹二次确认 (QA 2026-08-29)。
   const handleCancel = async () => {
-    const dirty = !!(name || repo || desc || stack || port || basePath || dss.some(d => d.dsn))
+    const dirty = JSON.stringify({ name, repo, desc, stack, port, basePath, dsn: dss.map(d => d.dsn) }) !== initialSnapshot
     if (!dirty) { onDone(); return }
     const ok = await confirm('放弃修改', '已填写的内容将丢失，确定取消吗？')
     if (ok) onDone()
@@ -42,6 +43,8 @@ export default function ProjectForm({ onDone, project }) {
   })
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [svcs, setSvcs] = useState(() => (project?.services || []).map(s => ({ name: s.name || '', start_cmd: s.start_cmd || '', stop_cmd: s.stop_cmd || '' })))
+  // Mount-time snapshot: the "unchanged" baseline for the cancel confirm.
+  const [initialSnapshot] = useState(() => JSON.stringify({ name, repo, desc, stack, port, basePath, dsn: dss.map(d => d.dsn) }))
   const [detecting, setDetecting] = useState(false)
 
   // Shared-service auto-detection: only for units that really exist on the

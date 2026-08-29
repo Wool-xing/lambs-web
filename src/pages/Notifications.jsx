@@ -56,6 +56,18 @@ export default function Notifications() {
     } catch (e) { toast(e.message, 'error') }
   }
 
+  const handleClearAll = async () => {
+    const ok = confirm('清空通知', '将删除所有你能看到的通知，确定清空吗？')
+    if (!ok) return
+    try {
+      await api.delete('/notifications')
+      setNotifs([])
+      setUnread(0)
+      toast('通知已清空')
+      refreshBadge()
+    } catch (e) { toast(e.message, 'error') }
+  }
+
   const handleDismiss = async (id) => {
     try {
       await api.delete(`/notifications/${id}`)
@@ -83,7 +95,10 @@ export default function Notifications() {
     <div className="card">
       <div className="card-header">
         <div className="card-title">通知中心</div>
-        <button className="btn btn-ghost btn-sm" onClick={handleMarkAllRead}>全部已读</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-ghost btn-sm" onClick={handleMarkAllRead}>全部已读</button>
+          <button className="btn btn-ghost btn-sm" onClick={handleClearAll}>清空</button>
+        </div>
       </div>
 
       <div className="filter-chips" style={{ marginBottom: 14 }}>

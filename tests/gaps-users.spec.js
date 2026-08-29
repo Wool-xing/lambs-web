@@ -36,7 +36,7 @@ test.describe('用户管理 分页加载', () => {
 test.describe('用户管理 空态与失败重试', () => {
   test('搜索无结果 → 空态提示', async ({ page }) => {
     await loginAsAdmin(page, '/users');
-    await page.getByPlaceholder('搜索姓名或邮箱…').fill('不存在的用户');
+    await page.getByPlaceholder('搜索账号、用户名或邮箱…').fill('不存在的用户');
     await page.waitForTimeout(400); // debounce
     await expect(page.getByText('未找到匹配的用户')).toBeVisible();
   });
