@@ -128,7 +128,7 @@ export default function Settings() {
           <div className="field">
             <label htmlFor="cfg-jwt">JWT 密钥</label>
             <input id="cfg-jwt" disabled
-              placeholder="由环境变量 JWT_SECRET 提供（不在页面配置）"
+              placeholder="在 .env 的 JWT_SECRET 配置"
               title="部署时在 .env 中生成，页面保存不会修改它" />
           </div>
           <div className="field">
