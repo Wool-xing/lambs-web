@@ -9,13 +9,12 @@ const PNG_1PX = Buffer.from(
 );
 
 test.describe('设置页 密钥可见性', () => {
-  test('JWT 与 SMTP 密钥眼睛切换明文/密文', async ({ page }) => {
+  test('JWT 只读展示 + SMTP 密钥眼睛切换明文/密文', async ({ page }) => {
     await loginAsAdmin(page, '/settings');
+    // JWT 由环境变量提供，页面不再可编辑 (QA 2026-08-29 UI 重设计)
     const jwtInput = page.locator('#cfg-jwt');
-    await expect(jwtInput).toHaveAttribute('type', 'password');
-    await page.getByRole('button', { name: '显示或隐藏密钥' }).click();
-    await expect(jwtInput).toHaveAttribute('type', 'text');
-    await expect(jwtInput).toHaveValue('lambs-jwt-secret-key');
+    await expect(jwtInput).toBeDisabled();
+    await expect(jwtInput).toHaveAttribute('placeholder', '由环境变量 JWT_SECRET 提供（不在页面配置）');
 
     const smtpInput = page.locator('#cfg-smtp-pass');
     await expect(smtpInput).toHaveAttribute('type', 'password');
