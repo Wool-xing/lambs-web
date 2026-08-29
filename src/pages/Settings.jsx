@@ -157,7 +157,7 @@ export default function Settings() {
               onClick={() => logoRef.current?.click()}
               onDragOver={e => { e.preventDefault() }}
               onDrop={e => { e.preventDefault(); upload.handleFile(e.dataTransfer.files[0]) }}>
-              {logoImg ? <img src={resolveAsset(logoImg)} alt="" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:7}} /> : <span className="upload-hint" style={{fontSize:11,lineHeight:1.4,textAlign:'center',padding:'0 4px'}}>上传 Logo</span>}
+              {logoImg ? <img src={resolveAsset(logoImg)} alt="" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:7}} /> : <span className="upload-hint" style={{fontSize:10,lineHeight:1.4,textAlign:'center',padding:'0 2px'}}>PNG / JPG</span>}
             </div>
             <input ref={logoRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{display:'none'}}
               onChange={e => upload.handleFile(e.target.files[0])} />
