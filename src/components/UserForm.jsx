@@ -123,7 +123,7 @@ export default function UserForm({ onDone, userData }) {
       </div>
       <div className="field">
         <label>账号<span className="req">*</span></label>
-        <input className={fErr.username ? 'input-error' : ''} value={username} onChange={e => setUsername(e.target.value)} placeholder="请输入用户名" />
+        <input className={fErr.username ? 'input-error' : ''} value={username} onChange={e => setUsername(e.target.value)} placeholder="请输入账号" />
       </div>
       <div className="field">
         <label>用户名<span className="req">*</span></label>

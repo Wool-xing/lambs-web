@@ -142,7 +142,7 @@ export default function Login() {
 
   const handleRegister = async (e) => {
     e.preventDefault()
-    if (!regUsername.trim()) { toast('请输入用户名', 'error'); return }
+    if (!regUsername.trim()) { toast('请输入账号', 'error'); return }
     if (!regEmail.trim()) { toast('请输入邮箱', 'error'); return }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail.trim())) { toast('邮箱格式不正确', 'error'); return }
     if (!regPassword || regPassword.length < 6) { toast('密码至少6位', 'error'); return }
