@@ -1,0 +1,167 @@
+import { useState, useEffect, useCallback } from 'react'
+import { api } from '../api/client'
+import { useAuth } from '../context/AuthContext'
+import { useToast } from '../components/Toast'
+import { useConfirm } from '../components/Modal'
+import { useDrawer } from '../components/Drawer'
+import { fmtTime } from '../utils/time'
+import MachineForm from '../components/MachineForm'
+
+const roleLabel = { gate: '网关', compute: '计算', data: '数据', control: '控制', 'data,control': '数据+控制' }
+
+function MemDiskBar({ label, used, total }) {
+  // used 未采集前只显示容量；百分比仅当两者都有意义
+  const pct = used && total ? Math.min(100, Math.round((used / total) * 100)) : 0
+  const color = pct > 85 ? 'var(--accent-red)' : pct > 65 ? 'var(--accent-amber)' : 'var(--accent-cyan)'
+  return (
+    <div style={{ flex: 1, minWidth: 70 }}>
+      <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 2 }}>{label} {total}G{used ? ` / ${used}G` : ''}</div>
+      <div style={{ height: 4, background: 'var(--bg-input)', borderRadius: 2, overflow: 'hidden' }}>
+        <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 2 }} />
+      </div>
+    </div>
+  )
+}
+
+export default function Machines() {
+  const { user } = useAuth()
+  const toast = useToast()
+  const confirm = useConfirm()
+  const { openDrawer, closeDrawer } = useDrawer()
+  const [machines, setMachines] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [reconciling, setReconciling] = useState(false)
+  const isSA = user?.role === 'super_admin'
+
+  const fetchMachines = useCallback(async () => {
+    try {
+      const res = await api.get('/machines')
+      if (res.success) { setMachines(res.data.machines || []); setLoadError(false) }
+      else setLoadError(true)
+    } catch { setLoadError(true) }
+    finally { setLoading(false) }
+  }, [])
+
+  useEffect(() => { fetchMachines() }, [fetchMachines])
+
+  const handleReconcile = async () => {
+    if (!isSA) return
+    setReconciling(true)
+    try {
+      const res = await api.post('/machines/reconcile')
+      const results = res.data?.results || []
+      const offline = results.filter(r => r.status === 'offline')
+      toast(offline.length ? `对账完成：${offline.length} 台离线（${offline.map(r => r.id).join('、')}）` : `对账完成：${results.length} 台全部在线`)
+      fetchMachines()
+    } catch (err) { toast(err.message, 'error') }
+    finally { setReconciling(false) }
+  }
+
+  const handleDelete = async (m) => {
+    const ok = await confirm('注销机器', `确定从注册表移除「${m.id}」吗？`)
+    if (!ok) return
+    try { await api.delete(`/machines/${m.id}`); toast('已注销'); fetchMachines() }
+    catch (err) { toast(err.message, 'error') }
+  }
+
+  if (loading) return (
+    <div className="card"><div className="page-skeleton">{[0, 1, 2, 3].map(i => <div key={i} className="sk" style={{ height: 60 }} />)}</div></div>
+  )
+  if (loadError) return (
+    <div className="empty-state">
+      <div className="t">机器注册表加载失败</div>
+      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>网络异常或服务不可用</div>
+      <button className="btn btn-ghost btn-sm" style={{ marginTop: 10 }} onClick={() => { setLoading(true); fetchMachines() }}>重试</button>
+    </div>
+  )
+
+  return (
+    <>
+    {/* 全局地图：机器拓扑卡片 */}
+    <div className="card" style={{ marginBottom: 14 }}>
+      <div className="card-header">
+        <div className="card-title">全局地图</div>
+        <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+          {machines.filter(m => m.status === 'online').length}/{machines.length} 在线
+        </span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+        {machines.map(m => (
+          <div key={m.id} className="machine-card" style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: m.status === 'online' ? 'var(--accent-green)' : m.status === 'maintenance' ? 'var(--accent-amber)' : 'var(--accent-red)', flexShrink: 0 }} />
+              <span style={{ fontWeight: 600, fontSize: 13 }}>{m.id}</span>
+              <span className="chip chip-pa" style={{ marginLeft: 'auto' }}>{roleLabel[m.role] || m.role}</span>
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+              TS {m.ts_ip}{m.lan_ip ? ` · LAN ${m.lan_ip}` : ''}<br />
+              {m.os} / {m.arch} · {m.cpu_cores}C · 最后对账 {m.last_check_at ? fmtTime(m.last_check_at) : '未对账'}
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <MemDiskBar label="内存" used={0} total={m.mem_gb} />
+              <MemDiskBar label="磁盘" used={0} total={m.disk_gb} />
+            </div>
+            {(m.tags || []).length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
+                {(Array.isArray(m.tags) ? m.tags : String(m.tags).split(',')).slice(0, 5).map(t => (
+                  <span key={t} className="chip" style={{ fontSize: 9.5, padding: '1px 6px' }}>{t}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+        {machines.length === 0 && <div className="empty-state" style={{ gridColumn: '1/-1' }}><div className="t">暂无机器注册</div></div>}
+      </div>
+    </div>
+
+    {/* 注册表表格 */}
+    <div className="card">
+      <div className="card-header">
+        <div className="card-title">机器注册表</div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {isSA && (
+            <button className="btn btn-ghost btn-sm" disabled={reconciling} onClick={handleReconcile}>
+              {reconciling ? '对账中…' : '对账'}
+            </button>
+          )}
+          {isSA && (
+            <button className="btn btn-primary btn-sm" onClick={() => openDrawer('注册机器', <MachineForm onDone={() => { closeDrawer(); fetchMachines() }} />)}>
+              + 注册机器
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="tbl">
+        <div className="tbl-row head" style={{ gridTemplateColumns: '1fr .9fr 1.2fr .8fr .8fr .7fr .9fr 1fr' }}>
+          <span>机器</span><span>角色</span><span>TS IP</span><span>系统/架构</span><span>资源</span><span>状态</span><span>最后对账</span><span>操作</span>
+        </div>
+        {machines.map(m => (
+          <div key={m.id} className="tbl-row" style={{ gridTemplateColumns: '1fr .9fr 1.2fr .8fr .8fr .7fr .9fr 1fr' }}>
+            <span style={{ fontWeight: 500 }}>{m.id}</span>
+            <span>{roleLabel[m.role] || m.role}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{m.ts_ip}</span>
+            <span style={{ fontSize: 11 }}>{m.os}/{m.arch}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10 }}>{m.cpu_cores}C/{m.mem_gb}G/{m.disk_gb}G</span>
+            <span className={`chip ${m.status === 'online' ? 'chip-online' : m.status === 'maintenance' ? 'chip-vi' : 'chip-offline'}`}>
+              {{ online: '在线', offline: '离线', maintenance: '维护中' }[m.status] || m.status}
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-tertiary)' }}>{m.last_check_at ? fmtTime(m.last_check_at) : '—'}</span>
+            <span style={{ display: 'flex', gap: 8 }}>
+              {isSA ? (
+                <>
+                  <span className="link-action" onClick={() => openDrawer(`编辑机器·${m.id}`, <MachineForm machineData={m} onDone={() => { closeDrawer(); fetchMachines() }} />)}>编辑</span>
+                  <span className="link-action danger" onClick={() => handleDelete(m)}>注销</span>
+                </>
+              ) : (
+                <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>只读</span>
+              )}
+            </span>
+          </div>
+        ))}
+        {machines.length === 0 && <div className="empty-state"><div className="t">注册表为空</div></div>}
+      </div>
+    </div>
+    </>
+  )
+}

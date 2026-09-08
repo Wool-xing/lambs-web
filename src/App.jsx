@@ -8,6 +8,7 @@ const ProjectDetail = lazy(() => import('./pages/ProjectDetail'))
 const Users = lazy(() => import('./pages/Users'))
 const Notifications = lazy(() => import('./pages/Notifications'))
 const Settings = lazy(() => import('./pages/Settings'))
+const Machines = lazy(() => import('./pages/Machines'))
 import Sidebar from './components/Sidebar'
 import Topbar from './components/Topbar'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -136,6 +137,7 @@ function AppInner() {
             <Route path="/project/:id" element={<ProjectDetail />} />
             <Route path="/users" element={<RequireRole role="super_admin"><Users /></RequireRole>} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/machines" element={<Machines />} />
             <Route path="/settings" element={<RequireRole role="super_admin"><Settings /></RequireRole>} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
