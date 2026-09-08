@@ -44,7 +44,7 @@ export default function ProjectForm({ onDone, project }) {
   })
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [autoUpdate, setAutoUpdate] = useState(!!project?.auto_update)
-  const [svcs, setSvcs] = useState(() => (project?.services || []).map(s => ({ name: s.name || '', type: s.type || 'backend', git_url: s.git_url || '', start_cmd: s.start_cmd || '', stop_cmd: s.stop_cmd || '' })))
+  const [svcs, setSvcs] = useState(() => (project?.services || []).map(s => ({ name: s.name || '', type: s.type || 'backend', host: s.host || '', git_url: s.git_url || '', start_cmd: s.start_cmd || '', stop_cmd: s.stop_cmd || '' })))
   // Mount-time snapshot: the "unchanged" baseline for the cancel confirm.
   const [host, setHost] = useState(project?.host || '')
   const [machines, setMachines] = useState([])
@@ -142,7 +142,7 @@ export default function ProjectForm({ onDone, project }) {
     try {
       const datasources = dss.map((d, i) => ({ id: d.id, name: d.name, type: d.type, dsn: d.dsn, is_primary: i === 0 }))
       const primary = datasources[0]
-      const services = svcs.filter(s => s.name && s.start_cmd).map(s => ({ name: s.name, type: s.type || 'backend', git_url: s.git_url || '', start_cmd: s.start_cmd, stop_cmd: s.stop_cmd || '' }))
+      const services = svcs.filter(s => s.name && s.start_cmd).map(s => ({ name: s.name, type: s.type || 'backend', host: s.host || '', git_url: s.git_url || '', start_cmd: s.start_cmd, stop_cmd: s.stop_cmd || '' }))
       const payload = {
         name, repo: repoFinal, description: desc, stack, port,
         db_type: primary ? primary.type : dbType,
@@ -400,6 +400,13 @@ export default function ProjectForm({ onDone, project }) {
                     options={['backend', 'frontend', 'middleware', 'job', 'windows-svc']}
                   />
                 </div>
+                <div style={{ width: 92, flexShrink: 0 }}>
+                  <TypeSelect
+                    value={s.host ? `${s.host}` : '自动'}
+                    onChange={v => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, host: v === '自动' ? '' : v } : x))}
+                    options={['自动', ...machines.filter(m => m.status === 'online').map(m => m.id)]}
+                  />
+                </div>
                 <input
                   value={s.start_cmd}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, start_cmd: e.target.value } : x))}
@@ -435,7 +442,7 @@ export default function ProjectForm({ onDone, project }) {
               </div>
             ))}
             <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
-              onClick={() => setSvcs(prev => [...prev, { name: '', type: 'backend', git_url: '', start_cmd: '', stop_cmd: '' }])}>
+              onClick={() => setSvcs(prev => [...prev, { name: '', type: 'backend', host: '', git_url: '', start_cmd: '', stop_cmd: '' }])}>
               + 添加共享服务
             </button>
           </>
