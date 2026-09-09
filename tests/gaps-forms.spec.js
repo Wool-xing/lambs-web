@@ -77,6 +77,9 @@ test.describe('ProjectForm 新增项目', () => {
       tags: ['AI', '测试'],
       backup_interval_hours: 24,
       backup_retention_days: 30,
+      host: '',
+      git_url: '',
+      auto_update: false,
     });
   });
 

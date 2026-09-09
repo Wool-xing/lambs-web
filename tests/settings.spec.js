@@ -8,10 +8,10 @@ test.describe('系统设置页面', () => {
 
   test('显示全局配置区块', async ({ page }) => {
     await expect(page.locator('.card-title').filter({ hasText: '全局配置' })).toBeVisible();
-    // Fields should be editable (not readonly)
-    const jwtInput = page.locator('.field').filter({ hasText: 'JWT' }).locator('input');
-    await expect(jwtInput).toBeVisible();
-    await expect(jwtInput).not.toHaveAttribute('readonly');
+    // JWT 字段已移除（PR#57）——改断言区块内任一可编辑字段 + 保存按钮
+    const anyInput = page.locator('.card:has(.card-title:has-text("全局配置")) input').first();
+    await expect(anyInput).toBeVisible();
+    await expect(anyInput).not.toHaveAttribute('readonly');
     await expect(page.locator('button:has-text("保存配置")')).toBeVisible();
   });
 
