@@ -30,7 +30,7 @@ export default function MachineForm({ onDone, machineData }) {
     if (Array.isArray(machineData.tags)) return machineData.tags.join(',')
     return machineData.tags
   })
-  const [status, setStatus] = useState(machineData?.status || 'online')
+  const [status, setStatus] = useState(machineData?.status || 'offline')
   const [notes, setNotes] = useState(machineData?.notes || '')
   const [loading, setLoading] = useState(false)
 
@@ -93,11 +93,19 @@ export default function MachineForm({ onDone, machineData }) {
       <div style={grid2}>
         <div className="field" style={{ marginBottom: 0 }}>
           <label>系统</label>
-          <TypeSelect value={os} onChange={v => setOs(v)} options={['ubuntu', 'windows', 'debian', 'other']} />
+          <TypeSelect
+            value={{ ubuntu: 'Ubuntu (Linux)', windows: 'Windows', debian: 'Debian (Linux)', other: '其他' }[os] || os}
+            onChange={v => setOs({ 'Ubuntu (Linux)': 'ubuntu', 'Windows': 'windows', 'Debian (Linux)': 'debian', '其他': 'other' }[v] || v)}
+            options={['Ubuntu (Linux)', 'Windows', 'Debian (Linux)', '其他']}
+          />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
           <label>架构</label>
-          <TypeSelect value={arch} onChange={v => setArch(v)} options={['amd64', 'arm64']} />
+          <TypeSelect
+            value={{ amd64: '64位 (amd64)', arm64: 'ARM 64位 (arm64)' }[arch] || arch}
+            onChange={v => setArch({ '64位 (amd64)': 'amd64', 'ARM 64位 (arm64)': 'arm64' }[v] || v)}
+            options={['64位 (amd64)', 'ARM 64位 (arm64)']}
+          />
         </div>
         <div className="field" style={{ marginBottom: 0 }}>
           <label>CPU 核数</label>
@@ -117,7 +125,7 @@ export default function MachineForm({ onDone, machineData }) {
         </div>
       </div>
 
-      {groupTitle('职责')}
+      {groupTitle('职责 *')}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {ROLE_OPTIONS.map(r => (
           <span
@@ -143,7 +151,7 @@ export default function MachineForm({ onDone, machineData }) {
         <button className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
           {loading ? '保存中…' : '保存'}
         </button>
-        <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={onDone}>取消</button>
+        <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={onDone} disabled={loading}>取消</button>
       </div>
     </form>
   )

@@ -126,17 +126,17 @@ export default function Machines() {
         </div>
         {machines.map(m => (
           <div key={m.id} className="tbl-row" style={{ gridTemplateColumns: '.9fr 1.1fr 1.2fr .9fr 1.1fr 1.1fr .7fr .9fr 1fr' }}>
-            <span style={{ fontWeight: 500 }}>{m.id}</span>
-            <RoleChips role={m.role} />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{m.ts_ip}</span>
-            <span style={{ fontSize: 11 }}>{m.os}/{m.arch} · {m.cpu_cores}C</span>
-            <UsageCell used={m.memory_used_mb} total={m.mem_gb * 1024} unit="MB" />
-            <UsageCell used={m.disk_used_gb} total={m.disk_gb} unit="G" />
-            <span className={`chip ${m.status === 'online' ? 'chip-online' : m.status === 'maintenance' ? 'chip-vi' : 'chip-offline'}`}>
+            <span data-label="机器" style={{ fontWeight: 500 }}>{m.id}</span>
+            <span data-label="职责"><RoleChips role={m.role} /></span>
+            <span data-label="TS IP" style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{m.ts_ip}</span>
+            <span data-label="系统/架构" style={{ fontSize: 11 }}>{m.os}/{m.arch} · {m.cpu_cores}C</span>
+            <span data-label="内存"><UsageCell used={m.memory_used_mb} total={m.mem_gb * 1024} unit="MB" /></span>
+            <span data-label="磁盘"><UsageCell used={m.disk_used_gb} total={m.disk_gb} unit="G" /></span>
+            <span data-label="状态" className={`chip ${m.status === 'online' ? 'chip-online' : m.status === 'maintenance' ? 'chip-vi' : 'chip-offline'}`}>
               {{ online: '在线', offline: '离线', maintenance: '维护中' }[m.status] || m.status}
             </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-tertiary)' }}>{m.last_check_at ? fmtTime(m.last_check_at) : '—'}</span>
-            <span style={{ display: 'flex', gap: 8 }}>
+            <span data-label="最后检测" style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-tertiary)' }}>{m.last_check_at ? fmtTime(m.last_check_at) : '—'}</span>
+            <span data-label="操作" style={{ display: 'flex', gap: 8 }}>
               {isSA ? (
                 <>
                   <span className="link-action" onClick={() => openDrawer(`编辑机器·${m.id}`, <MachineForm machineData={m} onDone={() => { closeDrawer(); fetchMachines() }} />)}>编辑</span>

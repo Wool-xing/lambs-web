@@ -93,7 +93,11 @@ export default function ProjectForm({ onDone, project }) {
     }))
     const g = guessSharedService(val)
     if (g) {
-      setSvcs(prev => prev.some(s => s.name === g.name) ? prev : [...prev, g])
+      setSvcs(prev => {
+        if (prev.some(s => s.name === g.name)) return prev
+        toast(`已自动添加共享服务「${g.name}」`, 'info')
+        return [...prev, g]
+      })
     }
   }
   const handleDetect = async () => {
@@ -131,7 +135,7 @@ export default function ProjectForm({ onDone, project }) {
     const hasDsn = !!(primaryDs && primaryDs.dsn && primaryDs.dsn.trim() && primaryDs.dsn !== '—')
     const hasService = !!(port && port !== '—' && (serviceName.trim() || startupCmd.trim()))
     if (!isEdit && !hasDsn && !hasService) {
-      setErrors({ dsn: '需填写数据源连接串，或展开高级设置填写端口+服务信息（否则项目无法被管理）' })
+      setErrors({ dsn: '需填写数据源连接串，或填写端口+启动命令（服务型项目可只填后者）' })
       return
     }
     if (port && port !== '—') {
@@ -250,7 +254,7 @@ export default function ProjectForm({ onDone, project }) {
 
       {/* ── 数据源（核心）── */}
       <div className="form-section">
-        <div className="form-section-title">数据源<span className="req">*</span> <span className="hint">新建必填连接串（数据浏览/健康监控/备份依赖它），或配端口+启动命令（服务型）</span></div>
+        <div className="form-section-title">数据源 <span className="hint">连接串 或 端口+启动命令 二选一（数据浏览/健康监控/备份依赖它）</span></div>
         {dss.map((d, i) => (
           <div key={d.id} style={{ marginBottom: 8 }}>
             <div style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
@@ -322,11 +326,11 @@ export default function ProjectForm({ onDone, project }) {
             {errors.port && <div className="field-error-msg">{errors.port}</div>}
           </div>
           <div className="field">
-            <label>部署目标机 <span className="hint">留空自动分配</span></label>
+            <label>部署到哪台机器 <span className="hint">留空自动分配</span></label>
             <TypeSelect
-              value={host ? `${host}（${machines.find(m => m.id === host)?.role || '已指定'}）` : '自动分配'}
-              onChange={v => setHost(v === '自动分配' ? '' : v.split('（')[0])}
-              options={['自动分配', ...machines.filter(m => m.status === 'online').map(m => `${m.id}（${m.role}）`)]}
+              value={host || '自动分配'}
+              onChange={v => setHost(v === '自动分配' ? '' : v)}
+              options={['自动分配', ...machines.filter(m => m.status === 'online').map(m => m.id)]}
             />
           </div>
           <div className="field">
@@ -390,7 +394,8 @@ export default function ProjectForm({ onDone, project }) {
         {showAdvanced && (
           <>
             {svcs.map((s, i) => (
-              <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div key={i} style={{ marginBottom: 6 }}>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                 <input
                   value={s.name}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
@@ -413,32 +418,36 @@ export default function ProjectForm({ onDone, project }) {
                     options={['自动', ...machines.filter(m => m.status === 'online').map(m => m.id)]}
                   />
                 </div>
+                <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 6px' }}
+                  onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
+              </div>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <input
+                  value={s.git_url}
+                  onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, git_url: e.target.value } : x))}
+                  placeholder="代码仓库地址（可选）"
+                  title={s.git_url}
+                  className="mono-input"
+                  style={{ ...rowCtrl, flex: 1, minWidth: 120 }}
+                />
                 <input
                   value={s.start_cmd}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, start_cmd: e.target.value } : x))}
                   placeholder="启动命令"
                   title={s.start_cmd}
                   className="mono-input"
-                  style={{ ...rowCtrl, flex: 1, minWidth: 0 }}
+                  style={{ ...rowCtrl, flex: 1.4, minWidth: 0 }}
                 />
-                <input
-                  value={s.git_url}
-                  onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, git_url: e.target.value } : x))}
-                  placeholder="Git 地址（可选）"
-                  title={s.git_url}
-                  className="mono-input"
-                  style={{ ...rowCtrl, flex: 1, minWidth: 130 }}
-                />
+
                 <input
                   value={s.stop_cmd}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, stop_cmd: e.target.value } : x))}
-                  placeholder="停止命令"
+                  placeholder="停止命令（可选）"
                   title={s.stop_cmd}
                   className="mono-input"
                   style={{ ...rowCtrl, flex: 1, minWidth: 0 }}
                 />
-                <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 6px' }}
-                  onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
+              </div>
               </div>
             ))}
             <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
@@ -451,9 +460,9 @@ export default function ProjectForm({ onDone, project }) {
 
       <div className="form-actions-sticky">
         <button className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
-          {loading ? '保存中…' : (isEdit ? '保存' : '确认接入')}
+          {loading ? '保存中…' : (isEdit ? '保存' : '创建项目')}
         </button>
-        <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={handleCancel}>取消</button>
+        <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={handleCancel} disabled={loading}>取消</button>
       </div>
     </form>
   )

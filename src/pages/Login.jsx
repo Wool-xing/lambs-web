@@ -11,7 +11,7 @@ export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPwd, setShowPwd] = useState(false)
-  const [remember, setRemember] = useState(true)
+  const [remember, setRemember] = useState(false)
   const [loading, setLoading] = useState(false)
 
   // Register modal
@@ -34,10 +34,15 @@ export default function Login() {
   const [forgotLoading, setForgotLoading] = useState(false)
   const [forgotCooldown, setForgotCooldown] = useState(0)
   const [brandLogo, setBrandLogo] = useState(localStorage.getItem('lambs_brand_logo_img') || '')
+  const [registerEnabled, setRegisterEnabled] = useState(true)
 
   useEffect(() => {
     applyTheme(localStorage.getItem('lambs_theme') || 'dark-default')
     if (window.setLambsFavicon) window.setLambsFavicon(localStorage.getItem('lambs_brand_logo_img'))
+    // 注册开关：salt 接口顺带返回（后端 LAMBS_ALLOW_REGISTER 门）
+    api.get('/auth/salt').then(r => {
+      if (r.success && r.data?.register_enabled === false) setRegisterEnabled(false)
+    }).catch(() => {})
   }, [])
 
   // Pre-fill credentials from "remember me" storage
@@ -192,7 +197,9 @@ export default function Login() {
         </button>
         <div style={{ marginTop: 14, textAlign: 'center', display: 'flex', justifyContent: 'center', gap: 24 }}>
           <button type="button" className="login-link" onClick={openForgot}>忘记密码？</button>
-          <button type="button" className="login-link" onClick={openRegister}>注册新账号</button>
+          {registerEnabled && (
+            <button type="button" className="login-link" onClick={openRegister}>注册新账号</button>
+          )}
         </div>
       </form>
 

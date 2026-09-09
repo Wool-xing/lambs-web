@@ -55,6 +55,7 @@ export default function UserForm({ onDone, userData }) {
     e.preventDefault()
     if (!username || !name || !email) {
       setFErr({ username: !username ? '账号必填' : '', name: !name ? '用户名必填' : '', email: !email ? '邮箱必填' : '' })
+      if (!email) toast('邮箱必填', 'error')
       return
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('邮箱格式不正确', 'error'); return }
@@ -131,7 +132,8 @@ export default function UserForm({ onDone, userData }) {
       </div>
       <div className="field">
         <label>邮箱<span className="req">*</span></label>
-        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="请输入邮箱" />
+        <input type="email" className={fErr.email ? 'input-error' : ''} value={email} onChange={e => { setEmail(e.target.value); if (fErr.email) setFErr({ ...fErr, email: '' }) }} placeholder="请输入邮箱" />
+        {fErr.email && <div className="field-error-msg">{fErr.email}</div>}
       </div>
       {!isEdit && (
         <>
@@ -208,7 +210,7 @@ export default function UserForm({ onDone, userData }) {
         <button className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
           {loading ? '保存中…' : '保存'}
         </button>
-        <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={onDone}>取消</button>
+        <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={onDone} disabled={loading}>取消</button>
       </div>
     </form>
   )

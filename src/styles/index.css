@@ -328,6 +328,14 @@ html.theme-switching body{opacity:.35}
 .tbl-row.head span:has(.col-resize:hover){border-right-color:var(--accent-cyan)}
 .tbl-row:hover:not(.head){border-color:var(--border-strong)}
 .tbl-row{transition:border-color var(--dur-fast) ease}
+/* 容器查询响应式表格：窄容器自动转卡片（data-label 显示字段名），宽容器保持表格 */
+.tbl{container-type:inline-size}
+@container (max-width:620px){
+  .tbl-row.head{display:none}
+  .tbl-row{grid-template-columns:1fr 1fr !important;gap:6px 12px;padding:12px 14px}
+  .tbl-row>span{display:flex;justify-content:space-between;align-items:center;white-space:normal;overflow:visible;text-overflow:clip}
+  .tbl-row>span::before{content:attr(data-label);color:var(--text-tertiary);font-size:11px;flex-shrink:0;margin-right:8px;font-family:var(--font-body)}
+}
 .tbl-row:not(.head)>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tbl-row.head .col-resize{position:absolute;right:-3px;top:0;bottom:0;width:6px;cursor:col-resize;z-index:2;display:block;flex:none}
 
@@ -436,7 +444,8 @@ html.theme-switching body{opacity:.35}
 .drawer-mask.closing{opacity:0}
 body.drawer-open .drawer-mask{opacity:1;pointer-events:auto}
 body.drawer-open .drawer{transform:translateX(0)}
-.drawer-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.drawer-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;position:sticky;top:-24px;padding-top:24px;background:rgba(var(--glass-bg),.92);backdrop-filter:blur(var(--glass-blur));z-index:2;margin-left:-24px;margin-right:-24px;padding-left:24px;padding-right:24px}
+body.drawer-open{overflow:hidden}
 .drawer-title{font-family:var(--font-display);font-size:20px;font-weight:600}
 .drawer-close{cursor:pointer;width:28px;height:28px;border-radius:6px;background:var(--bg-panel-raised);border:none;color:var(--text-secondary);display:grid;place-items:center}
 .drawer-close:hover{color:var(--text-primary)}
@@ -552,8 +561,8 @@ body.sidebar-open .sidebar-brand{padding:0 16px;justify-content:flex-start}
 .role-nav-mobile select{width:100%;background:var(--bg-input);border:1px solid var(--border-strong);border-radius:7px;padding:8px 12px;color:var(--text-primary);font-size:13px;font-family:var(--font-body)}
 
 /* ===== FORM SECTIONS (project form) ===== */
-.form-section{background:var(--bg-panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px}
-.form-section-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.form-section{background:var(--bg-panel);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:10px}
+.form-section-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:8px;display:flex;align-items:center;gap:8px}
 .form-section-title .hint{font-size:10px;color:var(--text-tertiary);font-weight:400}
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));column-gap:14px}
 .form-grid .field-full{grid-column:1/-1}

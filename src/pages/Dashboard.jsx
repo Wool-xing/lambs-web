@@ -335,9 +335,9 @@ export default function Dashboard() {
           <div className="sub">覆盖所有项目</div>
         </div>
         <div className="stat-card">
-          <div className="k">活跃数据源</div>
+          <div className="k">在线项目</div>
           <div className="v">{animatedOnline}</div>
-          <div className="sub">{stats.online > 0 ? `${stats.online} 个数据源在线 · ${stats.offline} 个离线` : '暂无在线数据源'}</div>
+          <div className="sub">{stats.online > 0 ? `${stats.online} 个项目在线 · ${stats.offline} 个离线` : '暂无在线数据源'}</div>
         </div>
       </div>
 

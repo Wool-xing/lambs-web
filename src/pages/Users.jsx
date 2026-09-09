@@ -26,6 +26,7 @@ export default function Users() {
   const [hasMore, setHasMore] = useState(true)
   const [resetTarget, setResetTarget] = useState(null)
   const [resetNewPwd, setResetNewPwd] = useState('')
+  const [resetNewPwd2, setResetNewPwd2] = useState('')
   const PAGE_SIZE = 20
   const debouncedSearch = useDebounce(search)
 
@@ -64,13 +65,14 @@ export default function Users() {
     catch (err) { toast(err.message, 'error') }
   }
 
-  const handleResetPwd = (u) => { setResetTarget(u); setResetNewPwd('') }
+  const handleResetPwd = (u) => { setResetTarget(u); setResetNewPwd(''); setResetNewPwd2('') }
   const doResetPwd = async () => {
     if (!resetTarget || resetNewPwd.length < 6) { toast('新密码至少6位', 'error'); return }
+    if (resetNewPwd !== resetNewPwd2) { toast('两次输入的密码不一致', 'error'); return }
     try {
       await api.post(`/users/${resetTarget.id}/reset-password`, { new_password: resetNewPwd })
       toast(`${resetTarget.name} 密码已重置`)
-      setResetTarget(null)
+      setResetTarget(null); setResetNewPwd(''); setResetNewPwd2('')
     } catch (err) { toast(err.message, 'error') }
   }
 
@@ -151,12 +153,12 @@ export default function Users() {
               <div className="empty-state"><div className="t">未找到匹配的用户</div></div>
             ) : users.map(u => (
               <div key={u.id} className="tbl-row" style={{ gridTemplateColumns: '.9fr 1.1fr .8fr .7fr .7fr 1fr' }}>
-                <span style={{ fontWeight: 500 }}>{u.name}</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{u.email}</span>
-                <span className={`chip ${roleChip(u.role)}`} style={{ textAlign: 'center' }}>{roleLabel(u.role)}</span>
-                <span className={`chip ${u.status === 'active' ? 'chip-online' : 'chip-offline'}`}>{u.status === 'active' ? '正常' : '禁用'}</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-tertiary)' }}>{fmtTime(u.last_login)}</span>
-                <span style={{ display: 'flex', gap: 8 }}>
+                <span data-label="用户名" style={{ fontWeight: 500 }}>{u.name}</span>
+                <span data-label="邮箱" style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{u.email}</span>
+                <span data-label="角色" className={`chip ${roleChip(u.role)}`} style={{ textAlign: 'center' }}>{roleLabel(u.role)}</span>
+                <span data-label="状态" className={`chip ${u.status === 'active' ? 'chip-online' : 'chip-offline'}`}>{u.status === 'active' ? '正常' : '禁用'}</span>
+                <span data-label="最近登录" style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-tertiary)' }}>{fmtTime(u.last_login)}</span>
+                <span data-label="操作" style={{ display: 'flex', gap: 8 }}>
                   <span className="link-action" onClick={() => openDrawer(`编辑用户·${u.name}`, <UserForm userData={u} onDone={() => { closeDrawer(); fetchUsers(1) }} />)}>编辑</span>
                   <span className="link-action" onClick={() => handleResetPwd(u)}>重置密码</span>
                   <span className="link-action danger" onClick={() => handleDelete(u)}>删除</span>
@@ -173,12 +175,13 @@ export default function Users() {
       </div>
     </div>
     {resetTarget && (
-      <div className="modal-overlay open" onClick={() => setResetTarget(null)}>
+      <div className="modal-overlay open" onClick={() => { setResetTarget(null); setResetNewPwd(''); setResetNewPwd2('') }}>
         <form className="modal-box" style={{maxWidth:380}} onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); doResetPwd() }}>
           <div className="modal-title">重置密码 · {resetTarget.name}</div>
           <div className="field"><label htmlFor="reset-new-pwd">新密码</label><input id="reset-new-pwd" type="password" value={resetNewPwd} onChange={e=>setResetNewPwd(e.target.value)} placeholder="至少6位" autoFocus /></div>
+          <div className="field"><label htmlFor="reset-new-pwd2">再次输入</label><input id="reset-new-pwd2" type="password" value={resetNewPwd2} onChange={e=>setResetNewPwd2(e.target.value)} placeholder="再次输入新密码" /></div>
           <div className="modal-actions">
-            <button type="button" className="btn btn-ghost btn-sm" onClick={()=>setResetTarget(null)}>取消</button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setResetTarget(null); setResetNewPwd(''); setResetNewPwd2('') }}>取消</button>
             <button className="btn btn-primary btn-sm">确认重置</button>
           </div>
         </form>

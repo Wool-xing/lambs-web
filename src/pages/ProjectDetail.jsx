@@ -358,6 +358,8 @@ export default function ProjectDetail() {
   }
 
   const deleteBackup = async (filename) => {
+    const ok = await confirm('删除备份', `确定删除备份「${filename}」吗？删除后无法恢复。`)
+    if (!ok) return
     try {
       await api.delete(`/backups/${id}/download/${encodeURIComponent(filename)}`)
       toast('备份已删除')

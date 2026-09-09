@@ -1,4 +1,12 @@
 import TypeSelect from '../components/TypeSelect'
+
+// DSN 脱敏：postgres://user:***@host:port/db —— 密码不展示，完整值存 title+复制按钮
+function maskDSN(dsn) {
+  if (!dsn) return '—'
+  try {
+    return String(dsn).replace(/(\/\/)([^:@\/]+):([^@\/]+)@/, '$1$2:***@')
+  } catch { return '***' }
+}
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { api, resolveAsset } from '../api/client'
 import { useToast } from '../components/Toast'
@@ -259,11 +267,15 @@ export default function Settings() {
             <div className="empty-state"><div className="t">暂无已注册的数据源</div></div>
           ) : datasources.map(ds => (
             <div key={ds.id} className="tbl-row" style={{ gridTemplateColumns: '1.4fr 1fr .8fr 1fr .8fr' }}>
-              <span>{ds.name}</span>
-              <span>{ds.repo}</span>
-              <span>{ds.stack.split('+')[0].trim()}+{ds.db_type}</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10 }}>{ds.dsn}</span>
-              <span className={`chip ${ds.status === 'online' ? 'chip-online' : 'chip-offline'}`}>{ds.status === 'online' ? '已连接' : '未连接'}</span>
+              <span data-label="项目">{ds.name}</span>
+              <span data-label="仓库">{ds.repo}</span>
+              <span data-label="类型">{ds.stack.split('+')[0].trim()}+{ds.db_type}</span>
+              <span data-label="连接" style={{ fontFamily: 'var(--font-mono)', fontSize: 10 }} title={ds.dsn}>
+                {maskDSN(ds.dsn)}
+                <button type="button" className="link-action" style={{ marginLeft: 6, fontSize: 10 }}
+                  onClick={() => { navigator.clipboard?.writeText(ds.dsn); toast('连接串已复制') }}>复制</button>
+              </span>
+              <span data-label="状态" className={`chip ${ds.status === 'online' ? 'chip-online' : 'chip-offline'}`}>{ds.status === 'online' ? '已连接' : '未连接'}</span>
             </div>
           ))}
         </div>
