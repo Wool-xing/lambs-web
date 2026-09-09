@@ -47,7 +47,7 @@ test.describe('ProjectForm 新增项目', () => {
     await page.getByPlaceholder('留空自动分配').fill('8080');
     await page.getByPlaceholder('如 /my-project').fill('/test');
     await page.getByPlaceholder('如 my-api').fill('test-api');
-    await page.getByPlaceholder('如 http://localhost:3000/health').fill('http://localhost:3000/health');
+    await page.getByPlaceholder(/health（自动更新健康门禁/).fill('http://localhost:3000/health');
     await page.getByPlaceholder(/cd \/home\/ubuntu\/apps\/myapp/).fill('cd /home/ubuntu/apps/test && ./start');
     await page.getByPlaceholder('该项目已被管理员暂时关闭，请稍后再试。').fill('维护中');
 
@@ -55,7 +55,7 @@ test.describe('ProjectForm 新增项目', () => {
     await page.getByPlaceholder('如：24').fill('24');
     await page.getByPlaceholder('如：30').fill('30');
 
-    await page.locator('.form-actions-sticky button:has-text("确认接入")').click();
+    await page.locator('.form-actions-sticky button:has-text("创建项目")').click();
     // 结果态断言：route handler 收到请求即置 postBody（早于响应/toast）。
     // toast 有 3s 自动消失 TTL，高并行负载下 webkit 会错过 —— 不依赖瞬时可见性。
     await expect.poll(() => postBody).toEqual({
@@ -87,17 +87,17 @@ test.describe('ProjectForm 新增项目', () => {
     await loginAsAdmin(page, '/dashboard');
     await page.locator('button:has-text("+ 新增项目")').click();
 
-    await page.locator('.form-actions-sticky button:has-text("确认接入")').click();
+    await page.locator('.form-actions-sticky button:has-text("创建项目")').click();
     await expect(page.locator('.field-error-msg')).toContainText('项目名称为必填');
 
     await fillSticky(page.getByPlaceholder('请输入项目名称'), '空壳项目');
     await page.locator('input[name="gh-repo"]').fill('test-project'); // 中文名无法自动生成仓库名，先手动填才能走到数据源校验
-    await page.locator('.form-actions-sticky button:has-text("确认接入")').click();
+    await page.locator('.form-actions-sticky button:has-text("创建项目")').click();
     await expect(page.locator('.field-error-msg')).toContainText('需填写数据源连接串');
 
     await page.locator('input[placeholder*="postgres://"]').fill('sqlite:///x.db');
     await page.getByPlaceholder('留空自动分配').fill('99999');
-    await page.locator('.form-actions-sticky button:has-text("确认接入")').click();
+    await page.locator('.form-actions-sticky button:has-text("创建项目")').click();
     await expect(page.locator('.field-error-msg')).toContainText('端口号需在 1-65535 之间');
   });
 
