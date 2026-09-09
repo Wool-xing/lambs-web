@@ -52,6 +52,20 @@ export default function ProjectForm({ onDone, project }) {
   const [initialSnapshot] = useState(() => JSON.stringify({ name, repo, desc, stack, port, basePath, dsn: dss.map(d => d.dsn) }))
   const [detecting, setDetecting] = useState(false)
 
+  // Git 元数据自动拉取：公开 github 仓库的描述/语言/技术栈（失败静默）
+  const fetchGitMeta = async (url) => {
+    const m = String(url).match(/github\.com\/([^/]+)\/([^/.\s]+)/)
+    if (!m) return
+    try {
+      const r = await fetch(`https://api.github.com/repos/${m[1]}/${m[2]}`, { headers: { Accept: 'application/vnd.github+json' } })
+      if (!r.ok) return
+      const data = await r.json()
+      if (!desc && data.description) setDesc(data.description)
+      if (data.language && !stack) setStack(data.language)
+      toast('已自动获取仓库描述与技术栈', 'info')
+    } catch { /* 静默 */ }
+  }
+
   // Shared-service auto-detection: only for units that really exist on the
   // server and are NOT system-critical (Lambs' own postgres etc).
   const [localServices, setLocalServices] = useState([])
@@ -217,7 +231,7 @@ export default function ProjectForm({ onDone, project }) {
               </div>
               <div className="field">
                 <label>Git 地址 <span className="hint">自动部署克隆源，留空=手工放代码</span></label>
-                <input value={gitUrl} onChange={e => setGitUrl(e.target.value)} placeholder="https://github.com/xxx/repo.git" className="mono-input" autoComplete="off" />
+                <input value={gitUrl} onChange={e => setGitUrl(e.target.value)} onBlur={e => fetchGitMeta(e.target.value)} placeholder="https://github.com/xxx/repo.git" className="mono-input" autoComplete="off" />
               </div>
               </>
             ) : (
@@ -342,8 +356,8 @@ export default function ProjectForm({ onDone, project }) {
             <input value={serviceName} onChange={e => setServiceName(e.target.value)} placeholder="如 my-api" className="mono-input" />
           </div>
           <div className="field">
-            <label>健康检查 URL <span className="hint">可选</span></label>
-            <input value={healthUrl} onChange={e => setHealthUrl(e.target.value)} placeholder="如 http://localhost:3000/health" />
+            <label>健康检查 URL <span className="hint">默认 /health</span></label>
+            <input value={healthUrl} onChange={e => setHealthUrl(e.target.value)} placeholder="/health（自动更新健康门禁用，留空不检查）" />
           </div>
         </div>
         <div className="field" style={{ marginTop: 14 }}>
