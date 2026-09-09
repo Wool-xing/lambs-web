@@ -10,6 +10,9 @@ const ROLE_OPTIONS = [
   { key: 'control', label: '控制', hint: '管理中枢' },
 ]
 
+// 紧凑两列网格：抽屉窄，全宽单列堆太高（会出滚动条）
+const grid2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }
+
 export default function MachineForm({ onDone, machineData }) {
   const toast = useToast()
   const isEdit = !!machineData
@@ -53,83 +56,85 @@ export default function MachineForm({ onDone, machineData }) {
   }
 
   const groupTitle = (t) => (
-    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '.5px', margin: '14px 0 8px', borderTop: '1px solid var(--border)', paddingTop: 12 }}>{t}</div>
+    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', margin: '12px 0 6px', borderTop: '1px solid var(--border)', paddingTop: 10 }}>{t}</div>
   )
 
   return (
     <form onSubmit={handleSubmit}>
       {groupTitle('身份')}
-      <div className="field">
-        <label>机器名（hostname）<span className="req">*</span></label>
-        <input value={id} disabled={isEdit} onChange={e => setId(e.target.value)} placeholder="如 wool / sheep / laptop" className="mono-input" />
-      </div>
-      <div className="field">
-        <label>状态</label>
-        <TypeSelect
-          value={{ online: '在线', offline: '离线', maintenance: '维护中' }[status]}
-          onChange={v => setStatus({ '在线': 'online', '离线': 'offline', '维护中': 'maintenance' }[v])}
-          options={['在线', '离线', '维护中']}
-        />
+      <div style={grid2}>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>机器名<span className="req">*</span></label>
+          <input value={id} disabled={isEdit} onChange={e => setId(e.target.value)} placeholder="wool / sheep / laptop" className="mono-input" />
+        </div>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>状态</label>
+          <TypeSelect
+            value={{ online: '在线', offline: '离线', maintenance: '维护中' }[status]}
+            onChange={v => setStatus({ '在线': 'online', '离线': 'offline', '维护中': 'maintenance' }[v])}
+            options={['在线', '离线', '维护中']}
+          />
+        </div>
       </div>
 
       {groupTitle('网络')}
-      <div className="field">
-        <label>Tailscale IP<span className="req">*</span></label>
-        <input value={tsIp} onChange={e => setTsIp(e.target.value)} placeholder="100.x.x.x" className="mono-input" />
-      </div>
-      <div className="field">
-        <label>内网 IP</label>
-        <input value={lanIp} onChange={e => setLanIp(e.target.value)} placeholder="10.x.x.x（无则留空）" className="mono-input" />
+      <div style={grid2}>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>Tailscale IP<span className="req">*</span></label>
+          <input value={tsIp} onChange={e => setTsIp(e.target.value)} placeholder="100.x.x.x" className="mono-input" />
+        </div>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>内网 IP</label>
+          <input value={lanIp} onChange={e => setLanIp(e.target.value)} placeholder="10.x.x.x（可选）" className="mono-input" />
+        </div>
       </div>
 
       {groupTitle('容量')}
-      <div style={{ display: 'flex', gap: 10 }}>
-        <div className="field" style={{ flex: 1 }}>
+      <div style={grid2}>
+        <div className="field" style={{ marginBottom: 0 }}>
           <label>系统</label>
           <TypeSelect value={os} onChange={v => setOs(v)} options={['ubuntu', 'windows', 'debian', 'other']} />
         </div>
-        <div className="field" style={{ flex: 1 }}>
+        <div className="field" style={{ marginBottom: 0 }}>
           <label>架构</label>
           <TypeSelect value={arch} onChange={v => setArch(v)} options={['amd64', 'arm64']} />
         </div>
-      </div>
-      <div style={{ display: 'flex', gap: 10 }}>
-        <div className="field" style={{ flex: 1 }}>
+        <div className="field" style={{ marginBottom: 0 }}>
           <label>CPU 核数</label>
           <input type="number" min="0" value={cpu} onChange={e => setCpu(e.target.value)} />
         </div>
-        <div className="field" style={{ flex: 1 }}>
+        <div className="field" style={{ marginBottom: 0 }}>
           <label>内存 GB</label>
           <input type="number" min="0" value={mem} onChange={e => setMem(e.target.value)} />
         </div>
-        <div className="field" style={{ flex: 1 }}>
+        <div className="field" style={{ marginBottom: 0 }}>
           <label>磁盘 GB</label>
           <input type="number" min="0" value={disk} onChange={e => setDisk(e.target.value)} />
+        </div>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>标签</label>
+          <input value={tags} onChange={e => setTags(e.target.value)} placeholder="oci,free-tier" className="mono-input" />
         </div>
       </div>
 
       {groupTitle('职责')}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {ROLE_OPTIONS.map(r => (
           <span
             key={r.key}
             onClick={() => toggleRole(r.key)}
             title={r.hint}
             className={`chip ${roles.includes(r.key) ? 'chip-pa' : ''}`}
-            style={{ cursor: 'pointer', userSelect: 'none', fontSize: 12, padding: '5px 12px', opacity: roles.includes(r.key) ? 1 : 0.45 }}
+            style={{ cursor: 'pointer', userSelect: 'none', fontSize: 12, padding: '4px 10px', opacity: roles.includes(r.key) ? 1 : 0.45 }}
           >
             {r.label}
           </span>
         ))}
       </div>
-      <div style={{ fontSize: 10.5, color: 'var(--text-tertiary)', marginTop: 6 }}>
+      <div style={{ fontSize: 10.5, color: 'var(--text-tertiary)', marginTop: 5 }}>
         网关=公网入口 · 计算=跑项目 · 数据=数据库 · 控制=管理中枢（可多选）
       </div>
-      <div className="field" style={{ marginTop: 10 }}>
-        <label>标签（逗号分隔）</label>
-        <input value={tags} onChange={e => setTags(e.target.value)} placeholder="oci,free-tier,arm" className="mono-input" />
-      </div>
-      <div className="field">
+      <div className="field" style={{ marginBottom: 0, marginTop: 10 }}>
         <label>备注</label>
         <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="用途/注意事项" />
       </div>
