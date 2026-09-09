@@ -768,7 +768,7 @@ export default function ProjectDetail() {
 
               return (
                 <>
-                  <div className="tbl">
+                  <div className="tbl" style={{ overflowX: 'auto' }}>
                     <div className="tbl-row head" style={gridStyle}>
                       <span>
                         {canManageRows && tableData.pk && (
