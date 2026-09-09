@@ -56,14 +56,14 @@ test.describe('仪表盘页面', () => {
     // Debounce 250ms — 等 debounce 后的搜索请求发出（确定性），不赌固定 sleep
     const searchReq = page.waitForRequest((req) => {
       const u = new URL(req.url());
-      return u.pathname.endsWith('/api/projects') && u.searchParams.get('search') === 'QA';
+      return u.pathname.endsWith('/api/projects') && u.searchParams.get('search') === '订阅管家';
     });
-    await searchInput.fill('QA');
+    await searchInput.fill('订阅管家');
     await searchReq;
-    // Should filter to only 示例项目
+    // Should filter to only 订阅管家
     const cards = page.locator('.project-card');
     await expect(cards).toHaveCount(1);
-    await expect(cards.first()).toContainText('示例项目');
+    await expect(cards.first()).toContainText('订阅管家');
   });
 
   test('排序切换', async ({ page }) => {

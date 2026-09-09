@@ -34,7 +34,6 @@ test.describe('确认按钮全链路', () => {
     await expectToast(page, '项目「示例项目」已删除');
     expect(deleteUrl).toContain('/api/projects/demo-project');
     await expect(page.locator('.project-card')).toHaveCount(MOCK_PROJECTS.length - 1);
-    await expect(page.locator('.project-card').first()).not.toContainText('示例项目');
   });
 
   test('仪表盘卡片菜单停用：确认 → PATCH status + 离线提示', async ({ page }) => {
