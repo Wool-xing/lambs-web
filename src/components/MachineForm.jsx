@@ -20,6 +20,7 @@ export default function MachineForm({ onDone, machineData }) {
     if (Array.isArray(machineData.tags)) return machineData.tags.join(',')
     return machineData.tags
   })
+  const [sshUser, setSshUser] = useState(machineData?.ssh_user || '')
   const [status, setStatus] = useState(machineData?.status || 'online')
   const [notes, setNotes] = useState(machineData?.notes || '')
   const [loading, setLoading] = useState(false)
@@ -35,7 +36,7 @@ export default function MachineForm({ onDone, machineData }) {
       await api.post('/machines', {
         id, role, ts_ip: tsIp, lan_ip: lanIp, os, arch,
         cpu_cores: Number(cpu) || 0, mem_gb: Number(mem) || 0, disk_gb: Number(disk) || 0,
-        tags: parseTags(), status, notes,
+        tags: parseTags(), status, notes, ssh_user: sshUser,
       })
       toast(`${id} 已${isEdit ? '更新' : '注册'}`)
       onDone()
@@ -64,6 +65,10 @@ export default function MachineForm({ onDone, machineData }) {
       <div className="field">
         <label>内网 IP</label>
         <input value={lanIp} onChange={e => setLanIp(e.target.value)} placeholder="10.x.x.x（无则留空）" style={{ fontFamily: 'var(--font-mono)' }} />
+      </div>
+      <div className="field">
+        <label>SSH 用户 <span className="hint">部署通道登录用户，留空=小写机器名</span></label>
+        <input value={sshUser} onChange={e => setSshUser(e.target.value)} placeholder="如 sheep / ubuntu" className="mono-input" />
       </div>
       <div style={{ display: 'flex', gap: 10 }}>
         <div className="field" style={{ flex: 1 }}>

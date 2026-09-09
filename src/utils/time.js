@@ -7,7 +7,10 @@ export function fmtTime(val) {
   if (!/^\d{4}-\d{2}-\d{2}/.test(s)) return s
   try {
     const raw = s.replace(' ', 'T')
-    const d = new Date(raw + (raw.endsWith('Z') ? '' : 'Z'))
+    // PG TIMESTAMPTZ::text 带 "+00" 偏移后缀（非 Z）——统一剥离后再解析，
+    // 双时区标记会导致 Date 解析失败回退成 UTC 原样显示。
+    const bare = raw.replace(/(Z|[+-]\d{2}(:?\d{2})?)$/, '')
+    const d = new Date(bare + 'Z')
     if (isNaN(d.getTime())) return raw.substring(0, 19).replace('T', ' ')
     // Manual format: consistent across all browsers
     const bj = new Date(d.getTime() + 8 * 3600000)
@@ -27,7 +30,8 @@ export function fmtRelative(val) {
   if (!/^\d{4}-\d{2}-\d{2}/.test(s)) return s
   try {
     const raw = s.replace(' ', 'T')
-    const d = new Date(raw + (raw.endsWith('Z') ? '' : 'Z'))
+    const bare = raw.replace(/(Z|[+-]\d{2}(:?\d{2})?)$/, '')
+    const d = new Date(bare + 'Z')
     if (isNaN(d.getTime())) return s.substring(0, 16)
     const diff = Date.now() - d.getTime()
     const min = Math.floor(diff / 60000)

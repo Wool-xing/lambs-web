@@ -371,6 +371,12 @@ export default function ProjectForm({ onDone, project }) {
             <input type="number" min="0" max="3650" value={backupRetention} onChange={e => setBackupRetention(e.target.value)} placeholder="如：30" className="mono-input" />
           </div>
         </div>
+        <div style={{ marginTop: 10 }}>
+          <label style={{ fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <input type="checkbox" checked={autoUpdate} onChange={e => setAutoUpdate(e.target.checked)} />
+            自动更新（每 10 分钟拉取 Git 变更，健康检查失败自动回滚上一版）
+          </label>
+        </div>
       </div>
 
       {/* ── 高级：共享服务（折叠）── */}
@@ -431,13 +437,7 @@ export default function ProjectForm({ onDone, project }) {
                   className="mono-input"
                   style={{ ...rowCtrl, flex: 1, minWidth: 0 }}
                 />
-                <div style={{ flexBasis: '100%', marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <label style={{ fontSize: 11, color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input type="checkbox" checked={autoUpdate} onChange={e => setAutoUpdate(e.target.checked)} />
-                自动更新（每 10 分钟拉取 Git 变更，健康检查失败自动回滚上一版）
-              </label>
-            </div>
-            <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 6px' }}
+                <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 6px' }}
                   onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
               </div>
             ))}
