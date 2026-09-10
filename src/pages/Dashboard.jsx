@@ -335,9 +335,9 @@ export default function Dashboard() {
           <div className="sub">覆盖所有项目</div>
         </div>
         <div className="stat-card">
-          <div className="k">活跃数据源</div>
+          <div className="k">在线项目</div>
           <div className="v">{animatedOnline}</div>
-          <div className="sub">{stats.online > 0 ? `${stats.online} 个数据源在线 · ${stats.offline} 个离线` : '暂无在线数据源'}</div>
+          <div className="sub">{stats.online > 0 ? `${stats.online} 个项目在线 · ${stats.offline} 个离线` : '暂无在线数据源'}</div>
         </div>
       </div>
 
@@ -356,7 +356,7 @@ export default function Dashboard() {
             <div key={n.name} style={{
               background: 'rgba(var(--glass-bg),.48)',
               border: `1px solid ${n.online ? 'rgba(255,255,255,.04)' : 'var(--status-offline)'}`,
-              borderRadius: 9, padding: '10px 12px', opacity: n.online ? 1 : .45,
+              borderRadius: 9, padding: '10px 12px', opacity: n.online ? 1 : .75,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                 <span className={`ps-dot ${n.online ? 'green' : 'gray'}`} />

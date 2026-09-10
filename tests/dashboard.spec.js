@@ -11,7 +11,7 @@ test.describe('仪表盘页面', () => {
     await expect(statCards).toHaveCount(4);
     await expect(statCards.nth(0)).toContainText('管理项目总数');
     await expect(statCards.nth(1)).toContainText('累计注册用户');
-    await expect(statCards.nth(2)).toContainText('活跃数据源');
+    await expect(statCards.nth(2)).toContainText('在线项目');
     await expect(statCards.nth(3)).toContainText('系统监控');
   });
 
@@ -56,14 +56,14 @@ test.describe('仪表盘页面', () => {
     // Debounce 250ms — 等 debounce 后的搜索请求发出（确定性），不赌固定 sleep
     const searchReq = page.waitForRequest((req) => {
       const u = new URL(req.url());
-      return u.pathname.endsWith('/api/projects') && u.searchParams.get('search') === 'QA';
+      return u.pathname.endsWith('/api/projects') && u.searchParams.get('search') === '订阅管家';
     });
-    await searchInput.fill('QA');
+    await searchInput.fill('订阅管家');
     await searchReq;
-    // Should filter to only 示例项目
+    // Should filter to only 订阅管家
     const cards = page.locator('.project-card');
     await expect(cards).toHaveCount(1);
-    await expect(cards.first()).toContainText('示例项目');
+    await expect(cards.first()).toContainText('订阅管家');
   });
 
   test('排序切换', async ({ page }) => {

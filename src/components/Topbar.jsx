@@ -25,6 +25,7 @@ const TITLES = {
   '/users': { title: '用户管理', bc: 'Lambs管理系统 / 用户管理' },
   '/notifications': { title: '通知中心', bc: 'Lambs管理系统 / 通知中心' },
   '/settings': { title: '系统设置', bc: 'Lambs管理系统 / 系统设置' },
+  '/machines': { title: '机器注册表', bc: 'Lambs管理系统 / 机器注册表' },
 }
 
 export default function Topbar() {

@@ -8,7 +8,7 @@ test.describe('用户管理页面', () => {
 
   test('显示用户列表表头', async ({ page }) => {
     await expect(page.locator('.card-title')).toContainText('用户管理');
-    await expect(page.locator('.tbl-row.head')).toContainText('姓名');
+    await expect(page.locator('.tbl-row.head')).toContainText('用户名');
     await expect(page.locator('.tbl-row.head')).toContainText('邮箱');
     await expect(page.locator('.tbl-row.head')).toContainText('角色');
     await expect(page.locator('.tbl-row.head')).toContainText('状态');

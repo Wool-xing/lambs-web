@@ -121,6 +121,9 @@ export default function Sidebar() {
         )}
 
         <div className="nav-group">管理</div>
+        <div className={`nav-item ${isActive('/machines') ? 'active' : ''}`} role="button" tabIndex={0} onKeyDown={e => navKey(e, () => navigate('/machines'))} onClick={() => navigate('/machines')}>
+          <Icon name="package" size={16} /> 机器注册表
+        </div>
         {user?.role === 'super_admin' && (
           <div className={`nav-item ${isActive('/users') ? 'active' : ''}`} role="button" tabIndex={0} onKeyDown={e => navKey(e, () => navigate('/users'))} onClick={() => navigate('/users')}>
             <Icon name="users" size={16} /> 用户管理

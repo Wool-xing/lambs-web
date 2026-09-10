@@ -21,6 +21,7 @@ export default function ProjectForm({ onDone, project }) {
   const isEdit = !!project
   const [name, setName] = useState(project?.name || '')
   const [repo, setRepo] = useState(project?.repo || '')
+  const [gitUrl, setGitUrl] = useState(project?.git_url || '')
   const [desc, setDesc] = useState(project?.description || '')
   const [stack, setStack] = useState(project?.stack || '')
   const [port, setPort] = useState(project?.port || '')
@@ -42,10 +43,28 @@ export default function ProjectForm({ onDone, project }) {
     return [{ id: 'ds1', name: '主数据源', type: project?.db_type || '直连 PostgreSQL', dsn: project?.dsn || '', is_primary: true, show: false }]
   })
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [svcs, setSvcs] = useState(() => (project?.services || []).map(s => ({ name: s.name || '', start_cmd: s.start_cmd || '', stop_cmd: s.stop_cmd || '' })))
+  const [autoUpdate, setAutoUpdate] = useState(!!project?.auto_update)
+  const [svcs, setSvcs] = useState(() => (project?.services || []).map(s => ({ name: s.name || '', type: s.type || 'backend', host: s.host || '', git_url: s.git_url || '', start_cmd: s.start_cmd || '', stop_cmd: s.stop_cmd || '' })))
   // Mount-time snapshot: the "unchanged" baseline for the cancel confirm.
+  const [host, setHost] = useState(project?.host || '')
+  const [machines, setMachines] = useState([])
+  useEffect(() => { api.get('/machines').then(r => { if (r.success) setMachines(r.data.machines || []) }).catch(() => {}) }, [])
   const [initialSnapshot] = useState(() => JSON.stringify({ name, repo, desc, stack, port, basePath, dsn: dss.map(d => d.dsn) }))
   const [detecting, setDetecting] = useState(false)
+
+  // Git 元数据自动拉取：公开 github 仓库的描述/语言/技术栈（失败静默）
+  const fetchGitMeta = async (url) => {
+    const m = String(url).match(/github\.com\/([^/]+)\/([^/.\s]+)/)
+    if (!m) return
+    try {
+      const r = await fetch(`https://api.github.com/repos/${m[1]}/${m[2]}`, { headers: { Accept: 'application/vnd.github+json' } })
+      if (!r.ok) return
+      const data = await r.json()
+      if (!desc && data.description) setDesc(data.description)
+      if (data.language && !stack) setStack(data.language)
+      toast('已自动获取仓库描述与技术栈', 'info')
+    } catch { /* 静默 */ }
+  }
 
   // Shared-service auto-detection: only for units that really exist on the
   // server and are NOT system-critical (Lambs' own postgres etc).
@@ -88,7 +107,11 @@ export default function ProjectForm({ onDone, project }) {
     }))
     const g = guessSharedService(val)
     if (g) {
-      setSvcs(prev => prev.some(s => s.name === g.name) ? prev : [...prev, g])
+      setSvcs(prev => {
+        if (prev.some(s => s.name === g.name)) return prev
+        toast(`已自动添加共享服务「${g.name}」`, 'info')
+        return [...prev, g]
+      })
     }
   }
   const handleDetect = async () => {
@@ -126,7 +149,7 @@ export default function ProjectForm({ onDone, project }) {
     const hasDsn = !!(primaryDs && primaryDs.dsn && primaryDs.dsn.trim() && primaryDs.dsn !== '—')
     const hasService = !!(port && port !== '—' && (serviceName.trim() || startupCmd.trim()))
     if (!isEdit && !hasDsn && !hasService) {
-      setErrors({ dsn: '需填写数据源连接串，或展开高级设置填写端口+服务信息（否则项目无法被管理）' })
+      setErrors({ dsn: '需填写数据源连接串，或填写端口+启动命令（服务型项目可只填后者）' })
       return
     }
     if (port && port !== '—') {
@@ -137,7 +160,7 @@ export default function ProjectForm({ onDone, project }) {
     try {
       const datasources = dss.map((d, i) => ({ id: d.id, name: d.name, type: d.type, dsn: d.dsn, is_primary: i === 0 }))
       const primary = datasources[0]
-      const services = svcs.filter(s => s.name && s.start_cmd)
+      const services = svcs.filter(s => s.name && s.start_cmd).map(s => ({ name: s.name, type: s.type || 'backend', host: s.host || '', git_url: s.git_url || '', start_cmd: s.start_cmd, stop_cmd: s.stop_cmd || '' }))
       const payload = {
         name, repo: repoFinal, description: desc, stack, port,
         db_type: primary ? primary.type : dbType,
@@ -148,6 +171,9 @@ export default function ProjectForm({ onDone, project }) {
         health_url: healthUrl || null, offline_msg: offlineMsg || null, icon_url: iconUrl || null,
         tags: tags.split(',').map(t => t.trim()).filter(Boolean),
         backup_interval_hours: parseInt(backupInterval) || 0, backup_retention_days: parseInt(backupRetention) || 0,
+        host: host || '',
+        git_url: gitUrl || '',
+        auto_update: autoUpdate,
       }
       if (isEdit) {
         await api.put(`/projects/${project.id}`, { ...payload, status })
@@ -197,11 +223,17 @@ export default function ProjectForm({ onDone, project }) {
               {errors.name && <div className="field-error-msg">{errors.name}</div>}
             </div>
             {!isEdit ? (
+              <>
               <div className="field" style={{ marginBottom: 0 }}>
                 <label>服务器目录名<span className="opt">（可选，留空自动生成）</span></label>
                 <input value={repo} onChange={e => { setRepo(e.target.value); if (errors.repo) setErrors({ ...errors, repo: '' }) }} name="gh-repo" placeholder="服务器目录名（/home/ubuntu/apps/xxx，也作项目 ID）" className={errors.repo ? 'mono-input input-error' : 'mono-input'} autoComplete="off" style={{ padding: '8px 12px' }} />
                 {errors.repo && <div className="field-error-msg">{errors.repo}</div>}
               </div>
+              <div className="field">
+                <label>Git 地址 <span className="hint">自动部署克隆源，留空=手工放代码</span></label>
+                <input value={gitUrl} onChange={e => setGitUrl(e.target.value)} onBlur={e => fetchGitMeta(e.target.value)} placeholder="https://github.com/xxx/repo.git" className="mono-input" autoComplete="off" />
+              </div>
+              </>
             ) : (
               <div className="field" style={{ marginBottom: 0 }}>
                 <label>状态</label>
@@ -236,7 +268,7 @@ export default function ProjectForm({ onDone, project }) {
 
       {/* ── 数据源（核心）── */}
       <div className="form-section">
-        <div className="form-section-title">数据源<span className="req">*</span> <span className="hint">新建必填连接串（数据浏览/健康监控/备份依赖它），或配端口+启动命令（服务型）</span></div>
+        <div className="form-section-title">数据源 <span className="hint">连接串 或 端口+启动命令 二选一（数据浏览/健康监控/备份依赖它）</span></div>
         {dss.map((d, i) => (
           <div key={d.id} style={{ marginBottom: 8 }}>
             <div style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
@@ -308,6 +340,14 @@ export default function ProjectForm({ onDone, project }) {
             {errors.port && <div className="field-error-msg">{errors.port}</div>}
           </div>
           <div className="field">
+            <label>部署到哪台机器 <span className="hint">留空自动分配</span></label>
+            <TypeSelect
+              value={host || '自动分配'}
+              onChange={v => setHost(v === '自动分配' ? '' : v)}
+              options={['自动分配', ...machines.filter(m => m.status === 'online').map(m => m.id)]}
+            />
+          </div>
+          <div className="field">
             <label>访问路径 <span className="hint">闸门控制</span></label>
             <input value={basePath} onChange={e => setBasePath(e.target.value)} placeholder="如 /my-project" className="mono-input" />
           </div>
@@ -316,8 +356,8 @@ export default function ProjectForm({ onDone, project }) {
             <input value={serviceName} onChange={e => setServiceName(e.target.value)} placeholder="如 my-api" className="mono-input" />
           </div>
           <div className="field">
-            <label>健康检查 URL <span className="hint">可选</span></label>
-            <input value={healthUrl} onChange={e => setHealthUrl(e.target.value)} placeholder="如 http://localhost:3000/health" />
+            <label>健康检查 URL <span className="hint">默认 /health</span></label>
+            <input value={healthUrl} onChange={e => setHealthUrl(e.target.value)} placeholder="/health（自动更新健康门禁用，留空不检查）" />
           </div>
         </div>
         <div className="field" style={{ marginTop: 14 }}>
@@ -349,6 +389,12 @@ export default function ProjectForm({ onDone, project }) {
             <input type="number" min="0" max="3650" value={backupRetention} onChange={e => setBackupRetention(e.target.value)} placeholder="如：30" className="mono-input" />
           </div>
         </div>
+        <div style={{ marginTop: 10 }}>
+          <label style={{ fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <input type="checkbox" checked={autoUpdate} onChange={e => setAutoUpdate(e.target.checked)} />
+            自动更新（每 10 分钟拉取 Git 变更，健康检查失败自动回滚上一版）
+          </label>
+        </div>
       </div>
 
       {/* ── 高级：共享服务（折叠）── */}
@@ -362,14 +408,41 @@ export default function ProjectForm({ onDone, project }) {
         {showAdvanced && (
           <>
             {svcs.map((s, i) => (
-              <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+              <div key={i} style={{ marginBottom: 6 }}>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                 <input
                   value={s.name}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, name: e.target.value } : x))}
                   placeholder="服务名"
                   title={s.name}
                   className="mono-input"
-                  style={{ ...rowCtrl, width: 100, flexShrink: 0 }}
+                  style={{ ...rowCtrl, width: 90, flexShrink: 0 }}
+                />
+                <div style={{ width: 108, flexShrink: 0 }}>
+                  <TypeSelect
+                    value={s.type || 'backend'}
+                    onChange={v => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, type: v } : x))}
+                    options={['backend', 'frontend', 'middleware', 'job', 'windows-svc']}
+                  />
+                </div>
+                <div style={{ width: 92, flexShrink: 0 }}>
+                  <TypeSelect
+                    value={s.host ? `${s.host}` : '自动'}
+                    onChange={v => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, host: v === '自动' ? '' : v } : x))}
+                    options={['自动', ...machines.filter(m => m.status === 'online').map(m => m.id)]}
+                  />
+                </div>
+                <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 6px' }}
+                  onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
+              </div>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <input
+                  value={s.git_url}
+                  onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, git_url: e.target.value } : x))}
+                  placeholder="代码仓库地址（可选）"
+                  title={s.git_url}
+                  className="mono-input"
+                  style={{ ...rowCtrl, flex: 1, minWidth: 120 }}
                 />
                 <input
                   value={s.start_cmd}
@@ -377,22 +450,22 @@ export default function ProjectForm({ onDone, project }) {
                   placeholder="启动命令"
                   title={s.start_cmd}
                   className="mono-input"
-                  style={{ ...rowCtrl, flex: 1, minWidth: 0 }}
+                  style={{ ...rowCtrl, flex: 1.4, minWidth: 0 }}
                 />
+
                 <input
                   value={s.stop_cmd}
                   onChange={e => setSvcs(prev => prev.map((x, xi) => xi === i ? { ...x, stop_cmd: e.target.value } : x))}
-                  placeholder="停止命令"
+                  placeholder="停止命令（可选）"
                   title={s.stop_cmd}
                   className="mono-input"
                   style={{ ...rowCtrl, flex: 1, minWidth: 0 }}
                 />
-                <button type="button" className="btn btn-ghost btn-sm" style={{ flexShrink: 0, padding: '4px 6px' }}
-                  onClick={() => setSvcs(prev => prev.filter((_, xi) => xi !== i))}>删除</button>
+              </div>
               </div>
             ))}
             <button type="button" className="btn btn-ghost btn-sm" style={{ padding: '4px 10px' }}
-              onClick={() => setSvcs(prev => [...prev, { name: '', start_cmd: '', stop_cmd: '' }])}>
+              onClick={() => setSvcs(prev => [...prev, { name: '', type: 'backend', host: '', git_url: '', start_cmd: '', stop_cmd: '' }])}>
               + 添加共享服务
             </button>
           </>
@@ -401,9 +474,9 @@ export default function ProjectForm({ onDone, project }) {
 
       <div className="form-actions-sticky">
         <button className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
-          {loading ? '保存中…' : (isEdit ? '保存' : '确认接入')}
+          {loading ? '保存中…' : (isEdit ? '保存' : '创建项目')}
         </button>
-        <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={handleCancel}>取消</button>
+        <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={handleCancel} disabled={loading}>取消</button>
       </div>
     </form>
   )

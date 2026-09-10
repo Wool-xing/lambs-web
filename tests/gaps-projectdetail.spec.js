@@ -169,6 +169,8 @@ test.describe('项目详情 备份管理', () => {
 
     // 页头「删除」按钮也在 main 内 → 备份行按钮是 btn-xs，精确到行
     await page.locator('main button.btn-xs:has-text("删除")').click();
+    // P0-4：删除备份加了确认弹窗
+    await page.locator('.modal-box button:has-text("确认")').click();
     await expectToast(page, '备份已删除');
     await expect(page.getByText('qa-20260827.db')).toBeHidden();
     await expect(page.getByText('暂无备份，点击上方按钮创建')).toBeVisible();

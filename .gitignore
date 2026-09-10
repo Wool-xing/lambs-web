@@ -4,3 +4,6 @@ dist/
 playwright-report/
 test-results/
 *.local
+
+# ux probe scripts may contain test credentials
+ux-*.mjs

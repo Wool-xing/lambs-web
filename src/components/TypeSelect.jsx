@@ -31,7 +31,8 @@ export default function TypeSelect({ value, onChange, style, options = OPTIONS }
   // Options may be plain strings or {value,label} pairs.
   const items = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const current = items.find(o => o.value === value)
-  const display = current ? current.label : (value || items[0]?.label || '')
+  // 假选中修复：value 不在选项里时不得伪装成第一项（显示值=真实值）
+  const display = current ? current.label : (value || '')
 
   const toggle = () => {
     if (!open && ref.current) {
