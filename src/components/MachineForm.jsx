@@ -10,8 +10,8 @@ const ROLE_OPTIONS = [
   { key: 'control', label: '控制', hint: '管理中枢' },
 ]
 
-// 紧凑两列网格：抽屉窄，全宽单列堆太高（会出滚动条）
-const grid2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }
+// 紧凑两列网格：抽屉窄，全宽单列堆太高（会出滚动条）；窄屏自动回单列（CSS 响应式）
+const grid2 = 'form-grid-2'
 
 export default function MachineForm({ onDone, machineData }) {
   const toast = useToast()
@@ -62,7 +62,7 @@ export default function MachineForm({ onDone, machineData }) {
   return (
     <form onSubmit={handleSubmit}>
       {groupTitle('身份')}
-      <div style={grid2}>
+      <div className="form-grid-2">
         <div className="field" style={{ marginBottom: 0 }}>
           <label>机器名<span className="req">*</span></label>
           <input value={id} disabled={isEdit} onChange={e => setId(e.target.value)} placeholder="wool / sheep / laptop" className="mono-input" />
@@ -78,7 +78,7 @@ export default function MachineForm({ onDone, machineData }) {
       </div>
 
       {groupTitle('网络')}
-      <div style={grid2}>
+      <div className="form-grid-2">
         <div className="field" style={{ marginBottom: 0 }}>
           <label>Tailscale IP<span className="req">*</span></label>
           <input value={tsIp} onChange={e => setTsIp(e.target.value)} placeholder="100.x.x.x" className="mono-input" />
@@ -90,7 +90,7 @@ export default function MachineForm({ onDone, machineData }) {
       </div>
 
       {groupTitle('容量')}
-      <div style={grid2}>
+      <div className="form-grid-2">
         <div className="field" style={{ marginBottom: 0 }}>
           <label>系统</label>
           <TypeSelect

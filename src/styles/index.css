@@ -438,6 +438,13 @@ html.theme-switching body{opacity:.35}
   backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));
   padding:24px;transform:translateX(100%);
   transition:transform var(--dur-med) ease;z-index:21;overflow:auto;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.drawer::-webkit-scrollbar{display:none}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-grid-2>*{min-width:0}
+@media (max-width:480px){
+  .form-grid-2{grid-template-columns:1fr}
 }
 .drawer.closing{transform:translateX(100%)}
 .drawer-mask{transition:opacity var(--dur-med) ease}
